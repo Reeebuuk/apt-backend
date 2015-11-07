@@ -29,7 +29,9 @@ class PriceRangeActor(pricingConfig: PricingConfig) extends PersistentActor with
 
   val dailyPriceActor = context.actorOf(DailyPriceActor.props(pricingConfig), "DailyPriceActor")
 
-  val priceRangeCalculations = mutable.Map[Long, Option[BigDecimal]]()
+  var requestId: Long = 0
+
+  val priceRangeCalculationsForRequests = mutable.Map[Long, mutable.Map[Long, Option[BigDecimal]]]()
 
   var router = {
     val routees = Vector.fill(5) {
@@ -45,19 +47,27 @@ class PriceRangeActor(pricingConfig: PricingConfig) extends PersistentActor with
       val fromDate = new DateTime(from).toDateTime(DateTimeZone.UTC)
       val toDate = new DateTime(to).toDateTime(DateTimeZone.UTC)
       val duration = Days.daysBetween(fromDate.toLocalDate, toDate.toLocalDate).getDays
+      requestId += 1
+
+      val priceRangeCalculations = mutable.Map[Long, Map[Long, Option[BigDecimal]]]()
 
       (0 until duration).foreach(daysFromStart => {
         val day = new DateTime(from).toDateTime(DateTimeZone.UTC).plusDays(daysFromStart).getMillis
         priceRangeCalculations + (day -> None)
-        router.route(CalculatePriceForDay(unitId, day), sender())
+        router.route(CalculatePriceForDay(requestId, unitId, day), sender())
       })
+
+      priceRangeCalculationsForRequests + (requestId -> priceRangeCalculations)
     }
 
-    case DailyPriceCalculated(unitId, day, price) => {
-      priceRangeCalculations + (day -> Option(price))
-      if (priceRangeCalculations.values.forall(_.isDefined)) {
+    case DailyPriceCalculated(id, unitId, day, price) => {
+      val previousCalculations = priceRangeCalculationsForRequests.getOrElse(id, sys.error(s"no map for requestId: $id"))
+      previousCalculations + (day -> Option(price))
+      priceRangeCalculationsForRequests + (id -> previousCalculations)
+
+      if (previousCalculations.values.forall(_.isDefined)) {
         PriceForRangeCalculated(unitId,
-          priceRangeCalculations.values.foldLeft(BigDecimal(0))((sum, value) => sum + value.get))
+          previousCalculations.values.foldLeft(BigDecimal(0))((sum, value) => sum + value.get))
       }
     }
 
