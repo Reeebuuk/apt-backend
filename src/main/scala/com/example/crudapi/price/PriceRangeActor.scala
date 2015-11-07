@@ -33,7 +33,7 @@ class PriceRangeActor(pricingConfig: PricingConfig) extends PersistentActor with
 
   var router = {
     val routees = Vector.fill(5) {
-      val r = context.actorOf(Props[DailyPriceActor])
+      val r = context.actorOf(Props(classOf[DailyPriceActor], pricingConfig))
       context watch r
       ActorRefRoutee(r)
     }
