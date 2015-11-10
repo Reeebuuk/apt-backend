@@ -1,5 +1,7 @@
 package com.example.crudapi.price
 
+import scala.concurrent.Promise
+
 object PriceCommandQueryProtocol {
 
   sealed trait PriceMsg {
@@ -8,7 +10,7 @@ object PriceCommandQueryProtocol {
 
   sealed trait PriceQuery extends PriceMsg
 
-  case class CalculatePriceForRange(unitId: Int, from: Long, to: Long) extends PriceQuery
+  case class CalculatePriceForRange(unitId: Int, from: Long, to: Long, pricePromise: Promise[PriceQueryResponse]) extends PriceQuery
 
   sealed trait PriceQueryResponse extends PriceMsg
 
