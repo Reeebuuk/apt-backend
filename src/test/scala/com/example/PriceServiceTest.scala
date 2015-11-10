@@ -1,7 +1,8 @@
 package com.example
 
-import akka.actor.Props
+import akka.actor.{ActorSystem, Props}
 import akka.http.scaladsl.model.{HttpEntity, MediaTypes}
+import akka.http.scaladsl.testkit.RouteTestTimeout
 import com.example.crudapi.Main._
 import com.example.crudapi.http.BaseService
 import com.example.crudapi.http.routes.{CalculatePriceForRangeDto, PriceForRangeDto}
@@ -12,16 +13,18 @@ import org.json4s.DefaultFormats
 import org.scalatest.concurrent.ScalaFutures
 import spray.json._
 
+import scala.concurrent.duration._
+
 class PriceServiceTest extends BaseServiceTest with ScalaFutures with BaseService with DateUtils with MarshallingSupport {
 
   implicit val ec = system.dispatcher
+
+  implicit def default(implicit system: ActorSystem) = RouteTestTimeout(new DurationInt(10).second)
 
   val processor = system.actorOf(Props(classOf[PriceRangeActor], PricingConfig(pricingConfig)), "processorActor")
   val view = system.actorOf(Props(classOf[PriceRangeActor], PricingConfig(pricingConfig)), "viewActor")
 
   implicit val format = DefaultFormats.withBigDecimal
-
-  import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport._
 
 
   "Price service" should {

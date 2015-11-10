@@ -5,11 +5,12 @@ import akka.persistence.PersistentActor
 import akka.routing.{ActorRefRoutee, RoundRobinRoutingLogic, Router}
 import akka.util.Timeout
 import com.example.crudapi.price.DailyPriceActor.{CalculatePriceForDay, DailyPriceCalculated}
-import com.example.crudapi.price.PriceCommandQueryProtocol.{CalculatePriceForRange, PriceForRangeCalculated}
+import com.example.crudapi.price.PriceCommandQueryProtocol.{CalculatePriceForRange, PriceForRangeCalculated, PriceQueryResponse}
 import com.example.crudapi.utils.PricingConfig
 import org.joda.time.{DateTime, DateTimeZone, Days}
 
 import scala.collection.mutable
+import scala.concurrent.Promise
 import scala.concurrent.duration.DurationInt
 import scala.language.postfixOps
 
@@ -32,6 +33,7 @@ class PriceRangeActor(pricingConfig: PricingConfig) extends PersistentActor with
   var requestId: Long = 0
 
   val priceRangeCalculationsForRequests = mutable.Map[Long, mutable.Map[Long, Option[BigDecimal]]]()
+  val pricePromises = mutable.Map[Long, Promise[PriceQueryResponse]]()
 
   var router = {
     val routees = Vector.fill(5) {
@@ -43,7 +45,7 @@ class PriceRangeActor(pricingConfig: PricingConfig) extends PersistentActor with
   }
 
   override def receiveCommand: Receive = {
-    case CalculatePriceForRange(unitId, from, to) => {
+    case CalculatePriceForRange(unitId, from, to, pricePromise) => {
       val fromDate = new DateTime(from).toDateTime(DateTimeZone.UTC)
       val toDate = new DateTime(to).toDateTime(DateTimeZone.UTC)
       val duration = Days.daysBetween(fromDate.toLocalDate, toDate.toLocalDate).getDays
@@ -58,6 +60,7 @@ class PriceRangeActor(pricingConfig: PricingConfig) extends PersistentActor with
       })
 
       priceRangeCalculationsForRequests + (requestId -> priceRangeCalculations)
+      pricePromises + (requestId -> pricePromise)
     }
 
     case DailyPriceCalculated(id, unitId, day, price) => {
@@ -66,8 +69,9 @@ class PriceRangeActor(pricingConfig: PricingConfig) extends PersistentActor with
       priceRangeCalculationsForRequests + (id -> previousCalculations)
 
       if (previousCalculations.values.forall(_.isDefined)) {
+        pricePromises.get(id).get.success(
         PriceForRangeCalculated(unitId,
-          previousCalculations.values.foldLeft(BigDecimal(0))((sum, value) => sum + value.get))
+          previousCalculations.values.foldLeft(BigDecimal(0))((sum, value) => sum + value.get)))
       }
     }
 
