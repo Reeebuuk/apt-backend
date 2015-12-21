@@ -1,6 +1,6 @@
 package com.example.crudapi.price
 
-import akka.actor.{ActorLogging, Props, Terminated}
+import akka.actor.{Props, ActorLogging, Terminated}
 import akka.persistence.PersistentActor
 import akka.routing.{ActorRefRoutee, RoundRobinRoutingLogic, Router}
 import akka.util.Timeout
@@ -16,7 +16,7 @@ import scala.language.postfixOps
 
 object PriceRangeActor {
 
-  def props(pricingConfig: PricingConfig) = Props(new PriceRangeActor(pricingConfig))
+  def apply(pricingConfig: PricingConfig) = Props(classOf[PriceRangeActor], pricingConfig)
 
 }
 
@@ -28,7 +28,7 @@ class PriceRangeActor(pricingConfig: PricingConfig) extends PersistentActor with
 
   implicit val timeout = Timeout(5 seconds)
 
-  val dailyPriceActor = context.actorOf(DailyPriceActor.props(pricingConfig), "DailyPriceActor")
+  val dailyPriceActor = context.actorOf(DailyPriceActor(pricingConfig), "DailyPriceActor")
 
   var requestId: Long = 0
 
@@ -37,7 +37,7 @@ class PriceRangeActor(pricingConfig: PricingConfig) extends PersistentActor with
 
   var router = {
     val routees = Vector.fill(5) {
-      val r = context.actorOf(Props(classOf[DailyPriceActor], pricingConfig))
+      val r = context.actorOf(DailyPriceActor(pricingConfig))
       context watch r
       ActorRefRoutee(r)
     }
@@ -77,7 +77,7 @@ class PriceRangeActor(pricingConfig: PricingConfig) extends PersistentActor with
 
     case Terminated(a) => {
       router = router.removeRoutee(a)
-      val r = context.actorOf(Props[DailyPriceActor])
+      val r = context.actorOf(DailyPriceActor(pricingConfig))
       context watch r
       router = router.addRoutee(r)
     }
