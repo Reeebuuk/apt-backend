@@ -1,6 +1,5 @@
 package com.example.crudapi
 
-import akka.actor.Props
 import akka.event.{Logging, LoggingAdapter}
 import akka.http.scaladsl.Http
 import akka.stream.ActorMaterializer
@@ -12,8 +11,8 @@ import scala.concurrent.ExecutionContext
 
 object Main extends App with AppConfig with BaseService with MainActorSystem {
 
-  val processor = system.actorOf(Props(classOf[PriceRangeActor], PricingConfig(pricingConfig)), "processorActor")
-  val view = system.actorOf(Props(classOf[PriceRangeActor], PricingConfig(pricingConfig)), "viewActor")
+  val processor = system.actorOf(PriceRangeActor(PricingConfig(pricingConfig)), "processorActor")
+  val view = system.actorOf(PriceRangeActor(PricingConfig(pricingConfig)), "viewActor")
 
   override protected implicit val executor: ExecutionContext = system.dispatcher
   override protected val log: LoggingAdapter = Logging(system, getClass)

@@ -17,7 +17,7 @@ object DailyPriceActor {
 
   case class DailyPriceCalculated(id: Long, unitId: Int, day: Long, price: BigDecimal) extends QueryResponse
 
-  def props(pricingConfig: PricingConfig) = Props(new DailyPriceActor(pricingConfig))
+  def apply(pricingConfig: PricingConfig) = Props(classOf[DailyPriceActor], pricingConfig)
 
 }
 

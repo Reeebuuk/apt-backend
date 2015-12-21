@@ -38,7 +38,7 @@ with WordSpecLike with Matchers with BeforeAndAfterAll with DateUtils {
 
     s"receiving '$calculatePriceForRangeForSingleDay'" should {
       s"return value for single day" in {
-        val concertActor = _system.actorOf(PriceRangeActor.props(priceConfig))
+        val concertActor = _system.actorOf(PriceRangeActor(priceConfig))
         concertActor ! calculatePriceForRangeForSingleDay
 
         expectMsg(PriceForRangeCalculated(1, BigDecimal(35)))
@@ -52,7 +52,7 @@ with WordSpecLike with Matchers with BeforeAndAfterAll with DateUtils {
 
     s"receiving '$calculatePriceForRangeForWeek'" should {
       s"return value for week" in {
-        val concertActor = _system.actorOf(PriceRangeActor.props(priceConfig))
+        val concertActor = _system.actorOf(PriceRangeActor(priceConfig))
         concertActor ! calculatePriceForRangeForWeek
 
         expectMsg(PriceForRangeCalculated(1, BigDecimal(245)))
