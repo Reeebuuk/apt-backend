@@ -14,9 +14,8 @@ resolvers += "Sonatype releases" at "http://repo.typesafe.com/typesafe/releases/
 
 libraryDependencies ++= {
   val akkaStreamV        = "1.0"
-  val akkaV              = "2.4.0"
-  val scalaTestV         = "3.0.0-M1"
-  val scalaMockV         = "3.2.2"
+  val akkaV              = "2.4.1"
+  val scalaTestV         = "2.2.4"
   val slf4jVersion       = "1.6.4"
   val rMongoVersion      = "0.11.7"
   val inMemMongoVersion  = "1.50.0"
@@ -26,7 +25,6 @@ libraryDependencies ++= {
     "com.typesafe.akka" %% "akka-contrib" % akkaV,
     "com.typesafe.akka" %% "akka-remote" % akkaV,
     "com.typesafe.akka" %% "akka-cluster" % akkaV,
-    "com.github.michaelpisula" %% "akka-persistence-inmemory" % "0.2.1",
     "com.typesafe.akka" %% "akka-stream-experimental" % akkaStreamV,
     "com.typesafe.akka" %% "akka-http-core-experimental" % akkaStreamV,
     "com.typesafe.akka" %% "akka-http-spray-json-experimental" % akkaStreamV,
@@ -39,7 +37,6 @@ libraryDependencies ++= {
     "com.typesafe.akka" %% "akka-typed-experimental" % akkaV,
     "de.flapdoodle.embed" % "de.flapdoodle.embed.mongo" % inMemMongoVersion % "test",
     "org.scalatest" %% "scalatest" % scalaTestV % "test",
-    "org.scalamock" %% "scalamock-scalatest-support" % scalaMockV % "test",
     "com.typesafe.akka" %% "akka-http-testkit-experimental" % akkaStreamV % "test"
   )
 }
