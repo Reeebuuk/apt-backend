@@ -1,8 +1,9 @@
 package com.example
 
 import akka.actor.{ActorSystem, Props}
+import akka.event.{NoLogging, LoggingAdapter}
 import akka.http.scaladsl.model.{HttpEntity, MediaTypes}
-import akka.http.scaladsl.testkit.RouteTestTimeout
+import akka.http.scaladsl.testkit.{ScalatestRouteTest, RouteTestTimeout}
 import com.example.crudapi.Main._
 import com.example.crudapi.http.BaseService
 import com.example.crudapi.http.routes.{CalculatePriceForRangeDto, PriceForRangeDto}
@@ -10,12 +11,15 @@ import com.example.crudapi.price.PriceRangeActor
 import com.example.crudapi.utils.{DateUtils, MarshallingSupport, PricingConfig}
 import org.joda.time.{DateTime, DateTimeZone}
 import org.json4s.DefaultFormats
+import org.scalatest.{Matchers, FlatSpec}
 import org.scalatest.concurrent.ScalaFutures
 import spray.json._
 
 import scala.concurrent.duration._
 
-class PriceServiceTest extends BaseServiceTest with ScalaFutures with BaseService with DateUtils with MarshallingSupport {
+class PriceServiceTest extends FlatSpec with Matchers with ScalatestRouteTest with BaseService with DateUtils with MarshallingSupport {
+
+  protected val log: LoggingAdapter = NoLogging
 
   implicit val ec = system.dispatcher
 
@@ -26,17 +30,18 @@ class PriceServiceTest extends BaseServiceTest with ScalaFutures with BaseServic
 
   implicit val format = DefaultFormats.withBigDecimal
 
+  import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport._
 
-  "Price service" should {
-    "retrieve price for single day" in {
+  "Price service" should "retrieve price for single day" in {
       val today = new DateTime().toDateTime(DateTimeZone.UTC).withTime(12, 0, 0, 0).getMillis
       val tomorrow = afterDay(today)
       val requestEntity = HttpEntity(MediaTypes.`application/json`, CalculatePriceForRangeDto(1, today, tomorrow).toJson.toString())
 
       Post("/v1/price/calculate", requestEntity) ~> routes(processor, view) ~> check {
-//        responseAs[PriceForRangeDto] should be(PriceForRangeDto(1, BigDecimal(35)))
+        val lala = response
+        responseAs[PriceForRangeDto] should be(PriceForRangeDto(1, BigDecimal(35)))
       }
-    }
+
     /*
 
         "return correct price if the duration is 7 day in same price range" in {

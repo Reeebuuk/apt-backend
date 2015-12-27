@@ -1,6 +1,6 @@
 package com.example.crudapi.price
 
-import akka.actor.{Props, ActorLogging, Terminated}
+import akka.actor.{Actor, Props, ActorLogging, Terminated}
 import akka.persistence.PersistentActor
 import akka.routing.{ActorRefRoutee, RoundRobinRoutingLogic, Router}
 import akka.util.Timeout
@@ -22,9 +22,7 @@ object PriceRangeActor {
 
 case class PriceForDay(day: Long, var price: Option[BigDecimal] = None)
 
-class PriceRangeActor(pricingConfig: PricingConfig) extends PersistentActor with ActorLogging {
-
-  def persistenceId = "PriceRangeActor"
+class PriceRangeActor(pricingConfig: PricingConfig) extends Actor {
 
   implicit val timeout = Timeout(5 seconds)
 
@@ -35,16 +33,16 @@ class PriceRangeActor(pricingConfig: PricingConfig) extends PersistentActor with
   val priceRangeCalculationsForRequests = mutable.Map[Long, mutable.Map[Long, Option[BigDecimal]]]()
   val pricePromises = mutable.Map[Long, Promise[PriceQueryResponse]]()
 
-  var router = {
-    val routees = Vector.fill(5) {
-      val r = context.actorOf(DailyPriceActor(pricingConfig))
-      context watch r
-      ActorRefRoutee(r)
-    }
-    Router(RoundRobinRoutingLogic(), routees)
-  }
+//  var router = {
+//    val routees = Vector.fill(5) {
+//      val r = context.actorOf(DailyPriceActor(pricingConfig))
+//      context watch r
+//      ActorRefRoutee(r)
+//    }
+//    Router(RoundRobinRoutingLogic(), routees)
+//  }
 
-  override def receiveCommand: Receive = {
+  override def receive: Receive = {
     case CalculatePriceForRange(unitId, from, to, pricePromise) => {
       val fromDate = new DateTime(from).toDateTime(DateTimeZone.UTC)
       val toDate = new DateTime(to).toDateTime(DateTimeZone.UTC)
@@ -53,20 +51,20 @@ class PriceRangeActor(pricingConfig: PricingConfig) extends PersistentActor with
 
       val priceRangeCalculations = mutable.Map[Long, Map[Long, Option[BigDecimal]]]()
 
+      pricePromises += (requestId -> pricePromise)
+
       (0 until duration).foreach(daysFromStart => {
         val day = new DateTime(from).toDateTime(DateTimeZone.UTC).plusDays(daysFromStart).getMillis
         priceRangeCalculations + (day -> None)
-        router.route(CalculatePriceForDay(requestId, unitId, day), sender())
+        priceRangeCalculationsForRequests += (requestId -> priceRangeCalculations)
+        dailyPriceActor ! CalculatePriceForDay(requestId, unitId, day)
       })
-
-      priceRangeCalculationsForRequests + (requestId -> priceRangeCalculations)
-      pricePromises + (requestId -> pricePromise)
     }
 
     case DailyPriceCalculated(id, unitId, day, price) => {
       val previousCalculations = priceRangeCalculationsForRequests.getOrElse(id, sys.error(s"no map for requestId: $id"))
       previousCalculations + (day -> Option(price))
-      priceRangeCalculationsForRequests + (id -> previousCalculations)
+      priceRangeCalculationsForRequests += (id -> previousCalculations)
 
       if (previousCalculations.values.forall(_.isDefined)) {
         pricePromises.get(id).get.success(
@@ -76,15 +74,11 @@ class PriceRangeActor(pricingConfig: PricingConfig) extends PersistentActor with
     }
 
     case Terminated(a) => {
-      router = router.removeRoutee(a)
-      val r = context.actorOf(DailyPriceActor(pricingConfig))
-      context watch r
-      router = router.addRoutee(r)
+//      router = router.removeRoutee(a)
+//      val r = context.actorOf(DailyPriceActor(pricingConfig))
+//      context watch r
+//      router = router.addRoutee(r)
     }
 
-  }
-
-  override def receiveRecover: Receive = {
-    case _ =>
   }
 }

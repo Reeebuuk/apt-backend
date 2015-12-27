@@ -10,8 +10,7 @@ import org.scalatest._
 import reactivemongo.api._
 import reactivemongo.api.collections.bson.BSONCollection
 
-trait BaseServiceTest extends WordSpec with Matchers with ScalatestRouteTest with BaseService with BeforeAndAfterAll {
-  protected val log: LoggingAdapter = NoLogging
+trait MongoDbSupport extends WordSpec with BaseService with BeforeAndAfterAll {
 
   def url = "localhost"
   def port = 6667

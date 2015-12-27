@@ -18,5 +18,4 @@ object PriceCommandQueryProtocol {
 
   case class InvalidRange(unitId: Int) extends PriceQueryResponse
 
-
 }
