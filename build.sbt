@@ -13,7 +13,7 @@ scalacOptions := Seq("-unchecked", "-feature", "-deprecation", "-encoding", "utf
 resolvers += "Sonatype releases" at "http://repo.typesafe.com/typesafe/releases/"
 
 libraryDependencies ++= {
-  val akkaStreamV        = "1.0"
+  val akkaStreamV        = "2.0.1"
   val akkaV              = "2.4.1"
   val scalaTestV         = "2.2.4"
   val slf4jVersion       = "1.6.4"
