@@ -5,8 +5,8 @@ import akka.actor._
 import akka.persistence.PersistentActor
 import akka.routing.{ActorRefRoutee, RoundRobinRoutingLogic, Router}
 import akka.util.Timeout
-import com.example.crudapi.price.DailyPriceActor.{CalculatePriceForDay, DailyPriceCalculated}
-import com.example.crudapi.price.PriceCommandQueryProtocol.{CalculatePriceForRange, PriceForRangeCalculated, PriceQueryResponse}
+import com.example.crudapi.price.DailyPriceActor.{DailyPriceCannotBeCalculated, CalculatePriceForDay, DailyPriceCalculated}
+import com.example.crudapi.price.PriceCommandQueryProtocol.{PriceForRangeCannotBeCalculated, CalculatePriceForRange, PriceForRangeCalculated, PriceQueryResponse}
 import com.example.crudapi.utils.PricingConfig
 import org.joda.time.{DateTime, DateTimeZone, Days}
 
@@ -68,6 +68,16 @@ class PriceRangeActor(pricingConfig: PricingConfig) extends Actor {
         pricePromises.get(id).get.success(
         PriceForRangeCalculated(unitId,
           previousCalculations.values.foldLeft(BigDecimal(0))((sum, value) => sum + value.get)))
+        pricePromises -= id
+      }
+    }
+
+    case DailyPriceCannotBeCalculated(id, unitId) => {
+      pricePromises.get(id) match {
+        case Some(value) =>
+          value.success(PriceForRangeCannotBeCalculated(unitId))
+          pricePromises -= id
+        case None =>
       }
     }
   }

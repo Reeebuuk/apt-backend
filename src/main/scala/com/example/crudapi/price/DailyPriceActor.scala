@@ -16,6 +16,7 @@ object DailyPriceActor {
   sealed trait QueryResponse extends DailyPriceMsg
 
   case class DailyPriceCalculated(id: Long, unitId: Int, day: Long, price: BigDecimal) extends QueryResponse
+  case class DailyPriceCannotBeCalculated(id: Long, unitId: Int) extends QueryResponse
 
   def apply(pricingConfig: PricingConfig) = Props(classOf[DailyPriceActor], pricingConfig)
 
@@ -27,9 +28,12 @@ class DailyPriceActor(pricingConfig: PricingConfig) extends Actor with ActorLogg
 
   override def receive: Receive = {
     case CalculatePriceForDay(id, unitId, day) => {
-      val price = pricingConfig.pricings.filter(x => x.from <= day && x.to >= day)
-        .map(x => x.appPrice(unitId)).head
-      sender() ! DailyPriceCalculated(id, unitId, day, price)
+      pricingConfig.pricings
+        .filter(x => x.from <= day && x.to >= day)
+        .map(x => x.appPrice(unitId)) match {
+        case price :: Nil => sender() ! DailyPriceCalculated(id, unitId, day, price)
+        case _  => sender() ! DailyPriceCannotBeCalculated(id, unitId)
+      }
     }
   }
 
