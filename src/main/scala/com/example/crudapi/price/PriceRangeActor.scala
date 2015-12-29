@@ -49,21 +49,22 @@ class PriceRangeActor(pricingConfig: PricingConfig) extends Actor {
       val duration = Days.daysBetween(fromDate.toLocalDate, toDate.toLocalDate).getDays
       requestId += 1
 
-      val priceRangeCalculations = mutable.Map[Long, Map[Long, Option[BigDecimal]]]()
+      val priceRangeCalculations = mutable.Map[Long, Option[BigDecimal]]()
 
       pricePromises += (requestId -> pricePromise)
 
       (0 until duration).foreach(daysFromStart => {
         val day = new DateTime(from).toDateTime(DateTimeZone.UTC).plusDays(daysFromStart).getMillis
-        priceRangeCalculations + (day -> None)
-        priceRangeCalculationsForRequests += (requestId -> priceRangeCalculations)
+        priceRangeCalculations += (day -> None)
         dailyPriceActor ! CalculatePriceForDay(requestId, unitId, day)
       })
+
+      priceRangeCalculationsForRequests += (requestId -> priceRangeCalculations)
     }
 
     case DailyPriceCalculated(id, unitId, day, price) => {
       val previousCalculations = priceRangeCalculationsForRequests.getOrElse(id, sys.error(s"no map for requestId: $id"))
-      previousCalculations + (day -> Option(price))
+      previousCalculations += (day -> Option(price))
       priceRangeCalculationsForRequests += (id -> previousCalculations)
 
       if (previousCalculations.values.forall(_.isDefined)) {
