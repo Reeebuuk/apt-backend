@@ -17,5 +17,6 @@ object PriceCommandQueryProtocol {
   case class PriceForRangeCalculated(unitId: Int, price: BigDecimal) extends PriceQueryResponse
 
   case class InvalidRange(unitId: Int) extends PriceQueryResponse
+  case class PriceForRangeCannotBeCalculated(unitId: Int) extends PriceQueryResponse
 
 }
