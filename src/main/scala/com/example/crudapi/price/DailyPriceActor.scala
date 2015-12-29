@@ -27,6 +27,8 @@ class DailyPriceActor(pricingConfig: PricingConfig) extends Actor with ActorLogg
 
   override def receive: Receive = {
     case CalculatePriceForDay(id, unitId, day) => {
+      val lala = pricingConfig.pricings.filter(x => x.from <= day && x.to >= day)
+        .map(x => x.appPrice(unitId))
       val price = pricingConfig.pricings.filter(x => x.from <= day && x.to >= day)
         .map(x => x.appPrice(unitId)).head
       sender() ! DailyPriceCalculated(id, unitId, day, price)
