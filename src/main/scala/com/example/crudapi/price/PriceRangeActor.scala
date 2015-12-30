@@ -19,6 +19,8 @@ object PriceRangeActor {
 
 }
 
+case class CalculationData(singleDayCalculations: Map[Long, Option[BigDecimal]], resultPromise: Promise[PriceQueryResponse])
+
 class PriceRangeActor(pricingConfig: PricingConfig) extends Actor {
 
   implicit val timeout = Timeout(5 seconds)
@@ -27,43 +29,43 @@ class PriceRangeActor(pricingConfig: PricingConfig) extends Actor {
 
   var requestId: Long = 0
 
-  override def receive = active(Map[Long, (Map[Long, Option[BigDecimal]], Promise[PriceQueryResponse])]())
+  override def receive = active(Map[Long, CalculationData]())
 
-  def active(priceRangeCalculations: Map[Long, (Map[Long, Option[BigDecimal]], Promise[PriceQueryResponse])]): Receive = {
+  def active(priceRangeCalculations: Map[Long, CalculationData]): Receive = {
     case CalculatePriceForRange(unitId, from, to, pricePromise) => {
       val fromDate = new DateTime(from).toDateTime(DateTimeZone.UTC)
       val toDate = new DateTime(to).toDateTime(DateTimeZone.UTC)
       val duration = Days.daysBetween(fromDate.toLocalDate, toDate.toLocalDate).getDays
       requestId += 1
 
-      val pricesForIndividualDays: Map[Long, Option[BigDecimal]] = (0 until duration).map(daysFromStart => {
+      val singleDayCalculations: Map[Long, Option[BigDecimal]] = (0 until duration).map(daysFromStart => {
         val day = new DateTime(from).toDateTime(DateTimeZone.UTC).plusDays(daysFromStart).getMillis
         dailyPriceActor ! CalculatePriceForDay(requestId, unitId, day)
         day -> None
       }) toMap
 
-      context become active(priceRangeCalculations + (requestId ->(pricesForIndividualDays, pricePromise)))
+      context become active(priceRangeCalculations + (requestId -> CalculationData(singleDayCalculations, pricePromise)))
     }
 
     case DailyPriceCalculated(reqId, unitId, day, price) => {
       val previousCalculations = priceRangeCalculations.getOrElse(reqId, sys.error(s"no map for reqId: $reqId"))
-      val newCalculationAdded = previousCalculations._1 + (day -> Option(price))
+      val newCalculationAdded = previousCalculations.singleDayCalculations + (day -> Option(price))
 
       if (newCalculationAdded.values.forall(_.isDefined)) {
-        previousCalculations._2.success(
+        previousCalculations.resultPromise.success(
           PriceForRangeCalculated(unitId,
             newCalculationAdded.values.foldLeft(BigDecimal(0))((sum, value) => sum + value.get)))
         context become active(priceRangeCalculations - reqId)
       }
       else {
-        context become active(priceRangeCalculations + (reqId ->(newCalculationAdded, previousCalculations._2)))
+        context become active(priceRangeCalculations + (reqId -> CalculationData(newCalculationAdded, previousCalculations.resultPromise)))
       }
     }
 
     case DailyPriceCannotBeCalculated(reqId, unitId) => {
       priceRangeCalculations.get(reqId) match {
-        case Some(value) =>
-          value._2.success(PriceForRangeCannotBeCalculated(unitId))
+        case Some(calculationData) =>
+          calculationData.resultPromise.success(PriceForRangeCannotBeCalculated(unitId))
           context become active(priceRangeCalculations - reqId)
         case None =>
       }
