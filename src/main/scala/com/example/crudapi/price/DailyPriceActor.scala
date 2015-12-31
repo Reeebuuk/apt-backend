@@ -5,18 +5,18 @@ import com.example.crudapi.utils.PricingConfig
 
 object DailyPriceActor {
 
-  sealed trait DailyPriceMsg {
-    val unitId: Int
-  }
+  sealed trait DailyPriceMsg
 
   sealed trait Query extends DailyPriceMsg
 
   case class CalculatePriceForDay(id: Long, unitId: Int, day: Long) extends Query
 
-  sealed trait QueryResponse extends DailyPriceMsg
+  sealed trait QueryResponse extends DailyPriceMsg {
+    def requestId: Long
+  }
 
-  case class DailyPriceCalculated(requestId: Long, unitId: Int, day: Long, price: BigDecimal) extends QueryResponse
-  case class DailyPriceCannotBeCalculated(requestId: Long, unitId: Int) extends QueryResponse
+  case class DailyPriceCalculated(requestId: Long, day: Long, price: BigDecimal) extends QueryResponse
+  case class DailyPriceCannotBeCalculated(requestId: Long) extends QueryResponse
 
   def apply(pricingConfig: PricingConfig) = Props(classOf[DailyPriceActor], pricingConfig)
 
@@ -31,8 +31,8 @@ class DailyPriceActor(pricingConfig: PricingConfig) extends Actor with ActorLogg
       pricingConfig.pricings
         .filter(x => x.from <= day && x.to >= day)
         .map(x => x.appPrice(unitId)) match {
-        case price :: Nil => sender() ! DailyPriceCalculated(requestId, unitId, day, price)
-        case _  => sender() ! DailyPriceCannotBeCalculated(requestId, unitId)
+        case price :: Nil => sender() ! DailyPriceCalculated(requestId, day, price)
+        case _  => sender() ! DailyPriceCannotBeCalculated(requestId)
       }
     }
   }

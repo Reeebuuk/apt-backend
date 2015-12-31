@@ -1,6 +1,6 @@
 package com.example.crudapi.price
 
-import akka.actor.SupervisorStrategy.Stop
+import akka.actor.SupervisorStrategy.{Restart, Stop}
 import akka.actor._
 import akka.util.Timeout
 import com.example.crudapi.price.DailyPriceActor.{CalculatePriceForDay, DailyPriceCalculated, DailyPriceCannotBeCalculated}
@@ -54,25 +54,28 @@ class PriceRangeActor(pricingConfig: PricingConfig) extends Actor {
       context become active(newRequestId, priceRangeCalculations + newlySentDailyCalculationMessages)
     }
 
-    case DailyPriceCalculated(reqId, unitId, day, price) => {
-      val previousCalculations = priceRangeCalculations.getOrElse(reqId, sys.error(s"no map for reqId: $reqId"))
-      val newCalculationAdded = previousCalculations.singleDayCalculations + (day -> Option(price))
+    case DailyPriceCalculated(reqId, day, price) => {
 
-      if (newCalculationAdded.values.forall(_.isDefined)) {
-        previousCalculations.resultPromise.success(
-          PriceForRangeCalculated(unitId,
-            newCalculationAdded.values.foldLeft(BigDecimal(0))((sum, value) => sum + value.get)))
+      val currentCalculationData = priceRangeCalculations.getOrElse(reqId, sys.error(s"No CalculationData for reqId: $reqId"))
+
+      val newCalculationAdded = currentCalculationData.singleDayCalculations + (day -> Option(price))
+      val isPriceCalculatedForWholeRange = newCalculationAdded.values.forall(_.isDefined)
+
+      if (isPriceCalculatedForWholeRange) {
+        currentCalculationData.resultPromise.success(
+          PriceForRangeCalculated(newCalculationAdded.values.foldLeft(BigDecimal(0))((sum, value) => sum + value.get))
+        )
         context become active(lastRequestId, priceRangeCalculations - reqId)
       }
       else {
-        context become active(lastRequestId, priceRangeCalculations + (reqId -> CalculationData(newCalculationAdded, previousCalculations.resultPromise)))
+        context become active(lastRequestId, priceRangeCalculations + (reqId -> CalculationData(newCalculationAdded, currentCalculationData.resultPromise)))
       }
     }
 
-    case DailyPriceCannotBeCalculated(reqId, unitId) => {
+    case DailyPriceCannotBeCalculated(reqId) => {
       priceRangeCalculations.get(reqId) match {
         case Some(calculationData) =>
-          calculationData.resultPromise.success(PriceForRangeCannotBeCalculated(unitId))
+          calculationData.resultPromise.success(PriceForRangeCannotBeCalculated)
           context become active(lastRequestId, priceRangeCalculations - reqId)
         case None =>
       }
@@ -82,6 +85,6 @@ class PriceRangeActor(pricingConfig: PricingConfig) extends Actor {
 
   override val supervisorStrategy =
     OneForOneStrategy(maxNrOfRetries = 2, withinTimeRange = 2 seconds) {
-      case x => Stop
+      case x => Restart
     }
 }

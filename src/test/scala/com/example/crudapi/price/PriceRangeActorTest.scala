@@ -22,6 +22,12 @@ with WordSpecLike with Matchers with BeforeAndAfterAll with DateUtils {
         |   autoreceive = on
         |   lifecycle = on
         |}
+        |akka.actor.deployment {
+        |  /parent/daily-price-calculators {
+        |    router = round-robin-pool
+        |    nr-of-instances = 5
+        |  }
+        |}
       """.stripMargin)))
 
   override def afterAll() {
@@ -41,7 +47,7 @@ with WordSpecLike with Matchers with BeforeAndAfterAll with DateUtils {
         val concertActor = _system.actorOf(PriceRangeActor(priceConfig))
         concertActor ! calculatePriceForRangeForSingleDay
 
-        expectMsg(PriceForRangeCalculated(1, BigDecimal(35)))
+        expectMsg(PriceForRangeCalculated(BigDecimal(35)))
       }
     }
 
@@ -55,7 +61,7 @@ with WordSpecLike with Matchers with BeforeAndAfterAll with DateUtils {
         val concertActor = _system.actorOf(PriceRangeActor(priceConfig))
         concertActor ! calculatePriceForRangeForWeek
 
-        expectMsg(PriceForRangeCalculated(1, BigDecimal(245)))
+        expectMsg(PriceForRangeCalculated(BigDecimal(245)))
       }
     }
 

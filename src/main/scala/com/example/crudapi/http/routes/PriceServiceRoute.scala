@@ -13,9 +13,9 @@ import scala.util.{Failure, Success}
 
 final case class CalculatePriceForRangeDto(unitId: Int, from: Long, to: Long)
 
-final case class PriceForRangeDto(unitId: Int, price: BigDecimal, response: String = "PriceForRangeDto")
+final case class PriceForRangeDto(price: BigDecimal, response: String = "PriceForRangeDto")
 
-final case class ErrorDto(unitId: Int, msg: String, response: String = "ErrorDto")
+final case class ErrorDto(msg: String, response: String = "ErrorDto")
 
 trait PriceServiceRoute extends BaseServiceRoute with MarshallingSupport {
 
@@ -41,15 +41,15 @@ trait PriceServiceRoute extends BaseServiceRoute with MarshallingSupport {
 
             result match {
               case Success(s) => s match {
-                case PriceForRangeCalculated(unitId, price) =>
-                  complete(PriceForRangeDto(unitId, price))
-                case InvalidRange(unitId) =>
-                  complete(ErrorDto(unitId, "ERROR"))
+                case PriceForRangeCalculated(price) =>
+                  complete(PriceForRangeDto(price))
+                case InvalidRange =>
+                  complete(ErrorDto("InvalidRange"))
                 case _ =>
-                  complete(ErrorDto(priceForRange.unitId, "ERROR"))
+                  complete(ErrorDto("UnknownError"))
               }
               case Failure(t) =>
-                complete(ErrorDto(priceForRange.unitId, t.getMessage))
+                complete(ErrorDto(t.getMessage))
             }
 
           }
