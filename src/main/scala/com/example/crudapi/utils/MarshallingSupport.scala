@@ -8,8 +8,8 @@ import spray.json.{DefaultJsonProtocol, JsString, JsValue, JsonFormat}
 
 trait MarshallingSupport extends DefaultJsonProtocol {
   implicit val CalculatePriceForRangeDtoFormat = jsonFormat3(CalculatePriceForRangeDto.apply)
-  implicit val PriceForRangeDtoFormat = jsonFormat3(PriceForRangeDto.apply)
-  implicit val ErrorDtoFormat = jsonFormat3(ErrorDto.apply)
+  implicit val PriceForRangeDtoFormat = jsonFormat2(PriceForRangeDto.apply)
+  implicit val ErrorDtoFormat = jsonFormat2(ErrorDto.apply)
 
   implicit val LocalDateTimeFormat = new JsonFormat[LocalDateTime] {
 

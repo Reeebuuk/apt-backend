@@ -4,9 +4,7 @@ import scala.concurrent.Promise
 
 object PriceCommandQueryProtocol {
 
-  sealed trait PriceMsg {
-    val unitId: Int
-  }
+  sealed trait PriceMsg
 
   sealed trait PriceQuery extends PriceMsg
 
@@ -14,9 +12,9 @@ object PriceCommandQueryProtocol {
 
   sealed trait PriceQueryResponse extends PriceMsg
 
-  case class PriceForRangeCalculated(unitId: Int, price: BigDecimal) extends PriceQueryResponse
+  case class PriceForRangeCalculated(price: BigDecimal) extends PriceQueryResponse
 
-  case class InvalidRange(unitId: Int) extends PriceQueryResponse
-  case class PriceForRangeCannotBeCalculated(unitId: Int) extends PriceQueryResponse
+  case object InvalidRange extends PriceQueryResponse
+  case object PriceForRangeCannotBeCalculated extends PriceQueryResponse
 
 }

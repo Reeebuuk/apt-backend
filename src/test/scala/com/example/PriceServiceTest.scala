@@ -40,7 +40,7 @@ class PriceServiceTest extends WordSpec with Matchers with ScalatestRouteTest wi
       val requestEntity = HttpEntity(MediaTypes.`application/json`, CalculatePriceForRangeDto(1, today, tomorrow).toJson.toString())
 
       Post("/v1/price/calculate", requestEntity) ~> routes(processor, view) ~> check {
-        responseAs[PriceForRangeDto] should be(PriceForRangeDto(1, BigDecimal(35)))
+        responseAs[PriceForRangeDto] should be(PriceForRangeDto(BigDecimal(35)))
       }
     }
 
@@ -51,7 +51,7 @@ class PriceServiceTest extends WordSpec with Matchers with ScalatestRouteTest wi
       val requestEntity = HttpEntity(MediaTypes.`application/json`, CalculatePriceForRangeDto(1, today, tomorrow).toJson.toString())
 
       Post("/v1/price/calculate", requestEntity) ~> routes(processor, view) ~> check {
-        responseAs[PriceForRangeDto] should be(PriceForRangeDto(1, BigDecimal(245)))
+        responseAs[PriceForRangeDto] should be(PriceForRangeDto(BigDecimal(245)))
       }
     }
 
@@ -61,7 +61,7 @@ class PriceServiceTest extends WordSpec with Matchers with ScalatestRouteTest wi
       val requestEntity = HttpEntity(MediaTypes.`application/json`, CalculatePriceForRangeDto(1, today, tomorrow).toJson.toString())
 
       Post("/v1/price/calculate", requestEntity) ~> routes(processor, view) ~> check {
-        responseAs[PriceForRangeDto] should be(PriceForRangeDto(1, BigDecimal(340)))
+        responseAs[PriceForRangeDto] should be(PriceForRangeDto(BigDecimal(340)))
       }
     }
 
@@ -71,7 +71,7 @@ class PriceServiceTest extends WordSpec with Matchers with ScalatestRouteTest wi
       val requestEntity = HttpEntity(MediaTypes.`application/json`, CalculatePriceForRangeDto(1, today, tomorrow).toJson.toString())
 
       Post("/v1/price/calculate", requestEntity) ~> routes(processor, view) ~> check {
-        responseAs[ErrorDto] should be(ErrorDto(1, "ERROR"))
+        responseAs[ErrorDto] should be(ErrorDto("UnknownError"))
       }
     }
 
