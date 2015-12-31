@@ -27,24 +27,31 @@ class PriceRangeActor(pricingConfig: PricingConfig) extends Actor {
 
   val dailyPriceActor = context.actorOf(DailyPriceActor(pricingConfig), "daily-price-calculators")
 
-  var requestId: Long = 0
+  override def receive = active(0, Map[Long, CalculationData]())
 
-  override def receive = active(Map[Long, CalculationData]())
+  def sendMessagesForSingleDayCalculations(requestId: Long, calculatePriceForRange: CalculatePriceForRange) = {
+    import calculatePriceForRange._
 
-  def active(priceRangeCalculations: Map[Long, CalculationData]): Receive = {
-    case CalculatePriceForRange(unitId, from, to, pricePromise) => {
-      val fromDate = new DateTime(from).toDateTime(DateTimeZone.UTC)
-      val toDate = new DateTime(to).toDateTime(DateTimeZone.UTC)
-      val duration = Days.daysBetween(fromDate.toLocalDate, toDate.toLocalDate).getDays
-      requestId += 1
+    val fromDate = new DateTime(from).toDateTime(DateTimeZone.UTC)
+    val toDate = new DateTime(to).toDateTime(DateTimeZone.UTC)
+    val duration = Days.daysBetween(fromDate.toLocalDate, toDate.toLocalDate).getDays
 
-      val singleDayCalculations: Map[Long, Option[BigDecimal]] = (0 until duration).map(daysFromStart => {
-        val day = new DateTime(from).toDateTime(DateTimeZone.UTC).plusDays(daysFromStart).getMillis
-        dailyPriceActor ! CalculatePriceForDay(requestId, unitId, day)
-        day -> None
-      }) toMap
+    val singleDayCalculations = (0 until duration).map(daysFromStart => {
+      val day = new DateTime(from).toDateTime(DateTimeZone.UTC).plusDays(daysFromStart).getMillis
+      dailyPriceActor ! CalculatePriceForDay(requestId, unitId, day)
+      day -> None
+    }) toMap
 
-      context become active(priceRangeCalculations + (requestId -> CalculationData(singleDayCalculations, pricePromise)))
+    requestId -> CalculationData(singleDayCalculations, pricePromise)
+  }
+
+  def active(lastRequestId: Long, priceRangeCalculations: Map[Long, CalculationData]): Receive = {
+    case cpfr: CalculatePriceForRange => {
+
+      val newRequestId = lastRequestId + 1
+      val newlySentDailyCalculationMessages = sendMessagesForSingleDayCalculations(newRequestId, cpfr)
+
+      context become active(newRequestId, priceRangeCalculations + newlySentDailyCalculationMessages)
     }
 
     case DailyPriceCalculated(reqId, unitId, day, price) => {
@@ -55,10 +62,10 @@ class PriceRangeActor(pricingConfig: PricingConfig) extends Actor {
         previousCalculations.resultPromise.success(
           PriceForRangeCalculated(unitId,
             newCalculationAdded.values.foldLeft(BigDecimal(0))((sum, value) => sum + value.get)))
-        context become active(priceRangeCalculations - reqId)
+        context become active(lastRequestId, priceRangeCalculations - reqId)
       }
       else {
-        context become active(priceRangeCalculations + (reqId -> CalculationData(newCalculationAdded, previousCalculations.resultPromise)))
+        context become active(lastRequestId, priceRangeCalculations + (reqId -> CalculationData(newCalculationAdded, previousCalculations.resultPromise)))
       }
     }
 
@@ -66,7 +73,7 @@ class PriceRangeActor(pricingConfig: PricingConfig) extends Actor {
       priceRangeCalculations.get(reqId) match {
         case Some(calculationData) =>
           calculationData.resultPromise.success(PriceForRangeCannotBeCalculated(unitId))
-          context become active(priceRangeCalculations - reqId)
+          context become active(lastRequestId, priceRangeCalculations - reqId)
         case None =>
       }
     }
