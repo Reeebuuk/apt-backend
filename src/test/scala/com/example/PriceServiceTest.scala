@@ -75,13 +75,13 @@ class PriceServiceTest extends WordSpec with Matchers with ScalatestRouteTest wi
       }
     }
 
-/*    "support concurrent requests" in {
-      val today = midYearDate.withDate(2015, 12, 30).getMillis
+    "return correct prices for sequential requests" in {
+      val today = midYearDate.getMillis
       val tomorrow = new DateTime(today).plusDays(7).getMillis
       val requestEntity = HttpEntity(MediaTypes.`application/json`, CalculatePriceForRangeDto(1, today, tomorrow).toJson.toString())
 
       Post("/v1/price/calculate", requestEntity) ~> routes(processor, view) ~> check {
-        responseAs[PriceForRangeDto] should be(PriceForRangeDto(1, BigDecimal(245)))
+        responseAs[PriceForRangeDto] should be(PriceForRangeDto(BigDecimal(245)))
       }
 
       val today1 = midYearDate.withDate(2015, 7, 19).getMillis
@@ -89,29 +89,9 @@ class PriceServiceTest extends WordSpec with Matchers with ScalatestRouteTest wi
       val requestEntity1 = HttpEntity(MediaTypes.`application/json`, CalculatePriceForRangeDto(1, today1, tomorrow1).toJson.toString())
 
       Post("/v1/price/calculate", requestEntity1) ~> routes(processor, view) ~> check {
-        responseAs[PriceForRangeDto] should be(PriceForRangeDto(1, BigDecimal(340)))
+        responseAs[PriceForRangeDto] should be(PriceForRangeDto(BigDecimal(340)))
       }
-    }*/
-
-
-    /*    "retrieve customer by id" in {
-            Get("/customers/1") ~> customersRoute ~> check {
-              responseAs[JsObject] should be(testCustomers.head)
-            }
-          }
-
-          "update customer by id and retrieve it" in {
-            val newCustomerfirstname = "UpdatedCustomerfirstname"
-            val requestEntity = HttpEntity(MediaTypes.`application/json`, JsObject("firstname" -> JsString(newCustomerfirstname)).toString())
-            Post("/customers/1", requestEntity) ~> customersRoute ~> check {
-              responseAs[JsObject] should be(testCustomers.head.copy(firstname = newCustomerfirstname))
-              //        whenReady(getCustomerById(1)) { result =>
-              //          result.get.firstname should be(newCustomerfirstname)
-              //        }
-            }
-          }*/
-
+    }
   }
-
 }
 
