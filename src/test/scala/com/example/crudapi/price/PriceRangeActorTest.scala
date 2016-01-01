@@ -7,8 +7,7 @@ import com.example.crudapi.utils.{PricingConfig, AppConfig, DateUtils}
 import com.typesafe.config.ConfigFactory
 import org.joda.time.{DateTime, DateTimeZone}
 import org.scalatest.concurrent.Eventually
-import org.scalatest.time.Span
-import org.scalatest.{WordSpec, BeforeAndAfterAll, Matchers, WordSpecLike}
+import org.scalatest.{BeforeAndAfterAll, Matchers, WordSpecLike}
 
 import scala.concurrent.Promise
 import scala.concurrent.duration._
