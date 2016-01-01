@@ -1,6 +1,6 @@
 package com.example.crudapi.price
 
-import akka.actor.SupervisorStrategy.{Restart, Stop}
+import akka.actor.SupervisorStrategy.Restart
 import akka.actor._
 import akka.util.Timeout
 import com.example.crudapi.price.DailyPriceActor.{CalculatePriceForDay, DailyPriceCalculated, DailyPriceCannotBeCalculated}
