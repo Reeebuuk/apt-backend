@@ -3,15 +3,24 @@ package com.example.crudapi.price
 import akka.actor.ActorSystem
 import akka.testkit.{ImplicitSender, TestKit}
 import com.example.crudapi.price.PriceCommandQueryProtocol.{CalculatePriceForRange, PriceForRangeCalculated, PriceQueryResponse}
-import com.example.crudapi.utils.{DateUtils, PricingConfig}
+import com.example.crudapi.utils.{PricingConfig, AppConfig, DateUtils}
 import com.typesafe.config.ConfigFactory
 import org.joda.time.{DateTime, DateTimeZone}
-import org.scalatest.{BeforeAndAfterAll, Matchers, WordSpecLike}
+import org.scalatest.concurrent.Eventually
+import org.scalatest.time.Span
+import org.scalatest.{WordSpec, BeforeAndAfterAll, Matchers, WordSpecLike}
 
 import scala.concurrent.Promise
+import scala.concurrent.duration._
+import scala.language.postfixOps
+import scala.util.Success
 
 class PriceRangeActorTest(_system: ActorSystem) extends TestKit(_system) with ImplicitSender
-with WordSpecLike with Matchers with BeforeAndAfterAll with DateUtils {
+with WordSpecLike with Matchers with BeforeAndAfterAll with DateUtils with AppConfig with Eventually {
+
+  implicit override val patienceConfig =
+    PatienceConfig(timeout = scaled(1 second), interval = scaled(100 milliseconds))
+
   def this() = this(
     ActorSystem("TestActorSystem", ConfigFactory.parseString(
       """
@@ -34,62 +43,41 @@ with WordSpecLike with Matchers with BeforeAndAfterAll with DateUtils {
     TestKit.shutdownActorSystem(system)
   }
 
-  val priceConfig: PricingConfig = PricingConfig(ConfigFactory.load("pricing"))
+  val midYearDate = new DateTime().toDateTime(DateTimeZone.UTC).withMonthOfYear(6).withDayOfMonth(5).withTime(12, 0, 0, 0)
 
-  "A PriceRangeActor" when {
-    val today = new DateTime().toDateTime(DateTimeZone.UTC).withTime(12, 0, 0, 0).getMillis
-    val tomorrow = afterDay(today)
-    val pricePromise = Promise[PriceQueryResponse]()
-    val calculatePriceForRangeForSingleDay = CalculatePriceForRange(1, today, tomorrow, pricePromise)
+  "A PriceRangeActor" should {
 
-    s"receiving '$calculatePriceForRangeForSingleDay'" should {
-      s"return value for single day" in {
-        val concertActor = _system.actorOf(PriceRangeActor(priceConfig))
-        concertActor ! calculatePriceForRangeForSingleDay
+    "return value for single day" in {
+      val today = midYearDate.getMillis
+      val tomorrow = afterDay(today)
+      val pricePromise = Promise[PriceQueryResponse]()
+      val calculatePriceForRangeForSingleDay = CalculatePriceForRange(1, today, tomorrow, pricePromise)
 
-        expectMsg(PriceForRangeCalculated(BigDecimal(35)))
+      val concertActor = _system.actorOf(PriceRangeActor(PricingConfig(pricingConfig)))
+      concertActor ! calculatePriceForRangeForSingleDay
+
+      eventually {
+        pricePromise.isCompleted shouldBe true
+        pricePromise.future.value.get shouldBe Success(PriceForRangeCalculated(BigDecimal(35)))
       }
     }
 
-    val weekAfter = new DateTime(today).plusDays(7).getMillis
-    val pricePromise1 = Promise[PriceQueryResponse]()
+    "return value for multiple days" in {
+      val today = midYearDate.getMillis
+      val tomorrow = midYearDate.plusDays(7).getMillis
+      val pricePromise = Promise[PriceQueryResponse]()
+      val calculatePriceForRangeForMultipleDays = CalculatePriceForRange(1, today, tomorrow, pricePromise)
 
-    val calculatePriceForRangeForWeek = CalculatePriceForRange(1, today, weekAfter, pricePromise1)
+      val concertActor = _system.actorOf(PriceRangeActor(PricingConfig(pricingConfig)))
+      concertActor ! calculatePriceForRangeForMultipleDays
 
-    s"receiving '$calculatePriceForRangeForWeek'" should {
-      s"return value for week" in {
-        val concertActor = _system.actorOf(PriceRangeActor(priceConfig))
-        concertActor ! calculatePriceForRangeForWeek
-
-        expectMsg(PriceForRangeCalculated(BigDecimal(245)))
+      eventually {
+        pricePromise.isCompleted shouldBe true
+        pricePromise.future.value.get shouldBe Success(PriceForRangeCalculated(BigDecimal(245)))
       }
     }
 
-    /*    val fromDifferentZones = new DateTime().toDateTime(DateTimeZone.UTC).withDate(2015, 7, 19).withTime(12, 0, 0, 0).getMillis
-        val toDifferentZones = new DateTime(fromDifferentZones).plusDays(7).getMillis
-        val calculatePriceForRangeForWeekDifferentZones = CalculatePriceForRange(1, fromDifferentZones, toDifferentZones)
-
-        s"receiving '$calculatePriceForRangeForWeekDifferentZones'" should {
-          s"return value for week in different zones" in {
-            val concertActor = _system.actorOf(PriceRangeActor.props(priceConfig))
-            concertActor ! calculatePriceForRangeForWeekDifferentZones
-
-            expectMsg(PriceForRangeCalculated(1, BigDecimal(340)))
-          }
-        }
-
-        val fromDifferentYear = new DateTime().toDateTime(DateTimeZone.UTC).withDate(2015, 12, 30).withTime(12, 0, 0, 0).getMillis
-        val toDifferentYear = new DateTime(fromDifferentYear).plusDays(7).getMillis
-        val calculatePriceForRangeForWeekDifferentYear = CalculatePriceForRange(1, fromDifferentYear, toDifferentYear)
-
-        s"receiving '$calculatePriceForRangeForWeekDifferentYear'" should {
-          s"return value for week in different years" in {
-            val concertActor = _system.actorOf(PriceRangeActor.props(priceConfig))
-            concertActor ! calculatePriceForRangeForWeekDifferentYear
-
-            expectMsg(PriceForRangeCalculated(1, BigDecimal(245)))
-          }
-        }*/
+//TODO filed promise? invalid stuff?
 
   }
 }
