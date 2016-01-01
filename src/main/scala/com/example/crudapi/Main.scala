@@ -21,9 +21,6 @@ object Main extends App with AppConfig with BaseService {
   override protected val log: LoggingAdapter = Logging(system, getClass)
   override protected implicit val materializer: ActorMaterializer = ActorMaterializer()
 
-  //  val router2: ActorRef =
-  //    system.actorOf(RoundRobinPool(5).props(Props[DailyPriceActor]), "DailyPriceActorRoutes")
-
   Http().bindAndHandle(routes(processor, view), httpInterface, httpPort)
 }
 

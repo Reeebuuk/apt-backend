@@ -19,7 +19,7 @@ final case class ErrorDto(msg: String, response: String = "ErrorDto")
 
 trait PriceServiceRoute extends BaseServiceRoute with MarshallingSupport {
 
-  implicit val timeout = Timeout(30 seconds)
+  implicit val timeout = Timeout(2 seconds)
 
   import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport._
 
@@ -37,7 +37,8 @@ trait PriceServiceRoute extends BaseServiceRoute with MarshallingSupport {
               pricePromise
             )
 
-            val result = Await.ready(pricePromise.future, Duration.Inf).value.get
+            //Would like to get rid of this and use bindAndHandleAsync in main but don't know how :P
+            val result = Await.ready(pricePromise.future, 2 seconds).value.get
 
             result match {
               case Success(s) => s match {
