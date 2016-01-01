@@ -2,6 +2,7 @@ package com.example.crudapi.price
 
 import akka.actor.{Actor, ActorLogging, Props}
 import com.example.crudapi.utils.PricingConfig
+import org.joda.time.DateTime
 
 object DailyPriceActor {
 
@@ -32,7 +33,10 @@ class DailyPriceActor(pricingConfig: PricingConfig) extends Actor with ActorLogg
         .filter(x => x.from <= day && x.to >= day)
         .map(x => x.appPrice(unitId)) match {
         case price :: Nil => sender() ! DailyPriceCalculated(requestId, day, price)
-        case _  => sender() ! DailyPriceCannotBeCalculated(requestId)
+        case price => {
+          log.error(s"Cannot find price for unitId: $unitId, day: ${new DateTime(day)} ($day). Found $price")
+          sender() ! DailyPriceCannotBeCalculated(requestId)
+        }
       }
     }
   }

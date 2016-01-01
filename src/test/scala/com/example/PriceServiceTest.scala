@@ -56,7 +56,7 @@ class PriceServiceTest extends WordSpec with Matchers with ScalatestRouteTest wi
     }
 
     "return correct price if the duration is 7 day in different price ranges" in {
-      val today = midYearDate.withDate(2015, 7, 19).getMillis
+      val today = midYearDate.withMonthOfYear(7).withDayOfMonth(19).getMillis
       val tomorrow = new DateTime(today).plusDays(7).getMillis
       val requestEntity = HttpEntity(MediaTypes.`application/json`, CalculatePriceForRangeDto(1, today, tomorrow).toJson.toString())
 
@@ -66,7 +66,7 @@ class PriceServiceTest extends WordSpec with Matchers with ScalatestRouteTest wi
     }
 
     "return correct price if the duration is 7 day in different years" in {
-      val today = midYearDate.withDate(2015, 12, 30).getMillis
+      val today = midYearDate.withMonthOfYear(12).withDayOfMonth(30).getMillis
       val tomorrow = new DateTime(today).plusDays(7).getMillis
       val requestEntity = HttpEntity(MediaTypes.`application/json`, CalculatePriceForRangeDto(1, today, tomorrow).toJson.toString())
 
@@ -84,7 +84,7 @@ class PriceServiceTest extends WordSpec with Matchers with ScalatestRouteTest wi
         responseAs[PriceForRangeDto] should be(PriceForRangeDto(BigDecimal(245)))
       }
 
-      val today1 = midYearDate.withDate(2015, 7, 19).getMillis
+      val today1 = midYearDate.withMonthOfYear(7).withDayOfMonth(19).getMillis
       val tomorrow1 = new DateTime(today1).plusDays(7).getMillis
       val requestEntity1 = HttpEntity(MediaTypes.`application/json`, CalculatePriceForRangeDto(1, today1, tomorrow1).toJson.toString())
 
