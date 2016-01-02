@@ -1,4 +1,4 @@
-package com.example.crudapi.http.routes
+package hr.com.blanka.apartments.http.routes
 
 import akka.event.LoggingAdapter
 import akka.stream.ActorMaterializer

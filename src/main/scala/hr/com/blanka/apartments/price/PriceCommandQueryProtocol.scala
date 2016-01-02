@@ -1,4 +1,4 @@
-package com.example.crudapi.price
+package hr.com.blanka.apartments.price
 
 import scala.concurrent.Promise
 

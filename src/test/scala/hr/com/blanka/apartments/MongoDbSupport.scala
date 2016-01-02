@@ -1,11 +1,9 @@
-package com.example
+package hr.com.blanka.apartments
 
-import akka.event.{LoggingAdapter, NoLogging}
-import akka.http.scaladsl.testkit.ScalatestRouteTest
-import com.example.crudapi.http.BaseService
 import de.flapdoodle.embed.mongo.config.{MongodConfigBuilder, Net}
 import de.flapdoodle.embed.mongo.distribution.Version
 import de.flapdoodle.embed.mongo.{MongodExecutable, MongodProcess, MongodStarter}
+import hr.com.blanka.apartments.http.BaseService
 import org.scalatest._
 import reactivemongo.api._
 import reactivemongo.api.collections.bson.BSONCollection

@@ -1,9 +1,9 @@
-package com.example.crudapi.price
+package hr.com.blanka.apartments.price
 
 import akka.actor.ActorSystem
 import akka.testkit.{ImplicitSender, TestKit}
-import com.example.crudapi.price.PriceCommandQueryProtocol.{CalculatePriceForRange, PriceForRangeCalculated, PriceQueryResponse}
-import com.example.crudapi.utils.{PricingConfig, AppConfig, DateUtils}
+import hr.com.blanka.apartments.price.PriceCommandQueryProtocol.{CalculatePriceForRange, PriceForRangeCalculated, PriceQueryResponse}
+import hr.com.blanka.apartments.utils.{PricingConfig, AppConfig, DateUtils}
 import com.typesafe.config.ConfigFactory
 import org.joda.time.{DateTime, DateTimeZone}
 import org.scalatest.concurrent.Eventually
