@@ -1,7 +1,7 @@
-package com.example.crudapi.price
+package hr.com.blanka.apartments.price
 
 import akka.actor.{Actor, ActorLogging, Props}
-import com.example.crudapi.utils.PricingConfig
+import hr.com.blanka.apartments.utils.PricingConfig
 import org.joda.time.DateTime
 
 object DailyPriceActor {

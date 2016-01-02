@@ -1,4 +1,4 @@
-package com.example.crudapi.utils
+package hr.com.blanka.apartments.utils
 
 import akka.http.scaladsl.model.HttpMethods._
 import akka.http.scaladsl.model.HttpResponse

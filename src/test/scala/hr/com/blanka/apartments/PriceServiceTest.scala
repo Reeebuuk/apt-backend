@@ -1,18 +1,16 @@
-package com.example
+package hr.com.blanka.apartments
 
 import akka.actor.{ActorSystem, Props}
-import akka.event.{NoLogging, LoggingAdapter}
+import akka.event.{LoggingAdapter, NoLogging}
 import akka.http.scaladsl.model.{HttpEntity, MediaTypes}
-import akka.http.scaladsl.testkit.{ScalatestRouteTest, RouteTestTimeout}
-import com.example.crudapi.Main._
-import com.example.crudapi.http.BaseService
-import com.example.crudapi.http.routes.{ErrorDto, CalculatePriceForRangeDto, PriceForRangeDto}
-import com.example.crudapi.price.PriceRangeActor
-import com.example.crudapi.utils.{DateUtils, MarshallingSupport, PricingConfig}
+import akka.http.scaladsl.testkit.{RouteTestTimeout, ScalatestRouteTest}
+import hr.com.blanka.apartments.Main._
+import hr.com.blanka.apartments.http.routes.{CalculatePriceForRangeDto, ErrorDto, PriceForRangeDto}
+import hr.com.blanka.apartments.price.PriceRangeActor
+import hr.com.blanka.apartments.utils.{DateUtils, PricingConfig}
 import org.joda.time.{DateTime, DateTimeZone}
 import org.json4s.DefaultFormats
-import org.scalatest.{WordSpec, Matchers, FlatSpec}
-import org.scalatest.concurrent.ScalaFutures
+import org.scalatest.{Matchers, WordSpec}
 import spray.json._
 
 import scala.concurrent.duration._

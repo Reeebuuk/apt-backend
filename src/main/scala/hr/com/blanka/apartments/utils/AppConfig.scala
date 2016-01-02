@@ -1,4 +1,4 @@
-package com.example.crudapi.utils
+package hr.com.blanka.apartments.utils
 
 import com.typesafe.config.ConfigFactory
 

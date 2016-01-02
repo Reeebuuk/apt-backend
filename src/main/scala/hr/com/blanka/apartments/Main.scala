@@ -1,12 +1,12 @@
-package com.example.crudapi
+package hr.com.blanka.apartments
 
 import akka.actor.ActorSystem
 import akka.event.{Logging, LoggingAdapter}
 import akka.http.scaladsl.Http
 import akka.stream.ActorMaterializer
-import com.example.crudapi.http.BaseService
-import com.example.crudapi.price.PriceRangeActor
-import com.example.crudapi.utils.{AppConfig, PricingConfig}
+import hr.com.blanka.apartments.http.BaseService
+import hr.com.blanka.apartments.price.PriceRangeActor
+import hr.com.blanka.apartments.utils.{AppConfig, PricingConfig}
 
 import scala.concurrent.ExecutionContext
 

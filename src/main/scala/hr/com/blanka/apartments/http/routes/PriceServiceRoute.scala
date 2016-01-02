@@ -1,10 +1,10 @@
-package com.example.crudapi.http.routes
+package hr.com.blanka.apartments.http.routes
 
 import akka.actor.ActorRef
 import akka.http.scaladsl.server.Directives._
 import akka.util.Timeout
-import com.example.crudapi.price.PriceCommandQueryProtocol._
-import com.example.crudapi.utils.MarshallingSupport
+import hr.com.blanka.apartments.price.PriceCommandQueryProtocol._
+import hr.com.blanka.apartments.utils.MarshallingSupport
 
 import scala.concurrent.duration._
 import scala.concurrent.{Await, Promise}

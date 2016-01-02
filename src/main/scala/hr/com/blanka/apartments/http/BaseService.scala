@@ -1,8 +1,8 @@
-package com.example.crudapi.http
+package hr.com.blanka.apartments.http
 
 import akka.actor.ActorRef
 import akka.http.scaladsl.server.Directives._
-import com.example.crudapi.http.routes._
+import hr.com.blanka.apartments.http.routes._
 
 trait BaseService extends PriceServiceRoute {
 

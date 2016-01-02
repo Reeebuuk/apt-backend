@@ -1,9 +1,9 @@
-package com.example.crudapi.utils
+package hr.com.blanka.apartments.utils
 
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
-import com.example.crudapi.http.routes.{CalculatePriceForRangeDto, ErrorDto, PriceForRangeDto}
+import hr.com.blanka.apartments.http.routes.{CalculatePriceForRangeDto, ErrorDto, PriceForRangeDto}
 import spray.json.{DefaultJsonProtocol, JsString, JsValue, JsonFormat}
 
 trait MarshallingSupport extends DefaultJsonProtocol {
