@@ -7,10 +7,13 @@ import akka.stream.ActorMaterializer
 import hr.com.blanka.apartments.http.BaseService
 import hr.com.blanka.apartments.price.PriceRangeActor
 import hr.com.blanka.apartments.utils.{AppConfig, PricingConfig}
+import kamon.Kamon
 
 import scala.concurrent.ExecutionContext
 
 object Main extends App with AppConfig with BaseService {
+
+  Kamon.start()
 
   implicit val system = ActorSystem("booking")
 
@@ -22,5 +25,7 @@ object Main extends App with AppConfig with BaseService {
   override protected implicit val materializer: ActorMaterializer = ActorMaterializer()
 
   Http().bindAndHandle(routes(processor, view), httpInterface, httpPort)
+
+  Kamon.shutdown()
 }
 
