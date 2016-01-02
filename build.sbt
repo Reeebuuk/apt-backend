@@ -20,6 +20,7 @@ libraryDependencies ++= {
   val rMongoVersion      = "0.11.7"
   val inMemMongoVersion  = "1.50.0"
   val nscalaVersion      = "2.2.0"
+  val kamonVersion       = "0.5.2"
 
   Seq(
     "com.typesafe.akka" %% "akka-contrib" % akkaV,
@@ -37,15 +38,21 @@ libraryDependencies ++= {
     "com.typesafe.akka" %% "akka-typed-experimental" % akkaV,
     "de.flapdoodle.embed" % "de.flapdoodle.embed.mongo" % inMemMongoVersion % "test",
     "org.scalatest" %% "scalatest" % scalaTestV % "test",
-    "com.typesafe.akka" %% "akka-http-testkit-experimental" % akkaStreamV % "test"
+    "com.typesafe.akka" %% "akka-http-testkit-experimental" % akkaStreamV % "test",
+
+    "io.kamon" %% "kamon-core" % kamonVersion,
+    "io.kamon" %% "kamon-scala" % kamonVersion,
+    "io.kamon" %% "kamon-akka" % kamonVersion,
+    "io.kamon" %% "kamon-system-metrics" % kamonVersion,
+    "io.kamon" %% "kamon-annotation" % kamonVersion
   )
 }
 
 
 initialCommands := """|import akka.actor._
-                      |import akka.pattern._
-                      |import akka.util._
-                      |import scala.concurrent._
-                      |import scala.concurrent.duration._""".stripMargin
+                     |import akka.pattern._
+                     |import akka.util._
+                     |import scala.concurrent._
+                     |import scala.concurrent.duration._""".stripMargin
 
 parallelExecution in Test := false
