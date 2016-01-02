@@ -1,4 +1,4 @@
-enablePlugins(JavaAppPackaging)
+enablePlugins(JavaServerAppPackaging)
 
 name          := "crudapi"
 
