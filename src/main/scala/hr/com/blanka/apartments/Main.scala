@@ -9,9 +9,7 @@ import hr.com.blanka.apartments.price.PriceRangeActor
 import hr.com.blanka.apartments.utils.{AppConfig, PricingConfig}
 import kamon.Kamon
 
-import scala.concurrent.ExecutionContext
-
-object Main extends App with AppConfig with BaseService {
+object Main extends App with AppConfig with BaseService with MongoDbConfiguration {
 
   Kamon.start()
 
@@ -20,7 +18,7 @@ object Main extends App with AppConfig with BaseService {
   val processor = system.actorOf(PriceRangeActor(PricingConfig(pricingConfig)), "processorActor")
   val view = system.actorOf(PriceRangeActor(PricingConfig(pricingConfig)), "viewActor")
 
-  override protected implicit val executor: ExecutionContext = system.dispatcher
+  override protected implicit val executor = system.dispatcher
   override protected val log: LoggingAdapter = Logging(system, getClass)
   override protected implicit val materializer: ActorMaterializer = ActorMaterializer()
 
