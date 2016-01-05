@@ -57,3 +57,7 @@ initialCommands := """|import akka.actor._
                      |import scala.concurrent.duration._""".stripMargin
 
 parallelExecution in Test := false
+
+fork in run := false
+
+kamon.aspectj.sbt.AspectjRunner.testSettings
