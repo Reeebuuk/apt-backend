@@ -4,7 +4,7 @@ import akka.actor.SupervisorStrategy.Restart
 import akka.actor._
 import akka.util.Timeout
 import hr.com.blanka.apartments.price.DailyPriceActor.{CalculatePriceForDay, DailyPriceCalculated, DailyPriceCannotBeCalculated}
-import hr.com.blanka.apartments.price.PriceCommandQueryProtocol.{CalculatePriceForRange, PriceForRangeCalculated, PriceForRangeCannotBeCalculated, PriceQueryResponse}
+import hr.com.blanka.apartments.price.PriceQueryProtocol.{CalculatePriceForRange, PriceForRangeCalculated, PriceForRangeCannotBeCalculated, PriceQueryResponse}
 import hr.com.blanka.apartments.utils.PricingConfig
 import org.joda.time.{DateTime, DateTimeZone, Days}
 

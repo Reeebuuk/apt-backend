@@ -11,7 +11,7 @@ import kamon.Kamon
 
 object Main extends App with AppConfig with BaseService with MongoDbConfiguration {
 
-  Kamon.start()
+//  Kamon.start()
 
   implicit val system = ActorSystem("booking")
 
@@ -24,6 +24,6 @@ object Main extends App with AppConfig with BaseService with MongoDbConfiguratio
 
   Http().bindAndHandle(routes(processor, view), httpInterface, httpPort)
 
-  Kamon.shutdown()
+//  Kamon.shutdown()
 }
 

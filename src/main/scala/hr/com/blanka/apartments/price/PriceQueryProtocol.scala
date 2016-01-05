@@ -2,7 +2,7 @@ package hr.com.blanka.apartments.price
 
 import scala.concurrent.Promise
 
-object PriceCommandQueryProtocol {
+object PriceQueryProtocol {
 
   sealed trait PriceMsg
 

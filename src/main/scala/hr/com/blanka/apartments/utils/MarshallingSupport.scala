@@ -3,13 +3,14 @@ package hr.com.blanka.apartments.utils
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
-import hr.com.blanka.apartments.http.routes.{CalculatePriceForRangeDto, ErrorDto, PriceForRangeDto}
+import hr.com.blanka.apartments.http.routes.{SavePriceForRangeDto, CalculatePriceForRangeDto, ErrorResponse, PriceForRangeResponse}
 import spray.json.{DefaultJsonProtocol, JsString, JsValue, JsonFormat}
 
 trait MarshallingSupport extends DefaultJsonProtocol {
   implicit val CalculatePriceForRangeDtoFormat = jsonFormat3(CalculatePriceForRangeDto.apply)
-  implicit val PriceForRangeDtoFormat = jsonFormat2(PriceForRangeDto.apply)
-  implicit val ErrorDtoFormat = jsonFormat2(ErrorDto.apply)
+  implicit val SavePriceForRangeDtoFormat = jsonFormat4(SavePriceForRangeDto.apply)
+  implicit val PriceForRangeDtoFormat = jsonFormat2(PriceForRangeResponse.apply)
+  implicit val ErrorDtoFormat = jsonFormat2(ErrorResponse.apply)
 
   implicit val LocalDateTimeFormat = new JsonFormat[LocalDateTime] {
 
