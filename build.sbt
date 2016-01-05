@@ -17,8 +17,8 @@ libraryDependencies ++= {
   val akkaV              = "2.4.1"
   val scalaTestV         = "2.2.4"
   val slf4jVersion       = "1.6.4"
-  val rMongoVersion      = "0.11.7"
-  val inMemMongoVersion  = "1.50.0"
+  val rMongoVersion      = "0.11.9"
+  val inMemMongoVersion  = "1.50.1"
   val nscalaVersion      = "2.2.0"
   val kamonVersion       = "0.5.2"
 
