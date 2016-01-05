@@ -44,7 +44,8 @@ libraryDependencies ++= {
     "io.kamon" %% "kamon-scala" % kamonVersion,
     "io.kamon" %% "kamon-akka" % kamonVersion,
     "io.kamon" %% "kamon-system-metrics" % kamonVersion,
-    "io.kamon" %% "kamon-annotation" % kamonVersion
+    "io.kamon" %% "kamon-annotation" % kamonVersion,
+    "io.kamon" %% "kamon-statsd" % kamonVersion
   )
 }
 
