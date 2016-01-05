@@ -15,7 +15,7 @@ import spray.json._
 
 import scala.concurrent.duration._
 
-class PriceServiceTest extends WordSpec with Matchers with ScalatestRouteTest with DateUtils {
+class PriceServiceTest extends IntegrationTestMongoDbSupport with Matchers with ScalatestRouteTest with DateUtils {
 
   protected val log: LoggingAdapter = NoLogging
 

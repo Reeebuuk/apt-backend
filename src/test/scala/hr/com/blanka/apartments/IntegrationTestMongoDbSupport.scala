@@ -8,12 +8,7 @@ import org.scalatest._
 import reactivemongo.api._
 import reactivemongo.api.collections.bson.BSONCollection
 
-trait MongoDbSupport extends WordSpec with BaseService with BeforeAndAfterAll {
-
-  def url = "localhost"
-  def port = 6667
-  def version = Version.V3_0_5
-  def dbName = "test_db"
+trait IntegrationTestMongoDbSupport extends WordSpec with BeforeAndAfterAll with TestMongoDbConfiguration {
 
   lazy val runtime : MongodStarter = MongodStarter.getDefaultInstance
   lazy val mongoExe : MongodExecutable = runtime.prepare(
@@ -34,21 +29,5 @@ trait MongoDbSupport extends WordSpec with BaseService with BeforeAndAfterAll {
     mongod.stop()
     mongoExe.stop()
   }
-
-  def connect() : BSONCollection = {
-    // gets an instance of the driver
-    // (creates an actor system)
-    val driver = new MongoDriver
-    val connection = driver.connection(List(s"$url:${port.toString}"))
-
-    // Gets a reference to the database "plugin"
-    val database : DefaultDB= connection(dbName)
-
-    // Gets a reference to the collection "acoll"
-    // By default, you get a BSONCollection.
-    database("booking")
-  }
-
-  val bookingsCollection = connect()
 
 }
