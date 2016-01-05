@@ -8,7 +8,6 @@ trait MongoDbConfiguration extends Configuration {
   configure {
     val driver = new MongoDriver
     val connection = driver.connection(List("localhost"))
-    val lala :DefaultDB = connection("test")
     connection("test")
   }
 }
