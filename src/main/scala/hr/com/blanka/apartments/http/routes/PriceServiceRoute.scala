@@ -3,19 +3,29 @@ package hr.com.blanka.apartments.http.routes
 import akka.actor.ActorRef
 import akka.http.scaladsl.server.Directives._
 import akka.util.Timeout
-import hr.com.blanka.apartments.price.PriceCommandQueryProtocol._
+import hr.com.blanka.apartments.price.PriceCommandProtocol.PriceForRangeSaved
+import hr.com.blanka.apartments.price.PriceQueryProtocol._
 import hr.com.blanka.apartments.utils.MarshallingSupport
 
 import scala.concurrent.duration._
 import scala.concurrent.{Await, Promise}
 import scala.language.postfixOps
 import scala.util.{Failure, Success}
+import akka.pattern.ask
 
 final case class CalculatePriceForRangeDto(unitId: Int, from: Long, to: Long)
 
-final case class PriceForRangeDto(price: BigDecimal, response: String = "PriceForRangeDto")
+final case class SavePriceForRangeDto(unitId: Int, from: Long, to: Long, price: Int)
 
-final case class ErrorDto(msg: String, response: String = "ErrorDto")
+sealed trait Response {
+  val response: String
+}
+
+final case class PriceForRangeResponse(price: BigDecimal, response: String) extends Response
+
+final case class SavePriceForRangeResponse(response: String) extends Response
+
+final case class ErrorResponse(msg: String, response: String) extends Response
 
 trait PriceServiceRoute extends BaseServiceRoute with MarshallingSupport {
 
@@ -23,7 +33,7 @@ trait PriceServiceRoute extends BaseServiceRoute with MarshallingSupport {
 
   import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport._
 
-  def customersRoute(command: ActorRef, query: ActorRef) = pathPrefix("price") {
+  def priceRoute(command: ActorRef, query: ActorRef) = pathPrefix("price") {
     post {
       path("calculate") {
         decodeRequest {
@@ -43,14 +53,28 @@ trait PriceServiceRoute extends BaseServiceRoute with MarshallingSupport {
             result match {
               case Success(s) => s match {
                 case PriceForRangeCalculated(price) =>
-                  complete(PriceForRangeDto(price))
+                  complete(PriceForRangeResponse(price))
                 case InvalidRange =>
-                  complete(ErrorDto("InvalidRange"))
+                  complete(ErrorResponse("InvalidRange"))
                 case _ =>
-                  complete(ErrorDto("UnknownError"))
+                  complete(ErrorResponse("UnknownError"))
               }
               case Failure(t) =>
-                complete(ErrorDto(t.getMessage))
+                complete(ErrorResponse(t.getMessage))
+            }
+
+          }
+        }
+      }
+      path("") {
+        decodeRequest {
+          entity(as[SavePriceForRangeDto]) { savePriceForRange =>
+            onComplete(command ? savePriceForRange onComplete).mapTo[Response])
+            {
+              case pfrs: PriceForRangeSaved =>
+                complete(SavePriceForRangeResponse("Saved"))
+              case _ =>
+                complete(ErrorResponse("ERROR", auctionId, ""))
             }
 
           }

@@ -5,7 +5,7 @@ import akka.event.{LoggingAdapter, NoLogging}
 import akka.http.scaladsl.model.{HttpEntity, MediaTypes}
 import akka.http.scaladsl.testkit.{RouteTestTimeout, ScalatestRouteTest}
 import hr.com.blanka.apartments.Main._
-import hr.com.blanka.apartments.http.routes.{CalculatePriceForRangeDto, ErrorDto, PriceForRangeDto}
+import hr.com.blanka.apartments.http.routes.{CalculatePriceForRangeDto, ErrorResponse, PriceForRangeResponse}
 import hr.com.blanka.apartments.price.PriceRangeActor
 import hr.com.blanka.apartments.utils.{DateUtils, PricingConfig}
 import org.joda.time.{DateTime, DateTimeZone}
@@ -38,7 +38,7 @@ class PriceServiceTest extends IntegrationTestMongoDbSupport with Matchers with 
       val requestEntity = HttpEntity(MediaTypes.`application/json`, CalculatePriceForRangeDto(1, today, tomorrow).toJson.toString())
 
       Post("/v1/price/calculate", requestEntity) ~> routes(processor, view) ~> check {
-        responseAs[PriceForRangeDto] should be(PriceForRangeDto(BigDecimal(35)))
+        responseAs[PriceForRangeResponse] should be(PriceForRangeResponse(BigDecimal(35)))
       }
     }
 
@@ -49,7 +49,7 @@ class PriceServiceTest extends IntegrationTestMongoDbSupport with Matchers with 
       val requestEntity = HttpEntity(MediaTypes.`application/json`, CalculatePriceForRangeDto(1, today, tomorrow).toJson.toString())
 
       Post("/v1/price/calculate", requestEntity) ~> routes(processor, view) ~> check {
-        responseAs[PriceForRangeDto] should be(PriceForRangeDto(BigDecimal(245)))
+        responseAs[PriceForRangeResponse] should be(PriceForRangeResponse(BigDecimal(245)))
       }
     }
 
@@ -59,7 +59,7 @@ class PriceServiceTest extends IntegrationTestMongoDbSupport with Matchers with 
       val requestEntity = HttpEntity(MediaTypes.`application/json`, CalculatePriceForRangeDto(1, today, tomorrow).toJson.toString())
 
       Post("/v1/price/calculate", requestEntity) ~> routes(processor, view) ~> check {
-        responseAs[PriceForRangeDto] should be(PriceForRangeDto(BigDecimal(340)))
+        responseAs[PriceForRangeResponse] should be(PriceForRangeResponse(BigDecimal(340)))
       }
     }
 
@@ -69,7 +69,7 @@ class PriceServiceTest extends IntegrationTestMongoDbSupport with Matchers with 
       val requestEntity = HttpEntity(MediaTypes.`application/json`, CalculatePriceForRangeDto(1, today, tomorrow).toJson.toString())
 
       Post("/v1/price/calculate", requestEntity) ~> routes(processor, view) ~> check {
-        responseAs[ErrorDto] should be(ErrorDto("UnknownError"))
+        responseAs[ErrorResponse] should be(ErrorResponse("UnknownError"))
       }
     }
 
@@ -79,7 +79,7 @@ class PriceServiceTest extends IntegrationTestMongoDbSupport with Matchers with 
       val requestEntity = HttpEntity(MediaTypes.`application/json`, CalculatePriceForRangeDto(1, today, tomorrow).toJson.toString())
 
       Post("/v1/price/calculate", requestEntity) ~> routes(processor, view) ~> check {
-        responseAs[PriceForRangeDto] should be(PriceForRangeDto(BigDecimal(245)))
+        responseAs[PriceForRangeResponse] should be(PriceForRangeResponse(BigDecimal(245)))
       }
 
       val today1 = midYearDate.withMonthOfYear(7).withDayOfMonth(19).getMillis
@@ -87,7 +87,7 @@ class PriceServiceTest extends IntegrationTestMongoDbSupport with Matchers with 
       val requestEntity1 = HttpEntity(MediaTypes.`application/json`, CalculatePriceForRangeDto(1, today1, tomorrow1).toJson.toString())
 
       Post("/v1/price/calculate", requestEntity1) ~> routes(processor, view) ~> check {
-        responseAs[PriceForRangeDto] should be(PriceForRangeDto(BigDecimal(340)))
+        responseAs[PriceForRangeResponse] should be(PriceForRangeResponse(BigDecimal(340)))
       }
     }
   }
