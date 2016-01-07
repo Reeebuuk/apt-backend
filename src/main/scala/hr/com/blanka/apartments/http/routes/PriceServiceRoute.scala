@@ -17,15 +17,13 @@ final case class CalculatePriceForRangeDto(unitId: Int, from: Long, to: Long)
 
 final case class SavePriceForRangeDto(unitId: Int, from: Long, to: Long, price: Int)
 
-sealed trait Response {
-  val response: String
-}
+sealed trait Response
 
-final case class PriceForRangeResponse(price: BigDecimal, response: String) extends Response
+final case class PriceForRangeResponse(price: BigDecimal) extends Response
 
 final case class SavePriceForRangeResponse(response: String) extends Response
 
-final case class ErrorResponse(msg: String, response: String) extends Response
+final case class ErrorResponse(response: String) extends Response
 
 trait PriceServiceRoute extends BaseServiceRoute with MarshallingSupport {
 
@@ -66,17 +64,15 @@ trait PriceServiceRoute extends BaseServiceRoute with MarshallingSupport {
           }
         }
       }
-      path("") {
+      pathEndOrSingleSlash {
         decodeRequest {
           entity(as[SavePriceForRangeDto]) { savePriceForRange =>
-            onComplete(command ? savePriceForRange onComplete).mapTo[Response])
+            (command ? savePriceForRange).mapTo[Response].onSuccess(
             {
-              case pfrs: PriceForRangeSaved =>
-                complete(SavePriceForRangeResponse("Saved"))
               case _ =>
-                complete(ErrorResponse("ERROR", auctionId, ""))
+                complete(SavePriceForRangeResponse("Saved"))
             }
-
+            )
           }
         }
       }
