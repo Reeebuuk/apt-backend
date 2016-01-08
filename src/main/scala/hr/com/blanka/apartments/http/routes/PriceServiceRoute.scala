@@ -1,5 +1,7 @@
 package hr.com.blanka.apartments.http.routes
 
+import akka.http.scaladsl.model.{HttpEntity, MediaTypes, HttpResponse}
+import akka.pattern.ask
 import akka.actor.ActorRef
 import akka.http.scaladsl.server.Directives._
 import akka.util.Timeout
@@ -8,8 +10,9 @@ import hr.com.blanka.apartments.price.PriceQueryProtocol._
 import hr.com.blanka.apartments.utils.MarshallingSupport
 
 import scala.concurrent.duration._
-import scala.concurrent.{Await, Promise}
+import scala.concurrent.{Future, Await, Promise}
 import scala.language.postfixOps
+import scala.util.control.NonFatal
 import scala.util.{Failure, Success}
 import akka.pattern.ask
 
@@ -36,30 +39,55 @@ trait PriceServiceRoute extends BaseServiceRoute with MarshallingSupport {
       path("calculate") {
         decodeRequest {
           entity(as[CalculatePriceForRangeDto]) { priceForRange: CalculatePriceForRangeDto =>
-            val pricePromise = Promise[PriceQueryResponse]()
 
-            query ! CalculatePriceForRange(
-              priceForRange.unitId,
-              priceForRange.from,
-              priceForRange.to,
-              pricePromise
-            )
+            complete {
+              val future = for (
+                res <- query ? CalculatePriceForRange(
+                  priceForRange.unitId,
+                  priceForRange.from,
+                  priceForRange.to
+                )) yield res
 
-            //Would like to get rid of this and use bindAndHandleAsync in main but don't know how :P
-            val result = Await.ready(pricePromise.future, 2 seconds).value.get
+              future.onComplete({
+                case Success(result) =>
+                  HttpResponse(entity = HttpEntity(MediaTypes.`text/xml`, result))
+                case Failure(result) =>
+                  HttpResponse(entity = "")
+              })
+              future
+//                res.asInstanceOf[Response] match {
+//                  case PriceForRangeCalculated(price) =>
+//                    complete(PriceForRangeResponse(price))
+//                  case InvalidRange =>
+//                    complete(ErrorResponse("InvalidRange"))
+//                  case _ =>
+//                    complete(ErrorResponse("UnknownError"))
+//                }
+//              }
+            }
 
-            result match {
+            complete {
+              val future = for {
+                response <- someIOFunc()
+                entity <- someOtherFunc()
+              } yield entity
+              future.onComplete({
+                case Success(result) =>
+                  HttpResponse(entity = HttpEntity(MediaTypes.`text/xml`, result))
+                case Failure(result) =>
+                  HttpResponse(entity = utils.getFault("fault"))
+              })
+              future
+            }
+
+
+/*            result match {
               case Success(s) => s match {
-                case PriceForRangeCalculated(price) =>
-                  complete(PriceForRangeResponse(price))
-                case InvalidRange =>
-                  complete(ErrorResponse("InvalidRange"))
-                case _ =>
-                  complete(ErrorResponse("UnknownError"))
+
               }
               case Failure(t) =>
                 complete(ErrorResponse(t.getMessage))
-            }
+            }*/
 
           }
         }
