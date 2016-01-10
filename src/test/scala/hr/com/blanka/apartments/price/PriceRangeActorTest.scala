@@ -2,7 +2,7 @@ package hr.com.blanka.apartments.price
 
 import akka.actor.ActorSystem
 import akka.testkit.{ImplicitSender, TestKit}
-import hr.com.blanka.apartments.price.PriceQueryProtocol.{CalculatePriceForRange, PriceForRangeCalculated, PriceQueryResponse}
+import hr.com.blanka.apartments.price.PriceQueryProtocol.{LookupPriceForRange, PriceForRangeCalculated, PriceQueryResponse}
 import hr.com.blanka.apartments.utils.{PricingConfig, AppConfig, DateUtils}
 import com.typesafe.config.ConfigFactory
 import org.joda.time.{DateTime, DateTimeZone}
@@ -50,7 +50,7 @@ with WordSpecLike with Matchers with BeforeAndAfterAll with DateUtils with AppCo
       val today = midYearDate.getMillis
       val tomorrow = afterDay(today)
       val pricePromise = Promise[PriceQueryResponse]()
-      val calculatePriceForRangeForSingleDay = CalculatePriceForRange(1, today, tomorrow, pricePromise)
+      val calculatePriceForRangeForSingleDay = LookupPriceForRange(1, today, tomorrow, pricePromise)
 
       val concertActor = _system.actorOf(PriceRangeActor(PricingConfig(pricingConfig)))
       concertActor ! calculatePriceForRangeForSingleDay
@@ -65,7 +65,7 @@ with WordSpecLike with Matchers with BeforeAndAfterAll with DateUtils with AppCo
       val today = midYearDate.getMillis
       val tomorrow = midYearDate.plusDays(7).getMillis
       val pricePromise = Promise[PriceQueryResponse]()
-      val calculatePriceForRangeForMultipleDays = CalculatePriceForRange(1, today, tomorrow, pricePromise)
+      val calculatePriceForRangeForMultipleDays = LookupPriceForRange(1, today, tomorrow, pricePromise)
 
       val concertActor = _system.actorOf(PriceRangeActor(PricingConfig(pricingConfig)))
       concertActor ! calculatePriceForRangeForMultipleDays

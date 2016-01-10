@@ -8,7 +8,7 @@ object PriceQueryProtocol {
 
   sealed trait PriceQuery extends PriceMsg
 
-  case class CalculatePriceForRange(unitId: Int, from: Long, to: Long, pricePromise: Promise[PriceQueryResponse]) extends PriceQuery
+  case class LookupPriceForRange(unitId: Int, from: Long, to: Long, pricePromise: Promise[PriceQueryResponse]) extends PriceQuery
 
   sealed trait PriceQueryResponse extends PriceMsg
 

@@ -5,7 +5,7 @@ import akka.http.scaladsl.model.StatusCodes
 import akka.http.scaladsl.server.Directives._
 import akka.util.Timeout
 import akka.pattern.ask
-import hr.com.blanka.apartments.price.PriceQueryProtocol.{CalculatePriceForRange, InvalidRange, PriceForRangeCalculated, PriceQueryResponse}
+import hr.com.blanka.apartments.price.PriceQueryProtocol.{LookupPriceForRange, InvalidRange, PriceForRangeCalculated, PriceQueryResponse}
 import hr.com.blanka.apartments.utils.MarshallingSupport
 import org.scalactic.{Bad, Good}
 
@@ -35,7 +35,7 @@ trait PriceServiceRoute extends BaseServiceRoute with MarshallingSupport {
           entity(as[CalculatePriceForRangeDto]) { priceForRange: CalculatePriceForRangeDto =>
             val pricePromise = Promise[PriceQueryResponse]()
 
-            query ! CalculatePriceForRange(
+            query ! LookupPriceForRange(
               priceForRange.unitId,
               priceForRange.from,
               priceForRange.to,
