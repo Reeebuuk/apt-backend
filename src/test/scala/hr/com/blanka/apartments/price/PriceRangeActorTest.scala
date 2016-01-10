@@ -3,7 +3,7 @@ package hr.com.blanka.apartments.price
 import akka.actor.ActorSystem
 import akka.testkit.{ImplicitSender, TestKit}
 import hr.com.blanka.apartments.price.PriceQueryProtocol.{LookupPriceForRange, PriceForRangeCalculated, PriceQueryResponse}
-import hr.com.blanka.apartments.price.query.PriceRangeActor
+import hr.com.blanka.apartments.price.query.QueryPriceRangeActor
 import hr.com.blanka.apartments.utils.{PricingConfig, AppConfig, DateUtils}
 import com.typesafe.config.ConfigFactory
 import org.joda.time.{DateTime, DateTimeZone}
@@ -53,7 +53,7 @@ with WordSpecLike with Matchers with BeforeAndAfterAll with DateUtils with AppCo
       val pricePromise = Promise[PriceQueryResponse]()
       val calculatePriceForRangeForSingleDay = LookupPriceForRange(1, today, tomorrow, pricePromise)
 
-      val concertActor = _system.actorOf(PriceRangeActor(PricingConfig(pricingConfig)))
+      val concertActor = _system.actorOf(QueryPriceRangeActor(PricingConfig(pricingConfig)))
       concertActor ! calculatePriceForRangeForSingleDay
 
       eventually {
@@ -68,7 +68,7 @@ with WordSpecLike with Matchers with BeforeAndAfterAll with DateUtils with AppCo
       val pricePromise = Promise[PriceQueryResponse]()
       val calculatePriceForRangeForMultipleDays = LookupPriceForRange(1, today, tomorrow, pricePromise)
 
-      val concertActor = _system.actorOf(PriceRangeActor(PricingConfig(pricingConfig)))
+      val concertActor = _system.actorOf(QueryPriceRangeActor(PricingConfig(pricingConfig)))
       concertActor ! calculatePriceForRangeForMultipleDays
 
       eventually {
