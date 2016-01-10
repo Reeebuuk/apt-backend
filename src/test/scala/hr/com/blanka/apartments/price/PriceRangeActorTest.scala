@@ -3,6 +3,7 @@ package hr.com.blanka.apartments.price
 import akka.actor.ActorSystem
 import akka.testkit.{ImplicitSender, TestKit}
 import hr.com.blanka.apartments.price.PriceQueryProtocol.{LookupPriceForRange, PriceForRangeCalculated, PriceQueryResponse}
+import hr.com.blanka.apartments.price.query.PriceRangeActor
 import hr.com.blanka.apartments.utils.{PricingConfig, AppConfig, DateUtils}
 import com.typesafe.config.ConfigFactory
 import org.joda.time.{DateTime, DateTimeZone}

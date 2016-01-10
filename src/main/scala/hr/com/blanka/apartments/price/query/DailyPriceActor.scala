@@ -1,4 +1,4 @@
-package hr.com.blanka.apartments.price
+package hr.com.blanka.apartments.price.query
 
 import akka.actor.{Actor, ActorLogging, Props}
 import hr.com.blanka.apartments.Configured
@@ -6,6 +6,7 @@ import hr.com.blanka.apartments.utils.PricingConfig
 import org.joda.time.DateTime
 import reactivemongo.api.DefaultDB
 import reactivemongo.api.collections.bson.BSONCollection
+
 import scala.concurrent.ExecutionContext.Implicits.global
 
 
