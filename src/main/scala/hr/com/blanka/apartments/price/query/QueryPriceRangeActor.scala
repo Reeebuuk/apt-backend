@@ -13,15 +13,15 @@ import scala.concurrent.Promise
 import scala.concurrent.duration.DurationInt
 import scala.language.postfixOps
 
-object PriceRangeActor {
+object QueryPriceRangeActor {
 
-  def apply(pricingConfig: PricingConfig) = Props(classOf[PriceRangeActor], pricingConfig)
+  def apply(pricingConfig: PricingConfig) = Props(classOf[QueryPriceRangeActor], pricingConfig)
 
 }
 
 case class CalculationData(singleDayCalculations: Map[Long, Option[BigDecimal]], resultPromise: Promise[PriceQueryResponse])
 
-class PriceRangeActor(pricingConfig: PricingConfig) extends Actor {
+class QueryPriceRangeActor(pricingConfig: PricingConfig) extends Actor {
 
   implicit val timeout = Timeout(5 seconds)
 
