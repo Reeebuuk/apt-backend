@@ -54,8 +54,8 @@ with TestMongoDbConfiguration {
       val pricePromise = Promise[PriceQueryResponse]()
       val calculatePriceForRangeForSingleDay = LookupPriceForRange(1, today, tomorrow, pricePromise)
 
-      val concertActor = _system.actorOf(QueryPriceRangeActor(PricingConfig(pricingConfig)))
-      concertActor ! calculatePriceForRangeForSingleDay
+      val actor = _system.actorOf(QueryPriceRangeActor(PricingConfig(pricingConfig)))
+      actor ! calculatePriceForRangeForSingleDay
 
       eventually {
         pricePromise.isCompleted shouldBe true
@@ -69,8 +69,8 @@ with TestMongoDbConfiguration {
       val pricePromise = Promise[PriceQueryResponse]()
       val calculatePriceForRangeForMultipleDays = LookupPriceForRange(1, today, tomorrow, pricePromise)
 
-      val concertActor = _system.actorOf(QueryPriceRangeActor(PricingConfig(pricingConfig)))
-      concertActor ! calculatePriceForRangeForMultipleDays
+      val actor = _system.actorOf(QueryPriceRangeActor(PricingConfig(pricingConfig)))
+      actor ! calculatePriceForRangeForMultipleDays
 
       eventually {
         pricePromise.isCompleted shouldBe true
