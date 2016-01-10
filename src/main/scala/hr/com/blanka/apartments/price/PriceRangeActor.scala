@@ -4,7 +4,7 @@ import akka.actor.SupervisorStrategy.Restart
 import akka.actor._
 import akka.util.Timeout
 import hr.com.blanka.apartments.price.DailyPriceActor.{CalculatePriceForDay, DailyPriceCalculated, DailyPriceCannotBeCalculated}
-import hr.com.blanka.apartments.price.PriceQueryProtocol.{CalculatePriceForRange, PriceForRangeCalculated, PriceForRangeCannotBeCalculated, PriceQueryResponse}
+import hr.com.blanka.apartments.price.PriceQueryProtocol.{LookupPriceForRange, PriceForRangeCalculated, PriceForRangeCannotBeCalculated, PriceQueryResponse}
 import hr.com.blanka.apartments.utils.PricingConfig
 import org.joda.time.{DateTime, DateTimeZone, Days}
 
@@ -29,7 +29,7 @@ class PriceRangeActor(pricingConfig: PricingConfig) extends Actor {
 
   override def receive = active(0, Map[Long, CalculationData]())
 
-  def sendMessagesForSingleDayCalculations(requestId: Long, calculatePriceForRange: CalculatePriceForRange) = {
+  def sendMessagesForSingleDayCalculations(requestId: Long, calculatePriceForRange: LookupPriceForRange) = {
     import calculatePriceForRange._
 
     val fromDate = new DateTime(from).toDateTime(DateTimeZone.UTC)
@@ -46,7 +46,7 @@ class PriceRangeActor(pricingConfig: PricingConfig) extends Actor {
   }
 
   def active(lastRequestId: Long, priceRangeCalculations: Map[Long, CalculationData]): Receive = {
-    case cpfr: CalculatePriceForRange => {
+    case cpfr: LookupPriceForRange => {
 
       val newRequestId = lastRequestId + 1
       val newlySentDailyCalculationMessages = sendMessagesForSingleDayCalculations(newRequestId, cpfr)
