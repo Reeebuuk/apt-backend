@@ -6,7 +6,7 @@ import akka.http.scaladsl.model.{HttpEntity, MediaTypes}
 import akka.http.scaladsl.testkit.{RouteTestTimeout, ScalatestRouteTest}
 import hr.com.blanka.apartments.Main._
 import hr.com.blanka.apartments.http.routes.{CalculatePriceForRangeDto, ErrorResponse, PriceForRangeResponse}
-import hr.com.blanka.apartments.price.PriceRangeActor
+import hr.com.blanka.apartments.price.query.PriceRangeActor
 import hr.com.blanka.apartments.utils.{DateUtils, PricingConfig}
 import org.joda.time.{DateTime, DateTimeZone}
 import org.json4s.DefaultFormats
