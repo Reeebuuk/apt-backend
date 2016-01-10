@@ -1,6 +1,7 @@
 package hr.com.blanka.apartments.http.routes
 
 import akka.actor.ActorRef
+import akka.http.scaladsl.model.StatusCodes
 import akka.http.scaladsl.server.Directives._
 import akka.util.Timeout
 import hr.com.blanka.apartments.price.PriceCommandQueryProtocol._
@@ -37,20 +38,10 @@ trait PriceServiceRoute extends BaseServiceRoute with MarshallingSupport {
               pricePromise
             )
 
-            //Would like to get rid of this and use bindAndHandleAsync in main but don't know how :P
-            val result = Await.ready(pricePromise.future, 2 seconds).value.get
-
-            result match {
-              case Success(s) => s match {
-                case PriceForRangeCalculated(price) =>
-                  complete(PriceForRangeDto(price))
-                case InvalidRange =>
-                  complete(ErrorDto("InvalidRange"))
-                case _ =>
-                  complete(ErrorDto("UnknownError"))
-              }
-              case Failure(t) =>
-                complete(ErrorDto(t.getMessage))
+            onSuccess(pricePromise.future) {
+              case PriceForRangeCalculated(price) => complete(PriceForRangeDto(price))
+              case InvalidRange => complete(StatusCodes.Conflict, "InvalidRange")
+              case _ => complete(StatusCodes.BadRequest, "UnknownError")
             }
 
           }
