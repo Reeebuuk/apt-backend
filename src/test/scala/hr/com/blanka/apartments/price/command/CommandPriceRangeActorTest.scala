@@ -66,7 +66,7 @@ with TestMongoDbConfiguration with Configured{
       val future = actor ? saveMessage
 
       val dataSource = configured[DefaultDB]
-      val collection = dataSource("test.collections").asInstanceOf[BSONCollection]
+      val collection = dataSource("priceForRange").asInstanceOf[BSONCollection]
 
       eventually {
         future.isCompleted shouldBe true
