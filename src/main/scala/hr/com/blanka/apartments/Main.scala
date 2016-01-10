@@ -13,14 +13,14 @@ object Main extends App with KamonSupport with AppConfig with BaseService with M
 
   implicit val system = ActorSystem("booking")
 
-  val processor = system.actorOf(PriceRangeActor(PricingConfig(pricingConfig)), "processorActor")
-  val view = system.actorOf(PriceRangeActor(PricingConfig(pricingConfig)), "viewActor")
+  val command = system.actorOf(PriceRangeActor(PricingConfig(pricingConfig)), "commandActor")
+  val query = system.actorOf(PriceRangeActor(PricingConfig(pricingConfig)), "queryActor")
 
   override protected implicit val executor = system.dispatcher
   override protected val log: LoggingAdapter = Logging(system, getClass)
   override protected implicit val materializer: ActorMaterializer = ActorMaterializer()
 
-  Http().bindAndHandle(routes(processor, view), httpInterface, httpPort)
+  Http().bindAndHandle(routes(command, query), httpInterface, httpPort)
 }
 
 trait KamonSupport {
