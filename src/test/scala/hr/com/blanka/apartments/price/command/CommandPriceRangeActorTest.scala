@@ -5,7 +5,7 @@ import akka.pattern.ask
 import akka.testkit.{ImplicitSender, TestKit}
 import akka.util.Timeout
 import com.typesafe.config.ConfigFactory
-import hr.com.blanka.apartments.TestMongoDbConfiguration
+import hr.com.blanka.apartments.{Configured, TestMongoDbConfiguration}
 import hr.com.blanka.apartments.http.routes.SavePriceForRangeDto
 import hr.com.blanka.apartments.price.PriceCommandProtocol.{PriceForRangeSaved, SavePriceCommandResponse}
 import hr.com.blanka.apartments.utils.{AppConfig, DateUtils}
@@ -13,14 +13,18 @@ import org.joda.time.{DateTime, DateTimeZone}
 import org.scalactic.Good
 import org.scalatest.concurrent.Eventually
 import org.scalatest.{BeforeAndAfterAll, Matchers, WordSpecLike}
+import reactivemongo.api.DefaultDB
+import reactivemongo.api.collections.bson.BSONCollection
 
 import scala.concurrent.duration._
 import scala.language.postfixOps
 import scala.util.Success
 
+import scala.concurrent.ExecutionContext.Implicits.global
+
 class CommandPriceRangeActorTest(_system: ActorSystem) extends TestKit(_system) with ImplicitSender
 with WordSpecLike with Matchers with BeforeAndAfterAll with DateUtils with AppConfig with Eventually
-with TestMongoDbConfiguration {
+with TestMongoDbConfiguration with Configured{
 
   implicit val timeout = Timeout(2 seconds)
 
@@ -61,9 +65,14 @@ with TestMongoDbConfiguration {
       val actor = _system.actorOf(CommandPriceRangeActor())
       val future = actor ? saveMessage
 
+      val dataSource = configured[DefaultDB]
+      val collection = dataSource("test.collections").asInstanceOf[BSONCollection]
+
       eventually {
         future.isCompleted shouldBe true
         future.value.get shouldBe Success(SavePriceCommandResponse(Good(PriceForRangeSaved)))
+
+        collection.count().value.get shouldBe Success(1)
       }
     }
   }
