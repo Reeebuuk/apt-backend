@@ -1,21 +1,16 @@
 package hr.com.blanka.apartments.price.query
 
 import akka.actor.ActorSystem
-import akka.pattern.ask
 import akka.testkit.{ImplicitSender, TestKit}
-import akka.util.Timeout
 import com.typesafe.config.ConfigFactory
 import hr.com.blanka.apartments.TestMongoDbConfiguration
-import hr.com.blanka.apartments.http.routes.SavePriceForRangeDto
-import hr.com.blanka.apartments.price.PriceCommandProtocol.{PriceForRangeSaved, SavePriceCommandResponse}
-import hr.com.blanka.apartments.price.PriceQueryProtocol.PriceForRangeCalculated
-import hr.com.blanka.apartments.price.command.CommandPriceRangeActor
+import hr.com.blanka.apartments.price.PriceQueryProtocol.{LookupPriceForRange, PriceForRangeCalculated, PriceQueryResponse}
 import hr.com.blanka.apartments.utils.{AppConfig, DateUtils, PricingConfig}
 import org.joda.time.{DateTime, DateTimeZone}
-import org.scalactic.Good
 import org.scalatest.concurrent.Eventually
 import org.scalatest.{BeforeAndAfterAll, Matchers, WordSpecLike}
 
+import scala.concurrent.Promise
 import scala.concurrent.duration._
 import scala.language.postfixOps
 import scala.util.Success
@@ -24,10 +19,8 @@ class QueryPriceRangeActorTest(_system: ActorSystem) extends TestKit(_system) wi
 with WordSpecLike with Matchers with BeforeAndAfterAll with DateUtils with AppConfig with Eventually
 with TestMongoDbConfiguration {
 
-  implicit val timeout = Timeout(2 seconds)
-
   implicit override val patienceConfig =
-    PatienceConfig(timeout = scaled(3 second), interval = scaled(100 milliseconds))
+    PatienceConfig(timeout = scaled(1 second), interval = scaled(100 milliseconds))
 
   def this() = this(
     ActorSystem("TestActorSystem", ConfigFactory.parseString(
@@ -53,20 +46,39 @@ with TestMongoDbConfiguration {
 
   val midYearDate = new DateTime().toDateTime(DateTimeZone.UTC).withMonthOfYear(6).withDayOfMonth(5).withTime(12, 0, 0, 0)
 
-  "CommandPriceRangeActorTest" should {
+  "QueryPriceRangeActor" should {
 
-    "save a price for a single day" in {
+    "return value for single day" in {
       val today = midYearDate.getMillis
       val tomorrow = afterDay(today)
-      val saveMessage = SavePriceForRangeDto(1, today, tomorrow, 50)
+      val pricePromise = Promise[PriceQueryResponse]()
+      val calculatePriceForRangeForSingleDay = LookupPriceForRange(1, today, tomorrow, pricePromise)
 
-      val actor = _system.actorOf(CommandPriceRangeActor())
-      val future = actor ? saveMessage
+      val actor = _system.actorOf(QueryPriceRangeActor(PricingConfig(pricingConfig)))
+      actor ! calculatePriceForRangeForSingleDay
 
       eventually {
-        future.isCompleted shouldBe true
-        future.value.get shouldBe Success(SavePriceCommandResponse(Good(PriceForRangeSaved)))
+        pricePromise.isCompleted shouldBe true
+        pricePromise.future.value.get shouldBe Success(PriceForRangeCalculated(BigDecimal(35)))
       }
     }
+
+    "return value for multiple days" in {
+      val today = midYearDate.getMillis
+      val tomorrow = midYearDate.plusDays(7).getMillis
+      val pricePromise = Promise[PriceQueryResponse]()
+      val calculatePriceForRangeForMultipleDays = LookupPriceForRange(1, today, tomorrow, pricePromise)
+
+      val actor = _system.actorOf(QueryPriceRangeActor(PricingConfig(pricingConfig)))
+      actor ! calculatePriceForRangeForMultipleDays
+
+      eventually {
+        pricePromise.isCompleted shouldBe true
+        pricePromise.future.value.get shouldBe Success(PriceForRangeCalculated(BigDecimal(245)))
+      }
+    }
+
+//TODO filed promise? invalid stuff?
+
   }
 }
