@@ -9,7 +9,6 @@ import reactivemongo.api.collections.bson.BSONCollection
 
 import scala.concurrent.ExecutionContext.Implicits.global
 
-
 object DailyPriceActor {
 
   sealed trait DailyPriceMsg
