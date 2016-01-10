@@ -19,12 +19,12 @@ trait IntegrationTestMongoDbSupport extends WordSpec with BeforeAndAfterAll with
 
   lazy val mongod: MongodProcess = mongoExe.start()
 
-  override def beforeAll(): Unit = {
+  override protected def beforeAll(): Unit = {
     mongod
     super.beforeAll()
   }
 
-  override def afterAll(): Unit = {
+  override protected def afterAll(): Unit = {
     super.afterAll()
     mongod.stop()
     mongoExe.stop()

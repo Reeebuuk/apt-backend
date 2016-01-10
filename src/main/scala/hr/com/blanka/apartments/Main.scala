@@ -9,9 +9,7 @@ import hr.com.blanka.apartments.price.PriceRangeActor
 import hr.com.blanka.apartments.utils.{AppConfig, PricingConfig}
 import kamon.Kamon
 
-object Main extends App with AppConfig with BaseService with MongoDbConfiguration {
-
-//  Kamon.start()
+object Main extends App with KamonSupport with AppConfig with BaseService with MongoDbConfiguration {
 
   implicit val system = ActorSystem("booking")
 
@@ -23,7 +21,10 @@ object Main extends App with AppConfig with BaseService with MongoDbConfiguratio
   override protected implicit val materializer: ActorMaterializer = ActorMaterializer()
 
   Http().bindAndHandle(routes(processor, view), httpInterface, httpPort)
+}
 
-//  Kamon.shutdown()
+trait KamonSupport {
+//  Kamon.start()
+//  sys.addShutdownHook(Kamon.shutdown())
 }
 
