@@ -1,11 +1,11 @@
-package hr.com.blanka.apartments.price
+package hr.com.blanka.apartments.price.query
 
 import akka.actor.ActorSystem
 import akka.testkit.{ImplicitSender, TestKit}
-import hr.com.blanka.apartments.price.PriceQueryProtocol.{LookupPriceForRange, PriceForRangeCalculated, PriceQueryResponse}
-import hr.com.blanka.apartments.price.query.QueryPriceRangeActor
-import hr.com.blanka.apartments.utils.{PricingConfig, AppConfig, DateUtils}
 import com.typesafe.config.ConfigFactory
+import hr.com.blanka.apartments.TestMongoDbConfiguration
+import hr.com.blanka.apartments.price.PriceQueryProtocol.{LookupPriceForRange, PriceForRangeCalculated, PriceQueryResponse}
+import hr.com.blanka.apartments.utils.{AppConfig, DateUtils, PricingConfig}
 import org.joda.time.{DateTime, DateTimeZone}
 import org.scalatest.concurrent.Eventually
 import org.scalatest.{BeforeAndAfterAll, Matchers, WordSpecLike}
@@ -15,8 +15,9 @@ import scala.concurrent.duration._
 import scala.language.postfixOps
 import scala.util.Success
 
-class PriceRangeActorTest(_system: ActorSystem) extends TestKit(_system) with ImplicitSender
-with WordSpecLike with Matchers with BeforeAndAfterAll with DateUtils with AppConfig with Eventually {
+class QueryPriceRangeActorTest(_system: ActorSystem) extends TestKit(_system) with ImplicitSender
+with WordSpecLike with Matchers with BeforeAndAfterAll with DateUtils with AppConfig with Eventually
+with TestMongoDbConfiguration {
 
   implicit override val patienceConfig =
     PatienceConfig(timeout = scaled(1 second), interval = scaled(100 milliseconds))
