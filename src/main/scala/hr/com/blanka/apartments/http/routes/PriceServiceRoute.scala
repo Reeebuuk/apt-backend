@@ -1,21 +1,26 @@
 package hr.com.blanka.apartments.http.routes
 
 import akka.actor.ActorRef
+import akka.http.scaladsl.model.StatusCodes
 import akka.http.scaladsl.server.Directives._
 import akka.util.Timeout
-import hr.com.blanka.apartments.price.PriceCommandQueryProtocol._
+import akka.pattern.ask
+import hr.com.blanka.apartments.price.PriceQueryProtocol.{CalculatePriceForRange, InvalidRange, PriceForRangeCalculated, PriceQueryResponse}
 import hr.com.blanka.apartments.utils.MarshallingSupport
+import org.scalactic.{Bad, Good}
 
+import scala.concurrent.Promise
 import scala.concurrent.duration._
-import scala.concurrent.{Await, Promise}
 import scala.language.postfixOps
-import scala.util.{Failure, Success}
 
 final case class CalculatePriceForRangeDto(unitId: Int, from: Long, to: Long)
 
-final case class PriceForRangeDto(price: BigDecimal, response: String = "PriceForRangeDto")
+final case class SavePriceForRangeDto(unitId: Int, from: Long, to: Long, price: Int)
 
-final case class ErrorDto(msg: String, response: String = "ErrorDto")
+
+final case class PriceForRangeResponse(price: BigDecimal)
+
+final case class ErrorResponse(msg: String)
 
 trait PriceServiceRoute extends BaseServiceRoute with MarshallingSupport {
 
@@ -23,7 +28,7 @@ trait PriceServiceRoute extends BaseServiceRoute with MarshallingSupport {
 
   import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport._
 
-  def customersRoute(command: ActorRef, query: ActorRef) = pathPrefix("price") {
+  def priceRoute(command: ActorRef, query: ActorRef) = pathPrefix("price") {
     post {
       path("calculate") {
         decodeRequest {
@@ -38,14 +43,26 @@ trait PriceServiceRoute extends BaseServiceRoute with MarshallingSupport {
             )
 
             onSuccess(pricePromise.future) {
-              case PriceForRangeCalculated(price) => complete(PriceForRangeDto(price))
+              case PriceForRangeCalculated(price) => complete(PriceForRangeResponse(price))
               case InvalidRange => complete(StatusCodes.Conflict, "InvalidRange")
               case _ => complete(StatusCodes.BadRequest, "UnknownError")
             }
 
           }
         }
-      }
+      } ~
+        pathEndOrSingleSlash {
+          decodeRequest {
+            entity(as[SavePriceForRangeDto]) { savePriceForRange =>
+              onSuccess(command ? savePriceForRange) {
+                case Good(_) => complete(StatusCodes.BadRequest, "Saved")
+                case Bad(response) => response match {
+                  case _ => complete(StatusCodes.BadRequest, "UnknownError")
+                }
+              }
+            }
+          }
+        }
     }
   }
 }
