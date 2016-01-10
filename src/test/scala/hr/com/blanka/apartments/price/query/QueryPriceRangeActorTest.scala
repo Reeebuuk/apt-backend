@@ -1,16 +1,17 @@
 package hr.com.blanka.apartments.price.query
 
 import akka.actor.ActorSystem
+import akka.pattern.ask
 import akka.testkit.{ImplicitSender, TestKit}
 import com.typesafe.config.ConfigFactory
 import hr.com.blanka.apartments.TestMongoDbConfiguration
-import hr.com.blanka.apartments.price.PriceQueryProtocol.{LookupPriceForRange, PriceForRangeCalculated, PriceQueryResponse}
+import hr.com.blanka.apartments.http.routes.SavePriceForRangeDto
+import hr.com.blanka.apartments.price.PriceQueryProtocol.PriceForRangeCalculated
 import hr.com.blanka.apartments.utils.{AppConfig, DateUtils, PricingConfig}
 import org.joda.time.{DateTime, DateTimeZone}
 import org.scalatest.concurrent.Eventually
 import org.scalatest.{BeforeAndAfterAll, Matchers, WordSpecLike}
 
-import scala.concurrent.Promise
 import scala.concurrent.duration._
 import scala.language.postfixOps
 import scala.util.Success
@@ -46,39 +47,20 @@ with TestMongoDbConfiguration {
 
   val midYearDate = new DateTime().toDateTime(DateTimeZone.UTC).withMonthOfYear(6).withDayOfMonth(5).withTime(12, 0, 0, 0)
 
-  "A PriceRangeActor" should {
+  it should {
 
-    "return value for single day" in {
+    "save a price for a single day" in {
       val today = midYearDate.getMillis
       val tomorrow = afterDay(today)
-      val pricePromise = Promise[PriceQueryResponse]()
-      val calculatePriceForRangeForSingleDay = LookupPriceForRange(1, today, tomorrow, pricePromise)
+      val saveMessage = SavePriceForRangeDto(1, today, tomorrow, 50)
 
       val actor = _system.actorOf(QueryPriceRangeActor(PricingConfig(pricingConfig)))
-      actor ! calculatePriceForRangeForSingleDay
+      val future = actor ? saveMessage
 
       eventually {
-        pricePromise.isCompleted shouldBe true
-        pricePromise.future.value.get shouldBe Success(PriceForRangeCalculated(BigDecimal(35)))
+        future.isCompleted shouldBe true
+        future.value.get shouldBe Success(PriceForRangeCalculated(BigDecimal(35)))
       }
     }
-
-    "return value for multiple days" in {
-      val today = midYearDate.getMillis
-      val tomorrow = midYearDate.plusDays(7).getMillis
-      val pricePromise = Promise[PriceQueryResponse]()
-      val calculatePriceForRangeForMultipleDays = LookupPriceForRange(1, today, tomorrow, pricePromise)
-
-      val actor = _system.actorOf(QueryPriceRangeActor(PricingConfig(pricingConfig)))
-      actor ! calculatePriceForRangeForMultipleDays
-
-      eventually {
-        pricePromise.isCompleted shouldBe true
-        pricePromise.future.value.get shouldBe Success(PriceForRangeCalculated(BigDecimal(245)))
-      }
-    }
-
-//TODO filed promise? invalid stuff?
-
   }
 }
