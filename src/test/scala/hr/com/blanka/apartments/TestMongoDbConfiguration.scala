@@ -8,8 +8,8 @@ import scala.concurrent.ExecutionContext.Implicits.global
 trait TestMongoDbConfiguration extends Configuration {
 
   val url = "localhost"
-  val port = 6667
-  val version = Version.V3_0_5
+  val port = 27000
+  val version = Version.V3_2_0
   val dbName = "test"
 
   configure {
