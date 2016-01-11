@@ -4,7 +4,8 @@ import de.flapdoodle.embed.mongo.config.{MongodConfigBuilder, Net}
 import de.flapdoodle.embed.mongo.{MongodExecutable, MongodProcess, MongodStarter}
 import org.scalatest._
 
-trait IntegrationTestMongoDbSupport extends WordSpecLike with BeforeAndAfterAll with TestMongoDbConfiguration {
+trait IntegrationTestMongoDbSupport extends WordSpecLike with BeforeAndAfterAll with BeforeAndAfter
+with TestMongoDbConfiguration {
 
   lazy val runtime : MongodStarter = MongodStarter.getDefaultInstance
   lazy val mongoExe : MongodExecutable = runtime.prepare(
