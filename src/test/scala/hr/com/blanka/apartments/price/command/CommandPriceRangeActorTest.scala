@@ -10,7 +10,7 @@ import hr.com.blanka.apartments.model.PriceForRange
 import hr.com.blanka.apartments.price.PriceCommandProtocol.{PriceForRangeSaved, SavePriceCommandResponse}
 import hr.com.blanka.apartments.utils.{AppConfig, DateUtils}
 import hr.com.blanka.apartments.{Configured, IntegrationTestMongoDbSupport}
-import org.joda.time.{DateTime, DateTimeZone}
+import org.joda.time.{LocalDate, DateTime, DateTimeZone}
 import org.scalactic.Good
 import org.scalatest.Matchers
 import org.scalatest.concurrent.Eventually
@@ -27,11 +27,10 @@ class CommandPriceRangeActorTest(_system: ActorSystem) extends TestKit(_system) 
 with Matchers with DateUtils with AppConfig with Eventually with IntegrationTestMongoDbSupport with Configured {
 
   implicit val timeout = Timeout(2 seconds)
-
-  implicit val priceForRangeFormat = Macros.handler[PriceForRange]
-
   implicit override val patienceConfig =
     PatienceConfig(timeout = scaled(3 second), interval = scaled(100 milliseconds))
+
+  implicit val priceForRangeFormat = Macros.handler[PriceForRange]
 
   def this() = this(
     ActorSystem("TestActorSystem", ConfigFactory.parseString(
@@ -51,30 +50,55 @@ with Matchers with DateUtils with AppConfig with Eventually with IntegrationTest
         |}
       """.stripMargin)))
 
+  val dataSource = configured[DefaultDB]
+  val collection = dataSource("priceForRange").asInstanceOf[BSONCollection]
+
   override def afterAll() {
     TestKit.shutdownActorSystem(system)
   }
 
-  val midYearDate = new DateTime().toDateTime(DateTimeZone.UTC).withMonthOfYear(6).withDayOfMonth(5).withTime(12, 0, 0, 0)
+  val midYearDate = new LocalDate().withMonthOfYear(6).withDayOfMonth(5)
 
   "CommandPriceRangeActorTest" should {
 
     "save a price for a single day" in {
-      val today = midYearDate.getMillis
-      val tomorrow = afterDay(today)
+      val today = midYearDate.toDateTimeAtStartOfDay.getMillis
+      val tomorrow = midYearDate.plusDays(1).toDateTimeAtStartOfDay.getMillis
       val saveMessage = SavePriceForRangeDto(1, today, tomorrow, 50)
 
       val actor = _system.actorOf(CommandPriceRangeActor())
       val future = actor ? saveMessage
 
-      val dataSource = configured[DefaultDB]
-      val collection = dataSource("priceForRange").asInstanceOf[BSONCollection]
 //      collection.insert(PriceForRange(123, 22, 33, 44))
       val count = collection.count()
 
 /*      val hoho = collection.find(BSONDocument("unitId" -> 1)).
         cursor[PriceForRange](ReadPreference.primaryPreferred).
         collect[List]()*/
+
+      eventually {
+        future.isCompleted shouldBe true
+        future.value.get shouldBe Success(SavePriceCommandResponse(Good(PriceForRangeSaved)))
+
+        count.isCompleted shouldBe true
+        count.value.get shouldBe Success(1)
+      }
+    }
+
+    "save a price for a multiple days" in {
+      val today = midYearDate.toDateTimeAtStartOfDay.getMillis
+      val tomorrow = midYearDate.plusDays(5).toDateTimeAtStartOfDay.getMillis
+      val saveMessage = SavePriceForRangeDto(1, today, tomorrow, 50)
+
+      val actor = _system.actorOf(CommandPriceRangeActor())
+      val future = actor ? saveMessage
+
+      //      collection.insert(PriceForRange(123, 22, 33, 44))
+      val count = collection.count()
+
+      /*      val hoho = collection.find(BSONDocument("unitId" -> 1)).
+              cursor[PriceForRange](ReadPreference.primaryPreferred).
+              collect[List]()*/
 
       eventually {
         future.isCompleted shouldBe true
