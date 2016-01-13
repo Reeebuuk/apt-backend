@@ -7,10 +7,9 @@ import akka.http.scaladsl.testkit.{RouteTestTimeout, ScalatestRouteTest}
 import hr.com.blanka.apartments.Main._
 import hr.com.blanka.apartments.http.routes.{CalculatePriceForRangeDto, ErrorResponse, PriceForRangeResponse}
 import hr.com.blanka.apartments.price.query.QueryPriceRangeActor
-import hr.com.blanka.apartments.utils.{DateUtils, PricingConfig}
 import org.joda.time.{DateTime, DateTimeZone}
 import org.json4s.DefaultFormats
-import org.scalatest.{Matchers, WordSpec}
+import org.scalatest.Matchers
 import spray.json._
 
 import scala.concurrent.duration._
@@ -23,8 +22,8 @@ class PriceServiceTest extends IntegrationTestMongoDbSupport with Matchers with 
 
   implicit def default(implicit system: ActorSystem) = RouteTestTimeout(new DurationInt(10).second)
 
-  val command = system.actorOf(Props(classOf[QueryPriceRangeActor], PricingConfig(pricingConfig)), "commandActor")
-  val query = system.actorOf(Props(classOf[QueryPriceRangeActor], PricingConfig(pricingConfig)), "queryActor")
+  val command = system.actorOf(Props(classOf[QueryPriceRangeActor]), "commandActor")
+  val query = system.actorOf(Props(classOf[QueryPriceRangeActor]), "queryActor")
 
   implicit val format = DefaultFormats.withBigDecimal
   val midYearDate = new DateTime().toDateTime(DateTimeZone.UTC).withMonthOfYear(6).withDayOfMonth(5).withTime(12, 0, 0, 0)

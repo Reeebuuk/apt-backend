@@ -5,7 +5,7 @@ import akka.testkit.{ImplicitSender, TestKit}
 import com.typesafe.config.ConfigFactory
 import hr.com.blanka.apartments.TestMongoDbConfiguration
 import hr.com.blanka.apartments.price.PriceQueryProtocol.{LookupPriceForRange, PriceForRangeCalculated, PriceQueryResponse}
-import hr.com.blanka.apartments.utils.{AppConfig, DateUtils, PricingConfig}
+import hr.com.blanka.apartments.utils.AppConfig
 import org.joda.time.{DateTime, DateTimeZone}
 import org.scalatest.concurrent.Eventually
 import org.scalatest.{BeforeAndAfterAll, Matchers, WordSpecLike}
@@ -54,7 +54,7 @@ with TestMongoDbConfiguration {
       val pricePromise = Promise[PriceQueryResponse]()
       val calculatePriceForRangeForSingleDay = LookupPriceForRange(1, today, tomorrow, pricePromise)
 
-      val actor = _system.actorOf(QueryPriceRangeActor(PricingConfig(pricingConfig)))
+      val actor = _system.actorOf(QueryPriceRangeActor())
       actor ! calculatePriceForRangeForSingleDay
 
       eventually {
@@ -69,7 +69,7 @@ with TestMongoDbConfiguration {
       val pricePromise = Promise[PriceQueryResponse]()
       val calculatePriceForRangeForMultipleDays = LookupPriceForRange(1, today, tomorrow, pricePromise)
 
-      val actor = _system.actorOf(QueryPriceRangeActor(PricingConfig(pricingConfig)))
+      val actor = _system.actorOf(QueryPriceRangeActor())
       actor ! calculatePriceForRangeForMultipleDays
 
       eventually {
