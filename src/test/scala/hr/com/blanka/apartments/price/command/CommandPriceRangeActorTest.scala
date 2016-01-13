@@ -8,9 +8,9 @@ import com.typesafe.config.ConfigFactory
 import hr.com.blanka.apartments.http.routes.SavePriceForRangeDto
 import hr.com.blanka.apartments.model.PriceForRange
 import hr.com.blanka.apartments.price.PriceCommandProtocol.{PriceForRangeSaved, SavePriceCommandResponse}
-import hr.com.blanka.apartments.utils.{AppConfig, DateUtils}
+import hr.com.blanka.apartments.utils.AppConfig
 import hr.com.blanka.apartments.{Configured, IntegrationTestMongoDbSupport}
-import org.joda.time.{LocalDate, DateTime, DateTimeZone}
+import org.joda.time.LocalDate
 import org.scalactic.Good
 import org.scalatest.Matchers
 import org.scalatest.concurrent.Eventually
@@ -29,8 +29,6 @@ with Matchers with DateUtils with AppConfig with Eventually with IntegrationTest
   implicit val timeout = Timeout(2 seconds)
   implicit override val patienceConfig =
     PatienceConfig(timeout = scaled(3 second), interval = scaled(100 milliseconds))
-
-  implicit val priceForRangeFormat = Macros.handler[PriceForRange]
 
   def this() = this(
     ActorSystem("TestActorSystem", ConfigFactory.parseString(
@@ -51,7 +49,7 @@ with Matchers with DateUtils with AppConfig with Eventually with IntegrationTest
       """.stripMargin)))
 
   val dataSource = configured[DefaultDB]
-  val collection = dataSource("priceForRange").asInstanceOf[BSONCollection]
+  val collection = dataSource(priceForRange).asInstanceOf[BSONCollection]
 
   override def afterAll() {
     TestKit.shutdownActorSystem(system)
@@ -69,12 +67,7 @@ with Matchers with DateUtils with AppConfig with Eventually with IntegrationTest
       val actor = _system.actorOf(CommandPriceRangeActor())
       val future = actor ? saveMessage
 
-//      collection.insert(PriceForRange(123, 22, 33, 44))
       val count = collection.count()
-
-/*      val hoho = collection.find(BSONDocument("unitId" -> 1)).
-        cursor[PriceForRange](ReadPreference.primaryPreferred).
-        collect[List]()*/
 
       eventually {
         future.isCompleted shouldBe true
@@ -93,12 +86,7 @@ with Matchers with DateUtils with AppConfig with Eventually with IntegrationTest
       val actor = _system.actorOf(CommandPriceRangeActor())
       val future = actor ? saveMessage
 
-      //      collection.insert(PriceForRange(123, 22, 33, 44))
       val count = collection.count()
-
-      /*      val hoho = collection.find(BSONDocument("unitId" -> 1)).
-              cursor[PriceForRange](ReadPreference.primaryPreferred).
-              collect[List]()*/
 
       eventually {
         future.isCompleted shouldBe true

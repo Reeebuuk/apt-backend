@@ -7,7 +7,7 @@ import akka.stream.ActorMaterializer
 import hr.com.blanka.apartments.http.BaseService
 import hr.com.blanka.apartments.price.command.CommandPriceRangeActor
 import hr.com.blanka.apartments.price.query.QueryPriceRangeActor
-import hr.com.blanka.apartments.utils.{AppConfig, PricingConfig}
+import hr.com.blanka.apartments.utils.AppConfig
 import kamon.Kamon
 
 object Main extends App with KamonSupport with AppConfig with BaseService with MongoDbConfiguration {
@@ -15,7 +15,7 @@ object Main extends App with KamonSupport with AppConfig with BaseService with M
   implicit val system = ActorSystem("booking")
 
   val command = system.actorOf(CommandPriceRangeActor(), "commandActor")
-  val query = system.actorOf(QueryPriceRangeActor(PricingConfig(pricingConfig)), "queryActor")
+  val query = system.actorOf(QueryPriceRangeActor(), "queryActor")
 
   override protected implicit val executor = system.dispatcher
   override protected val log: LoggingAdapter = Logging(system, getClass)

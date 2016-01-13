@@ -5,6 +5,7 @@ import hr.com.blanka.apartments.Configured
 import hr.com.blanka.apartments.http.routes.SavePriceForRangeDto
 import hr.com.blanka.apartments.model.PriceForRange
 import hr.com.blanka.apartments.price.PriceCommandProtocol.{PriceForRangeSaved, SavePriceCommandResponse}
+import org.joda.time.DateTime
 import org.scalactic.Good
 import reactivemongo.api.DefaultDB
 import reactivemongo.api.collections.bson.BSONCollection
@@ -24,10 +25,11 @@ class CommandPriceRangeActor extends Actor with ActorLogging with Configured {
   override def receive: Receive = {
     case SavePriceForRangeDto(unitId, from, to, price) => {
       val dataSource = configured[DefaultDB]
-      val collection = dataSource("priceForRange").asInstanceOf[BSONCollection]
+      val collection = dataSource(priceForRange).asInstanceOf[BSONCollection]
+      val sendTo = sender()
 
-      collection.insert(PriceForRange(unitId, from, to, price))
-      sender ! SavePriceCommandResponse(Good(PriceForRangeSaved))
+      collection.insert(PriceForRange(unitId, from, to, price, new DateTime().getMillis))
+      sendTo ! SavePriceCommandResponse(Good(PriceForRangeSaved))
     }
   }
 

@@ -19,12 +19,16 @@ private object ConfigurationStore {
   }
 }
 
-trait Configured {
+trait Configured extends CollectionNames{
 
   def configured[A: Manifest, U](f: A => U) = f(ConfigurationStore.get[A].get)
 
   def configured[A: Manifest] = ConfigurationStore.get[A].get
 
+}
+
+trait CollectionNames {
+  val priceForRange = "priceForRange"
 }
 
 trait Configuration {

@@ -2,10 +2,10 @@ package hr.com.blanka.apartments.price.query
 
 import akka.actor.{Actor, ActorLogging, Props}
 import hr.com.blanka.apartments.Configured
-import hr.com.blanka.apartments.utils.PricingConfig
-import org.joda.time.DateTime
-import reactivemongo.api.DefaultDB
+import hr.com.blanka.apartments.model.PriceForRange
 import reactivemongo.api.collections.bson.BSONCollection
+import reactivemongo.api.{DefaultDB, ReadPreference}
+import reactivemongo.bson.{BSONDocument, Macros}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 
@@ -21,33 +21,36 @@ object DailyPriceActor {
     def requestId: Long
   }
 
-  case class DailyPriceCalculated(requestId: Long, day: Long, price: BigDecimal) extends QueryResponse
+  case class DailyPriceCalculated(requestId: Long, day: Long, price: Int) extends QueryResponse
+
   case class DailyPriceCannotBeCalculated(requestId: Long) extends QueryResponse
 
-  def apply(pricingConfig: PricingConfig) = Props(classOf[DailyPriceActor], pricingConfig)
+  def apply() = Props(classOf[DailyPriceActor])
 
 }
 
-class DailyPriceActor(pricingConfig: PricingConfig) extends Actor with ActorLogging with Configured {
+class DailyPriceActor extends Actor with ActorLogging with Configured {
 
   import DailyPriceActor._
+
+  implicit val priceForRangeFormat = Macros.handler[PriceForRange]
 
   override def receive: Receive = {
     case CalculatePriceForDay(requestId, unitId, day) => {
       val dataSource = configured[DefaultDB]
-      val collection = dataSource("test.collections").asInstanceOf[BSONCollection]
+      val collection = dataSource(priceForRange).asInstanceOf[BSONCollection]
+      val sendTo = sender()
 
-      val lala = collection.count()
+      val priceForRangeForUnit = collection.find(BSONDocument("unitId" -> unitId)).
+        cursor[PriceForRange](ReadPreference.primaryPreferred).
+        collect[List]()
 
-      pricingConfig.pricings
-        .filter(x => x.from <= day && x.to >= day)
-        .map(x => x.appPrice(unitId)) match {
-        case price :: Nil => sender() ! DailyPriceCalculated(requestId, day, price)
-        case price => {
-          log.error(s"Cannot find price for unitId: $unitId, day: ${new DateTime(day)} ($day). Found $price")
-          sender() ! DailyPriceCannotBeCalculated(requestId)
-        }
+      val price = priceForRangeForUnit.map {
+        _.filter(x => x.from <= day && x.to >= day)
+         .maxBy(_.created).price
       }
+
+      price.map(sendTo ! DailyPriceCalculated(requestId, day, _))
     }
   }
 

@@ -5,7 +5,6 @@ import akka.actor._
 import akka.util.Timeout
 import hr.com.blanka.apartments.price.PriceQueryProtocol.{LookupPriceForRange, PriceForRangeCalculated, PriceForRangeCannotBeCalculated, PriceQueryResponse}
 import hr.com.blanka.apartments.price.query.DailyPriceActor.{CalculatePriceForDay, DailyPriceCalculated, DailyPriceCannotBeCalculated}
-import hr.com.blanka.apartments.utils.PricingConfig
 import org.joda.time.{DateTime, DateTimeZone, Days}
 
 import scala.collection.immutable.Map
@@ -15,17 +14,17 @@ import scala.language.postfixOps
 
 object QueryPriceRangeActor {
 
-  def apply(pricingConfig: PricingConfig) = Props(classOf[QueryPriceRangeActor], pricingConfig)
+  def apply() = Props(classOf[QueryPriceRangeActor])
 
 }
 
-case class CalculationData(singleDayCalculations: Map[Long, Option[BigDecimal]], resultPromise: Promise[PriceQueryResponse])
+case class CalculationData(singleDayCalculations: Map[Long, Option[Int]], resultPromise: Promise[PriceQueryResponse])
 
-class QueryPriceRangeActor(pricingConfig: PricingConfig) extends Actor {
+class QueryPriceRangeActor extends Actor {
 
   implicit val timeout = Timeout(5 seconds)
 
-  val dailyPriceActor = context.actorOf(DailyPriceActor(pricingConfig), "daily-price-calculators")
+  val dailyPriceActor = context.actorOf(DailyPriceActor(), "daily-price-calculators")
 
   override def receive = active(0, Map[Long, CalculationData]())
 
@@ -63,7 +62,7 @@ class QueryPriceRangeActor(pricingConfig: PricingConfig) extends Actor {
 
       if (isPriceCalculatedForWholeRange) {
         currentCalculationData.resultPromise.success(
-          PriceForRangeCalculated(newCalculationAdded.values.foldLeft(BigDecimal(0))((sum, value) => sum + value.get))
+          PriceForRangeCalculated(newCalculationAdded.values.foldLeft(0)((sum, value) => sum + value.get))
         )
         context become active(lastRequestId, priceRangeCalculations - reqId)
       }
