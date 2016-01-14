@@ -14,7 +14,7 @@ import spray.json._
 
 import scala.concurrent.duration._
 
-class PriceServiceTest extends IntegrationTestMongoDbSupport with Matchers with ScalatestRouteTest with DateUtils {
+class PriceServiceTest extends IntegrationTestMongoDbSupport with Matchers with ScalatestRouteTest {
 
   protected val log: LoggingAdapter = NoLogging
 
@@ -33,7 +33,7 @@ class PriceServiceTest extends IntegrationTestMongoDbSupport with Matchers with 
   "Price service" should {
     "retrieve price for single day" in {
       val today = midYearDate.getMillis
-      val tomorrow = afterDay(today)
+      val tomorrow = midYearDate.plusDays(1).getMillis
       val requestEntity = HttpEntity(MediaTypes.`application/json`, CalculatePriceForRangeDto(1, today, tomorrow).toJson.toString())
 
       Post("/v1/price/calculate", requestEntity) ~> routes(command, query) ~> check {

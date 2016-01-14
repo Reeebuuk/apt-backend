@@ -3,7 +3,7 @@ package hr.com.blanka.apartments.price.query
 import akka.actor.ActorSystem
 import akka.testkit.{ImplicitSender, TestKit}
 import com.typesafe.config.ConfigFactory
-import hr.com.blanka.apartments.TestMongoDbConfiguration
+import hr.com.blanka.apartments.{DBMocks, TestMongoDbConfiguration}
 import hr.com.blanka.apartments.price.PriceQueryProtocol.{LookupPriceForRange, PriceForRangeCalculated, PriceQueryResponse}
 import hr.com.blanka.apartments.utils.AppConfig
 import org.joda.time.{DateTime, DateTimeZone}
@@ -16,8 +16,8 @@ import scala.language.postfixOps
 import scala.util.Success
 
 class QueryPriceRangeActorTest(_system: ActorSystem) extends TestKit(_system) with ImplicitSender
-with WordSpecLike with Matchers with BeforeAndAfterAll with DateUtils with AppConfig with Eventually
-with TestMongoDbConfiguration {
+with WordSpecLike with Matchers with BeforeAndAfterAll with AppConfig with Eventually
+with TestMongoDbConfiguration with DBMocks {
 
   implicit override val patienceConfig =
     PatienceConfig(timeout = scaled(1 second), interval = scaled(100 milliseconds))
@@ -40,6 +40,10 @@ with TestMongoDbConfiguration {
         |}
       """.stripMargin)))
 
+  override def beforeAll() {
+    insertPrices()
+  }
+
   override def afterAll() {
     TestKit.shutdownActorSystem(system)
   }
@@ -50,7 +54,7 @@ with TestMongoDbConfiguration {
 
     "return value for single day" in {
       val today = midYearDate.getMillis
-      val tomorrow = afterDay(today)
+      val tomorrow = midYearDate.plusDays(1).getMillis
       val pricePromise = Promise[PriceQueryResponse]()
       val calculatePriceForRangeForSingleDay = LookupPriceForRange(1, today, tomorrow, pricePromise)
 

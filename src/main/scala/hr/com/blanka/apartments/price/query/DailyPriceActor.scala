@@ -45,12 +45,15 @@ class DailyPriceActor extends Actor with ActorLogging with Configured {
         cursor[PriceForRange](ReadPreference.primaryPreferred).
         collect[List]()
 
-      val price = priceForRangeForUnit.map {
-        _.filter(x => x.from <= day && x.to >= day)
-         .maxBy(_.created).price
-      }
+      for(
+        price <- priceForRangeForUnit.map {
+          _.filter(x => x.from <= day && x.to >= day)
+            .maxBy(_.created).price
+        }
 
-      price.map(sendTo ! DailyPriceCalculated(requestId, day, _))
+      ) yield {
+        sendTo ! DailyPriceCalculated(requestId, day, price)
+      }
     }
   }
 
