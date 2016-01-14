@@ -6,7 +6,6 @@ import akka.testkit.{ImplicitSender, TestKit}
 import akka.util.Timeout
 import com.typesafe.config.ConfigFactory
 import hr.com.blanka.apartments.http.routes.SavePriceForRangeDto
-import hr.com.blanka.apartments.model.PriceForRange
 import hr.com.blanka.apartments.price.PriceCommandProtocol.{PriceForRangeSaved, SavePriceCommandResponse}
 import hr.com.blanka.apartments.utils.AppConfig
 import hr.com.blanka.apartments.{Configured, IntegrationTestMongoDbSupport}
@@ -16,7 +15,6 @@ import org.scalatest.Matchers
 import org.scalatest.concurrent.Eventually
 import reactivemongo.api.DefaultDB
 import reactivemongo.api.collections.bson.BSONCollection
-import reactivemongo.bson.Macros
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration._
@@ -24,7 +22,7 @@ import scala.language.postfixOps
 import scala.util.Success
 
 class CommandPriceRangeActorTest(_system: ActorSystem) extends TestKit(_system) with ImplicitSender
-with Matchers with DateUtils with AppConfig with Eventually with IntegrationTestMongoDbSupport with Configured {
+with Matchers with AppConfig with Eventually with IntegrationTestMongoDbSupport with Configured {
 
   implicit val timeout = Timeout(2 seconds)
   implicit override val patienceConfig =
