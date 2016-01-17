@@ -12,7 +12,7 @@ object PriceQueryProtocol {
 
   sealed trait PriceQueryResponse extends PriceMsg
 
-  case class PriceForRangeCalculated(price: BigDecimal) extends PriceQueryResponse
+  case class PriceForRangeCalculated(price: Int) extends PriceQueryResponse
 
   case object InvalidRange extends PriceQueryResponse
   case object PriceForRangeCannotBeCalculated extends PriceQueryResponse

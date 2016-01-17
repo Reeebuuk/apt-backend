@@ -7,7 +7,10 @@ import reactivemongo.api.collections.bson.BSONCollection
 import reactivemongo.api.{DefaultDB, ReadPreference}
 import reactivemongo.bson.{BSONDocument, Macros}
 
+import scala.concurrent.Await
 import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.duration.Duration
+import scala.util.{Failure, Success}
 
 object DailyPriceActor {
 
@@ -45,15 +48,22 @@ class DailyPriceActor extends Actor with ActorLogging with Configured {
         cursor[PriceForRange](ReadPreference.primaryPreferred).
         collect[List]()
 
-      for(
-        price <- priceForRangeForUnit.map {
-          _.filter(x => x.from <= day && x.to >= day)
-            .maxBy(_.created).price
-        }
+      val lala = Await.ready(priceForRangeForUnit, Duration.Inf).value.get
 
-      ) yield {
-        sendTo ! DailyPriceCalculated(requestId, day, price)
+      val hohi = lala match {
+        case Success(hoho) => hoho.filter(x => x.from <= day && x.to >= day).maxBy(_.created).price
+        case Failure(t) => log.debug(t.getLocalizedMessage); 0
       }
+
+//      for(
+//        price <- priceForRangeForUnit.map {
+//          _.filter(x => x.from <= day && x.to >= day)
+//            .maxBy(_.created).price
+//        }
+//
+//      ) yield {
+        sendTo ! DailyPriceCalculated(requestId, day, hohi)
+//      }
     }
   }
 
