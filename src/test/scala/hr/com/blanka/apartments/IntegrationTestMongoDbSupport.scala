@@ -11,17 +11,17 @@ with TestMongoDbConfiguration {
   lazy val mongoExe : MongodExecutable = runtime.prepare(
     new MongodConfigBuilder()
       .version(version)
-      .net(new Net(url, port, false))
+      .net(new Net(httpInterface, httpPort, false))
       .build())
 
   lazy val mongod: MongodProcess = mongoExe.start()
 
-  override protected def beforeAll(): Unit = {
+  override def beforeAll {
     mongod
     super.beforeAll()
   }
 
-  override protected def afterAll(): Unit = {
+  override def afterAll {
     super.afterAll()
     mongod.stop()
     mongoExe.stop()
