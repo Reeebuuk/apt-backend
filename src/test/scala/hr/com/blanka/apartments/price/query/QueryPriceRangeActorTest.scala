@@ -68,11 +68,11 @@ with WordSpecLike with Matchers with Eventually with IntegrationTestMongoDbSuppo
     }
   }
 
-  "QueryPriceRangeActor with multiple price" should {
+  "QueryPriceRangeActor with multiple price for same dates" should {
 
-    "return value for single day" in {
-      val hoho = defaultPrice.copy(price = 52)
-      insertPrices(Set(hoho))
+    "return value for single day with latest price" in {
+      val newPrice = defaultPrice.copy(price = 52)
+      insertPrices(Set(newPrice))
 
       val today = midYearDate.getMillis
       val tomorrow = midYearDate.plusDays(1).getMillis
