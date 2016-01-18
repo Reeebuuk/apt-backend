@@ -48,22 +48,11 @@ class DailyPriceActor extends Actor with ActorLogging with Configured {
         cursor[PriceForRange](ReadPreference.primaryPreferred).
         collect[List]()
 
-      val lala = Await.ready(priceForRangeForUnit, Duration.Inf).value.get
-
-      val hohi = lala match {
-        case Success(hoho) => hoho.filter(x => x.from <= day && x.to >= day).maxBy(_.created).price
-        case Failure(t) => log.debug(t.getLocalizedMessage); 0
+      priceForRangeForUnit.map {
+        _.filter(x => x.from <= day && x.to >= day).maxBy(_.created).price
+      }.foreach {
+        sendTo ! DailyPriceCalculated(requestId, day, _)
       }
-
-//      for(
-//        price <- priceForRangeForUnit.map {
-//          _.filter(x => x.from <= day && x.to >= day)
-//            .maxBy(_.created).price
-//        }
-//
-//      ) yield {
-        sendTo ! DailyPriceCalculated(requestId, day, hohi)
-//      }
     }
   }
 

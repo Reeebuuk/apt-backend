@@ -18,7 +18,7 @@ class QueryPriceRangeActorTest(_system: ActorSystem) extends TestKit(_system) wi
 with WordSpecLike with Matchers with Eventually with IntegrationTestMongoDbSupport with DBMocks {
 
   implicit override val patienceConfig =
-    PatienceConfig(timeout = scaled(1 second), interval = scaled(100 milliseconds))
+    PatienceConfig(timeout = scaled(2 second), interval = scaled(100 milliseconds))
 
   def this() = this(
     ActorSystem("TestActorSystem", ConfigFactory.parseString(
