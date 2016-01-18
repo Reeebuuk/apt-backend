@@ -6,9 +6,7 @@ import reactivemongo.api.{ReadPreference, DefaultDB}
 import reactivemongo.api.collections.bson.BSONCollection
 import reactivemongo.bson.{BSONDocument, Macros}
 
-import scala.concurrent.Await
 import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.duration.Duration
 
 trait DBMocks extends Configured {
 
@@ -24,10 +22,5 @@ trait DBMocks extends Configured {
 
     prices.foreach(collection.insert(_))
 
-    val priceForRangeForUnit = collection.find(BSONDocument("unitId" -> 1)).
-      cursor[PriceForRange](ReadPreference.primaryPreferred).
-      collect[List]()
-
-    Await.ready(priceForRangeForUnit, Duration.Inf).value.get
   }
 }

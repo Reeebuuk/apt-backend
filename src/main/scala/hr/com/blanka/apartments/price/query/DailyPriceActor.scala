@@ -48,6 +48,9 @@ class DailyPriceActor extends Actor with ActorLogging with Configured {
         cursor[PriceForRange](ReadPreference.primaryPreferred).
         collect[List]()
 
+
+      val lala = Await.ready(priceForRangeForUnit, Duration.Inf).value.get
+
       priceForRangeForUnit.map {
         _.filter(x => x.from <= day && x.to >= day).maxBy(_.created).price
       }.foreach {

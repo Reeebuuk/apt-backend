@@ -70,9 +70,10 @@ with WordSpecLike with Matchers with Eventually with IntegrationTestMongoDbSuppo
 
   "QueryPriceRangeActor with multiple price" should {
 
-    insertPrices(Set(defaultPrice.copy(price = 52)))
-
     "return value for single day" in {
+      val hoho = defaultPrice.copy(price = 52)
+      insertPrices(Set(hoho))
+
       val today = midYearDate.getMillis
       val tomorrow = midYearDate.plusDays(1).getMillis
       val pricePromise = Promise[PriceQueryResponse]()
