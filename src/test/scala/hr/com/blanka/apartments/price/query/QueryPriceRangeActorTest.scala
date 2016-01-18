@@ -50,7 +50,7 @@ with WordSpecLike with Matchers with Eventually with IntegrationTestMongoDbSuppo
 
   val midYearDate = new DateTime().toDateTime(DateTimeZone.UTC).withMonthOfYear(6).withDayOfMonth(5).withTime(12, 0, 0, 0)
 
-  "QueryPriceRangeActor" should {
+  "QueryPriceRangeActor with single price" should {
 
     "return value for single day" in {
       val today = midYearDate.getMillis
@@ -66,23 +66,26 @@ with WordSpecLike with Matchers with Eventually with IntegrationTestMongoDbSuppo
         pricePromise.future.value.get shouldBe Success(PriceForRangeCalculated(50))
       }
     }
+  }
 
-/*    "return value for multiple days" in {
+  "QueryPriceRangeActor with multiple price" should {
+
+    insertPrices(Set(defaultPrice.copy(price = 52)))
+
+    "return value for single day" in {
       val today = midYearDate.getMillis
-      val tomorrow = midYearDate.plusDays(7).getMillis
+      val tomorrow = midYearDate.plusDays(1).getMillis
       val pricePromise = Promise[PriceQueryResponse]()
-      val calculatePriceForRangeForMultipleDays = LookupPriceForRange(1, today, tomorrow, pricePromise)
+      val calculatePriceForRangeForSingleDay = LookupPriceForRange(1, today, tomorrow, pricePromise)
 
       val actor = _system.actorOf(QueryPriceRangeActor())
-      actor ! calculatePriceForRangeForMultipleDays
+      actor ! calculatePriceForRangeForSingleDay
 
       eventually {
         pricePromise.isCompleted shouldBe true
-        pricePromise.future.value.get shouldBe Success(PriceForRangeCalculated(BigDecimal(245)))
+        pricePromise.future.value.get shouldBe Success(PriceForRangeCalculated(52))
       }
-    }*/
-
-//TODO filed promise? invalid stuff?
-
+    }
   }
+
 }
