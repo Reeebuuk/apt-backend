@@ -41,7 +41,6 @@ class PriceServiceTest extends IntegrationTestMongoDbSupport with Matchers with 
       }
     }
 
-
     "return correct price if the duration is 7 day in same price range" in {
       val today = midYearDate.getMillis
       val tomorrow = new DateTime(today).plusDays(7).getMillis
