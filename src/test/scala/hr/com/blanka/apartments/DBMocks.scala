@@ -14,19 +14,20 @@ trait DBMocks extends Configured {
 
   implicit val priceForRangeFormat = Macros.handler[PriceForRange]
 
-  def insertPrices() = {
+  val defaultPrice = PriceForRange(1, new DateTime().withDayOfMonth(1).withMonthOfYear(1).getMillis,
+    new DateTime().withDayOfMonth(31).withMonthOfYear(12).getMillis, 50, new DateTime().getMillis)
+
+  def insertPrices(prices : Set[PriceForRange] = Set(defaultPrice)) = {
 
     val dataSource = configured[DefaultDB]
     val collection = dataSource(priceForRange).asInstanceOf[BSONCollection]
 
-    collection.insert(PriceForRange(1, new DateTime().withDayOfMonth(1).withMonthOfYear(1).getMillis,
-      new DateTime().withDayOfMonth(31).withMonthOfYear(12).getMillis, 50, new DateTime().getMillis))
+    prices.foreach(collection.insert(_))
 
     val priceForRangeForUnit = collection.find(BSONDocument("unitId" -> 1)).
       cursor[PriceForRange](ReadPreference.primaryPreferred).
       collect[List]()
 
-    val lala = Await.ready(priceForRangeForUnit, Duration.Inf).value.get
-    lala
+    Await.ready(priceForRangeForUnit, Duration.Inf).value.get
   }
 }
