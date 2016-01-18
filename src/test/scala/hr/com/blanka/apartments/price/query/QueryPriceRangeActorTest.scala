@@ -38,21 +38,21 @@ with WordSpecLike with Matchers with Eventually with IntegrationTestMongoDbSuppo
         |}
       """.stripMargin)))
 
-/*  override def beforeAll() {
+  override def beforeAll {
+    super.beforeAll
     insertPrices()
   }
 
-  override def afterAll() {
+  override def afterAll {
     TestKit.shutdownActorSystem(system)
-  }*/
+    super.afterAll
+  }
 
   val midYearDate = new DateTime().toDateTime(DateTimeZone.UTC).withMonthOfYear(6).withDayOfMonth(5).withTime(12, 0, 0, 0)
 
   "QueryPriceRangeActor" should {
 
     "return value for single day" in {
-      mongod
-      insertPrices()
       val today = midYearDate.getMillis
       val tomorrow = midYearDate.plusDays(1).getMillis
       val pricePromise = Promise[PriceQueryResponse]()
