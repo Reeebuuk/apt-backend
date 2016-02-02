@@ -27,7 +27,7 @@ object DailyPriceAggregateActor {
     case cmd: Command => "Main"
   }
 
-  val shardName: String = "AggregatePriceRangeActor"
+  val shardName: String = "DailyPriceAggregateActor"
 }
 
 class DailyPriceAggregateActor extends PersistentActor {
