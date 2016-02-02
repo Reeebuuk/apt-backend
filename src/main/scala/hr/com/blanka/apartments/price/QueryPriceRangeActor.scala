@@ -1,10 +1,10 @@
-package hr.com.blanka.apartments.price.query
+package hr.com.blanka.apartments.price
 
 import akka.actor.SupervisorStrategy.Restart
 import akka.actor._
+import akka.cluster.sharding.ClusterSharding
 import akka.util.Timeout
-import hr.com.blanka.apartments.price.PriceQueryProtocol.{LookupPriceForRange, PriceForRangeCalculated, PriceForRangeCannotBeCalculated, PriceQueryResponse}
-import hr.com.blanka.apartments.price.query.DailyPriceActor.{CalculatePriceForDay, DailyPriceCalculated, DailyPriceCannotBeCalculated}
+import hr.com.blanka.apartments.price.protocol._
 import org.joda.time.{DateTime, DateTimeZone, Days}
 
 import scala.collection.immutable.Map
@@ -24,7 +24,7 @@ class QueryPriceRangeActor extends Actor {
 
   implicit val timeout = Timeout(5 seconds)
 
-  val dailyPriceActor = context.actorOf(DailyPriceActor(), "daily-price-calculators")
+  val dailyPriceCluster = ClusterSharding(context.system).shardRegion(DailyPriceAggregateActor.shardName)
 
   override def receive = active(0, Map[Long, CalculationData]())
 
@@ -37,7 +37,7 @@ class QueryPriceRangeActor extends Actor {
 
     val singleDayCalculations = (0 until duration).map(daysFromStart => {
       val day = new DateTime(from).toDateTime(DateTimeZone.UTC).plusDays(daysFromStart).getMillis
-      dailyPriceActor ! CalculatePriceForDay(requestId, unitId, day)
+      dailyPriceCluster ! LookupPriceForDay(userId, unitId, requestId, day)
       day -> None
     }) toMap
 
@@ -53,7 +53,7 @@ class QueryPriceRangeActor extends Actor {
       context become active(newRequestId, priceRangeCalculations + newlySentDailyCalculationMessages)
     }
 
-    case DailyPriceCalculated(reqId, day, price) => {
+    case PriceDayFetched(reqId, day, price) => {
 
       val currentCalculationData = priceRangeCalculations.getOrElse(reqId, sys.error(s"No CalculationData for reqId: $reqId"))
 
@@ -71,14 +71,14 @@ class QueryPriceRangeActor extends Actor {
       }
     }
 
-    case DailyPriceCannotBeCalculated(reqId) => {
-      priceRangeCalculations.get(reqId) match {
-        case Some(calculationData) =>
-          calculationData.resultPromise.success(PriceForRangeCannotBeCalculated)
-          context become active(lastRequestId, priceRangeCalculations - reqId)
-        case None =>
-      }
-    }
+//    case DailyPriceCannotBeCalculated(reqId) => {
+//      priceRangeCalculations.get(reqId) match {
+//        case Some(calculationData) =>
+//          calculationData.resultPromise.success(PriceForRangeCannotBeCalculated)
+//          context become active(lastRequestId, priceRangeCalculations - reqId)
+//        case None =>
+//      }
+//    }
 
   }
 

@@ -3,9 +3,9 @@ package hr.com.blanka.apartments.http.routes
 import akka.actor.ActorRef
 import akka.http.scaladsl.model.StatusCodes
 import akka.http.scaladsl.server.Directives._
-import akka.util.Timeout
 import akka.pattern.ask
-import hr.com.blanka.apartments.price.PriceQueryProtocol.{LookupPriceForRange, InvalidRange, PriceForRangeCalculated, PriceQueryResponse}
+import akka.util.Timeout
+import hr.com.blanka.apartments.price.protocol.{InvalidRange, PriceForRangeCalculated, LookupPriceForRange, PriceQueryResponse}
 import hr.com.blanka.apartments.utils.MarshallingSupport
 import org.scalactic.{Bad, Good}
 
@@ -15,7 +15,7 @@ import scala.language.postfixOps
 
 final case class CalculatePriceForRangeDto(unitId: Int, from: Long, to: Long)
 
-final case class SavePriceForRangeDto(unitId: Int, from: Long, to: Long, price: Int)
+final case class SavePriceForRange(userId: String, unitId: Int, from: Long, to: Long, price: Int)
 
 
 final case class PriceForRangeResponse(price: BigDecimal)
@@ -36,6 +36,7 @@ trait PriceServiceRoute extends BaseServiceRoute with MarshallingSupport {
             val pricePromise = Promise[PriceQueryResponse]()
 
             query ! LookupPriceForRange(
+              "user",
               priceForRange.unitId,
               priceForRange.from,
               priceForRange.to,
@@ -53,7 +54,7 @@ trait PriceServiceRoute extends BaseServiceRoute with MarshallingSupport {
       } ~
         pathEndOrSingleSlash {
           decodeRequest {
-            entity(as[SavePriceForRangeDto]) { savePriceForRange =>
+            entity(as[SavePriceForRange]) { savePriceForRange =>
               onSuccess(command ? savePriceForRange) {
                 case Good(_) => complete(StatusCodes.BadRequest, "Saved")
                 case Bad(response) => response match {
