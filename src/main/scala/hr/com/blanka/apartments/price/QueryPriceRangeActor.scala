@@ -24,7 +24,7 @@ class QueryPriceRangeActor extends Actor {
 
   implicit val timeout = Timeout(5 seconds)
 
-  val dailyPriceCluster = ClusterSharding(context.system).shardRegion(DailyPriceAggregateActor.shardName)
+  lazy val dailyPriceCluster = ClusterSharding(context.system).shardRegion(DailyPriceAggregateActor.shardName)
 
   override def receive = active(0, Map[Long, CalculationData]())
 
