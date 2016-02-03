@@ -15,7 +15,7 @@ class CommandPriceRangeActor extends Actor with ActorLogging {
 
   var as = Map.empty[Int, ActorRef]
 
-  val postRegion = ClusterSharding(context.system).shardRegion(DailyPriceAggregateActor.shardName)
+  lazy val postRegion = ClusterSharding(context.system).shardRegion(DailyPriceAggregateActor.shardName)
 
   override def receive: Receive = {
     case SavePriceForRange(userId, unitId, from, to, price) => {

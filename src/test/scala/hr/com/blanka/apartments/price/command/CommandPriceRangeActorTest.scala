@@ -1,28 +1,19 @@
 package hr.com.blanka.apartments.price.command
 
 import akka.actor.ActorSystem
-import akka.pattern.ask
 import akka.testkit.{ImplicitSender, TestKit}
 import akka.util.Timeout
 import com.typesafe.config.ConfigFactory
-import hr.com.blanka.apartments.http.routes.SavePriceForRange
-import hr.com.blanka.apartments.price.CommandPriceRangeActor
 import hr.com.blanka.apartments.utils.AppConfig
-import hr.com.blanka.apartments.{Configured, IntegrationTestMongoDbSupport}
 import org.joda.time.LocalDate
-import org.scalactic.Good
-import org.scalatest.Matchers
 import org.scalatest.concurrent.Eventually
-import reactivemongo.api.DefaultDB
-import reactivemongo.api.collections.bson.BSONCollection
+import org.scalatest.{BeforeAndAfterAll, Matchers, WordSpecLike}
 
-import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration._
 import scala.language.postfixOps
-import scala.util.Success
 
 class CommandPriceRangeActorTest(_system: ActorSystem) extends TestKit(_system) with ImplicitSender
-with Matchers with AppConfig with Eventually with IntegrationTestMongoDbSupport with Configured {
+with Matchers with AppConfig with Eventually with WordSpecLike with BeforeAndAfterAll {
 
   implicit val timeout = Timeout(2 seconds)
   implicit override val patienceConfig =
@@ -45,9 +36,6 @@ with Matchers with AppConfig with Eventually with IntegrationTestMongoDbSupport 
         |  }
         |}
       """.stripMargin)))
-
-  val dataSource = configured[DefaultDB]
-  val collection = dataSource(priceForRange).asInstanceOf[BSONCollection]
 
   override def afterAll {
     TestKit.shutdownActorSystem(system)

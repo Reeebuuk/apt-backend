@@ -29,8 +29,8 @@ trait PriceServiceRoute extends BaseServiceRoute with MarshallingSupport {
   import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport._
 
   def priceRoute(command: ActorRef, query: ActorRef) = pathPrefix("price") {
-    post {
-      path("calculate") {
+    path("calculate") {
+      post {
         decodeRequest {
           entity(as[CalculatePriceForRangeDto]) { priceForRange: CalculatePriceForRangeDto =>
             val pricePromise = Promise[PriceQueryResponse]()
@@ -51,8 +51,10 @@ trait PriceServiceRoute extends BaseServiceRoute with MarshallingSupport {
 
           }
         }
-      } ~
-        pathEndOrSingleSlash {
+      }
+    } ~
+      pathEndOrSingleSlash {
+        post {
           decodeRequest {
             entity(as[SavePriceForRange]) { savePriceForRange =>
               onSuccess(command ? savePriceForRange) {
@@ -64,6 +66,6 @@ trait PriceServiceRoute extends BaseServiceRoute with MarshallingSupport {
             }
           }
         }
-    }
+      }
   }
 }

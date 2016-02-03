@@ -3,19 +3,15 @@ package hr.com.blanka.apartments.price.query
 import akka.actor.ActorSystem
 import akka.testkit.{ImplicitSender, TestKit}
 import com.typesafe.config.ConfigFactory
-import hr.com.blanka.apartments.price.QueryPriceRangeActor
-import hr.com.blanka.apartments.{DBMocks, IntegrationTestMongoDbSupport}
 import org.joda.time.{DateTime, DateTimeZone}
 import org.scalatest.concurrent.Eventually
-import org.scalatest.{Matchers, WordSpecLike}
+import org.scalatest.{BeforeAndAfterAll, Matchers, WordSpecLike}
 
-import scala.concurrent.Promise
 import scala.concurrent.duration._
 import scala.language.postfixOps
-import scala.util.Success
 
 class QueryPriceRangeActorTest(_system: ActorSystem) extends TestKit(_system) with ImplicitSender
-with WordSpecLike with Matchers with Eventually with IntegrationTestMongoDbSupport with DBMocks {
+ with Matchers with Eventually with WordSpecLike with BeforeAndAfterAll {
 
   implicit override val patienceConfig =
     PatienceConfig(timeout = scaled(2 second), interval = scaled(100 milliseconds))
@@ -38,14 +34,9 @@ with WordSpecLike with Matchers with Eventually with IntegrationTestMongoDbSuppo
         |}
       """.stripMargin)))
 
-  override def beforeAll {
-    super.beforeAll
-    insertPrices()
-  }
 
   override def afterAll {
     TestKit.shutdownActorSystem(system)
-    super.afterAll
   }
 
   val midYearDate = new DateTime().toDateTime(DateTimeZone.UTC).withMonthOfYear(6).withDayOfMonth(5).withTime(12, 0, 0, 0)
