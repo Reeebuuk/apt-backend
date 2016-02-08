@@ -1,3 +1,4 @@
+enablePlugins(SbtNativePackager)
 enablePlugins(JavaServerAppPackaging)
 
 name          := "crudapi"
