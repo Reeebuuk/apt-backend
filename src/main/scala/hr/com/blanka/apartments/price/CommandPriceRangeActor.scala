@@ -15,7 +15,7 @@ import scala.language.postfixOps
 
 object CommandPriceRangeActor {
 
-  def apply() = Props(new CommandPriceRangeActor())
+  def apply() = Props(classOf[CommandPriceRangeActor])
 }
 
 class CommandPriceRangeActor extends Actor with ActorLogging {

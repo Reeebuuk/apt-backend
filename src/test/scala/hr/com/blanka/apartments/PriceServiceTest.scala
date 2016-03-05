@@ -25,6 +25,8 @@ class PriceServiceTest extends WordSpecLike with Matchers with ScalatestRouteTes
   val command = system.actorOf(Props(classOf[QueryPriceRangeActor]), "commandActor")
   val query = system.actorOf(Props(classOf[QueryPriceRangeActor]), "queryActor")
 
+  import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport._
+
   implicit val format = DefaultFormats.withBigDecimal
   val midYearDate = new DateTime().toDateTime(DateTimeZone.UTC).withMonthOfYear(6).withDayOfMonth(5).withTime(12, 0, 0, 0)
 

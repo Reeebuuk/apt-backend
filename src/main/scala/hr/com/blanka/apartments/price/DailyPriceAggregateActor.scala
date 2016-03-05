@@ -16,7 +16,7 @@ case class DailyPriceSaved(unitId: Int, day: Long, newPrice: Price)
 
 object DailyPriceAggregateActor {
 
-  def apply() = Props(new DailyPriceAggregateActor())
+  def apply() = Props(classOf[DailyPriceAggregateActor])
 
 }
 
