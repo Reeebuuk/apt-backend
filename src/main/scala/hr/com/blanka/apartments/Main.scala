@@ -23,7 +23,7 @@ object Main extends App with KamonSupport with AppConfig with BaseService {
 }
 
 trait KamonSupport {
-//  Kamon.start()
-//  sys.addShutdownHook(Kamon.shutdown())
+  //  Kamon.start()
+  //  sys.addShutdownHook(Kamon.shutdown())
 }
 

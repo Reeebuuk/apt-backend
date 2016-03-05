@@ -26,12 +26,6 @@ class QueryPriceRangeActorTest(_system: ActorSystem) extends TestKit(_system) wi
         |   autoreceive = on
         |   lifecycle = on
         |}
-        |akka.actor.deployment {
-        |  /parent/daily-price-calculators {
-        |    router = round-robin-pool
-        |    nr-of-instances = 5
-        |  }
-        |}
       """.stripMargin)))
 
 

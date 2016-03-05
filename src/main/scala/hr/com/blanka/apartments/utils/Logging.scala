@@ -32,5 +32,3 @@ trait Logging extends LazyLogging {
 
 }
 
-
-
