@@ -15,7 +15,7 @@ import scala.language.postfixOps
 
 object QueryPriceRangeActor {
 
-  def apply() = Props(new QueryPriceRangeActor())
+  def apply() = Props(classOf[QueryPriceRangeActor])
 
 }
 

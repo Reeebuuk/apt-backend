@@ -1,6 +1,6 @@
 package hr.com.blanka.apartments
 
-import akka.actor.ActorSystem
+import akka.actor.{Props, ActorSystem}
 import akka.event.{Logging, LoggingAdapter}
 import akka.http.scaladsl.Http
 import akka.stream.ActorMaterializer
@@ -12,8 +12,8 @@ object Main extends App with KamonSupport with AppConfig with BaseService {
 
   implicit val system = ActorSystem("booking")
 
-  val command = system.actorOf(CommandPriceRangeActor(), "commandActor")
-  val query = system.actorOf(QueryPriceRangeActor(), "queryActor")
+  val command = system.actorOf(Props(classOf[CommandPriceRangeActor]), "commandActor")
+  val query = system.actorOf(Props(classOf[QueryPriceRangeActor]), "queryActor")
 
   override protected implicit val executor = system.dispatcher
   override protected val log: LoggingAdapter = Logging(system, getClass)
