@@ -4,6 +4,7 @@ import akka.actor.Props
 import akka.persistence.PersistentActor
 import hr.com.blanka.apartments.price.protocol.{LookupPriceForDay, PriceDayFetched, SavePriceForSingleDay}
 import org.joda.time.DateTime
+import org.scalactic.Good
 
 case class Price(value: Int, timeSaved: Long)
 
@@ -23,12 +24,10 @@ class DailyPriceAggregateActor extends PersistentActor {
 
   override def persistenceId: String = self.path.parent.name + "-" + self.path.name
 
-  val queryPriceRangeActor = context.actorOf(QueryPriceRangeActor(), "queryActor")
+  def updateState(newDailyPrice: DailyPriceSaved, currentDailyPrices: Map[Int, Map[Long, List[Price]]]): Unit = {
+    import newDailyPrice._
 
-  def updateState(dailyPriceSaved: DailyPriceSaved, dailyPrices: Map[Int, Map[Long, List[Price]]]): Unit = {
-    import dailyPriceSaved._
-
-    val newDailyPrices: Map[Long, List[Price]] = dailyPrices.get(unitId) match {
+    val newDailyPrices: Map[Long, List[Price]] = currentDailyPrices.get(unitId) match {
       case None => Map(day -> List(newPrice))
       case Some(previousPricesForDay) =>
         previousPricesForDay.get(day) match {
@@ -37,28 +36,31 @@ class DailyPriceAggregateActor extends PersistentActor {
         }
     }
 
-    context become active(dailyPrices + (unitId -> newDailyPrices))
+    context become active(currentDailyPrices + (unitId -> newDailyPrices))
+    sender() ! Good
   }
 
   override def receiveCommand = active(Map[Int, Map[Long, List[Price]]]())
 
-  def active(dailyPrices: Map[Int, Map[Long, List[Price]]]): Receive = {
+  def active(currentDailyPrices: Map[Int, Map[Long, List[Price]]]): Receive = {
     case SavePriceForSingleDay(userId, unitId, day, price) => {
-      persist(DailyPriceSaved(unitId, day, Price(price)))(updateState(_, dailyPrices))
+      persist(DailyPriceSaved(unitId, day, Price(price)))(updateState(_, currentDailyPrices))
     }
-    case LookupPriceForDay(_, unitId, requestId, day) => {
-      val lastPrice: Int = dailyPrices.get(unitId) match {
+    case LookupPriceForDay(_, unitId, day) => {
+      val lastPrice: Int = currentDailyPrices.get(unitId) match {
         case None => 0
         case Some(priceForDay) =>
           priceForDay.get(day) match {
             case None => 0
             case Some(prices) => prices.head.value
-        }
+          }
       }
 
-      queryPriceRangeActor ! PriceDayFetched(requestId, day, lastPrice)
+      sender() ! PriceDayFetched(lastPrice)
     }
   }
 
-  override def receiveRecover: Receive = ???
+  override def receiveRecover: Receive = {
+    case _ =>
+  }
 }

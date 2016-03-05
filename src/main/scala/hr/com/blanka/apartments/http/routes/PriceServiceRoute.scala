@@ -5,7 +5,7 @@ import akka.http.scaladsl.model.StatusCodes
 import akka.http.scaladsl.server.Directives._
 import akka.pattern.ask
 import akka.util.Timeout
-import hr.com.blanka.apartments.price.protocol.{InvalidRange, PriceForRangeCalculated, LookupPriceForRange, PriceQueryResponse}
+import hr.com.blanka.apartments.price.protocol.{InvalidRange, LookupPriceForRange, PriceForRangeCalculated, PriceQueryResponse}
 import hr.com.blanka.apartments.utils.MarshallingSupport
 import org.scalactic.{Bad, Good}
 
@@ -16,7 +16,6 @@ import scala.language.postfixOps
 final case class CalculatePriceForRangeDto(unitId: Int, from: Long, to: Long)
 
 final case class SavePriceForRange(userId: String, unitId: Int, from: Long, to: Long, price: Int)
-
 
 final case class PriceForRangeResponse(price: BigDecimal)
 

@@ -2,18 +2,20 @@ package hr.com.blanka.apartments.price
 
 import akka.actor.SupervisorStrategy.Restart
 import akka.actor._
+import akka.pattern.ask
 import akka.util.Timeout
 import hr.com.blanka.apartments.price.protocol._
 import org.joda.time.{DateTime, DateTimeZone, Days}
+import org.scalactic.Good
 
 import scala.collection.immutable.Map
-import scala.concurrent.Promise
 import scala.concurrent.duration.DurationInt
+import scala.concurrent.{Future, Promise}
 import scala.language.postfixOps
 
 object QueryPriceRangeActor {
 
-  def apply() = Props(classOf[QueryPriceRangeActor])
+  def apply() = Props(new QueryPriceRangeActor())
 
 }
 
@@ -21,63 +23,36 @@ case class CalculationData(singleDayCalculations: Map[Long, Option[Int]], result
 
 class QueryPriceRangeActor extends Actor {
 
-  implicit val timeout = Timeout(5 seconds)
+  implicit val timeout = Timeout(2 seconds)
 
+  import context.dispatcher
 
-  override def receive = active(0, Map[Long, CalculationData]())
+  val dailyPriceActor = context.actorOf(Props(classOf[DailyPriceAggregateActor]))
 
-  def sendMessagesForSingleDayCalculations(requestId: Long, calculatePriceForRange: LookupPriceForRange) = {
+  override def receive = active(Map[Long, CalculationData]())
+
+  def sendMessagesForSingleDayCalculations(calculatePriceForRange: LookupPriceForRange) = {
     import calculatePriceForRange._
 
     val fromDate = new DateTime(from).toDateTime(DateTimeZone.UTC)
     val toDate = new DateTime(to).toDateTime(DateTimeZone.UTC)
     val duration = Days.daysBetween(fromDate.toLocalDate, toDate.toLocalDate).getDays
 
-    val singleDayCalculations = (0 until duration).map(daysFromStart => {
+    (0 until duration).map(daysFromStart => {
       val day = new DateTime(from).toDateTime(DateTimeZone.UTC).plusDays(daysFromStart).getMillis
-//      dailyPriceCluster ! LookupPriceForDay(userId, unitId, requestId, day)
-      day -> None
-    }) toMap
+      dailyPriceActor ? LookupPriceForDay(userId, unitId, day)
+    })
 
-    requestId -> CalculationData(singleDayCalculations, pricePromise)
   }
 
-  def active(lastRequestId: Long, priceRangeCalculations: Map[Long, CalculationData]): Receive = {
+  def active(priceRangeCalculations: Map[Long, CalculationData]): Receive = {
     case cpfr: LookupPriceForRange => {
 
-      val newRequestId = lastRequestId + 1
-      val newlySentDailyCalculationMessages = sendMessagesForSingleDayCalculations(newRequestId, cpfr)
+      val newlySentDailyCalculationMessages = sendMessagesForSingleDayCalculations(cpfr)
 
-      context become active(newRequestId, priceRangeCalculations + newlySentDailyCalculationMessages)
+      Future.sequence(newlySentDailyCalculationMessages).onSuccess({ case _ => sender() ! Good })
+
     }
-
-    case PriceDayFetched(reqId, day, price) => {
-
-      val currentCalculationData = priceRangeCalculations.getOrElse(reqId, sys.error(s"No CalculationData for reqId: $reqId"))
-
-      val newCalculationAdded = currentCalculationData.singleDayCalculations + (day -> Option(price))
-      val isPriceCalculatedForWholeRange = newCalculationAdded.values.forall(_.isDefined)
-
-      if (isPriceCalculatedForWholeRange) {
-        currentCalculationData.resultPromise.success(
-          PriceForRangeCalculated(newCalculationAdded.values.foldLeft(0)((sum, value) => sum + value.get))
-        )
-        context become active(lastRequestId, priceRangeCalculations - reqId)
-      }
-      else {
-        context become active(lastRequestId, priceRangeCalculations + (reqId -> CalculationData(newCalculationAdded, currentCalculationData.resultPromise)))
-      }
-    }
-
-//    case DailyPriceCannotBeCalculated(reqId) => {
-//      priceRangeCalculations.get(reqId) match {
-//        case Some(calculationData) =>
-//          calculationData.resultPromise.success(PriceForRangeCannotBeCalculated)
-//          context become active(lastRequestId, priceRangeCalculations - reqId)
-//        case None =>
-//      }
-//    }
-
   }
 
   override val supervisorStrategy =

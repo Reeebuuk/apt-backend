@@ -29,12 +29,6 @@ with Matchers with AppConfig with Eventually with WordSpecLike with BeforeAndAft
         |   autoreceive = on
         |   lifecycle = on
         |}
-        |akka.actor.deployment {
-        |  /parent/daily-price-calculators {
-        |    router = round-robin-pool
-        |    nr-of-instances = 5
-        |  }
-        |}
       """.stripMargin)))
 
   override def afterAll {

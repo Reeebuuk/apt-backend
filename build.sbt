@@ -25,7 +25,7 @@ libraryDependencies ++= {
   val scalaLoggingV      = "3.1.0"
   val json4sV            = "3.2.11"
   val scalacticV         = "2.2.6"
-  val mongoPersistV      = "1.0.0-SNAPSHOT"
+  val cassandraPersistV  = "0.11"
 
   Seq(
     "com.typesafe.akka" %% "akka-contrib" % akkaV,
@@ -36,19 +36,18 @@ libraryDependencies ++= {
     "org.json4s" %% "json4s-jackson" % json4sV,
     "com.github.nscala-time" %% "nscala-time" % nscalaV,
     "org.scalactic" %% "scalactic" % scalacticV,
-    "com.github.ironfish" %% "akka-persistence-mongo"  % mongoPersistV % "compile",
+    "com.typesafe.akka" %% "akka-persistence-cassandra" % cassandraPersistV,
   
-    "de.flapdoodle.embed" % "de.flapdoodle.embed.mongo" % inMemMongoV % "test",
     "org.scalatest" %% "scalatest" % scalaTestV % "test",
-    "com.typesafe.akka" %% "akka-http-testkit" % akkaV % "test",
+    "com.typesafe.akka" %% "akka-http-testkit" % akkaV % "test"
 
-    "io.kamon" %% "kamon-core" % kamonV,
-    "io.kamon" %% "kamon-scala" % kamonV,
-    "io.kamon" %% "kamon-akka" % kamonV,
-    "io.kamon" %% "kamon-system-metrics" % kamonV,
-    "io.kamon" %% "kamon-annotation" % kamonV,
-    "io.kamon" %% "kamon-statsd" % kamonV,
-    "io.kamon" %% "kamon-log-reporter" % kamonV
+//    "io.kamon" %% "kamon-core" % kamonV,
+//    "io.kamon" %% "kamon-scala" % kamonV,
+//    "io.kamon" %% "kamon-akka" % kamonV,
+//    "io.kamon" %% "kamon-system-metrics" % kamonV,
+//    "io.kamon" %% "kamon-annotation" % kamonV,
+//    "io.kamon" %% "kamon-statsd" % kamonV,
+//    "io.kamon" %% "kamon-log-reporter" % kamonV
   )
 }
 

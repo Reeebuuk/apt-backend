@@ -10,7 +10,7 @@ sealed trait Command {
 }
 
 case class SavePriceRange(userId: String, unitId: Int, from: Long, to: Long, price: Int) extends Command
-case class SavePriceForSingleDay(userId: String, unitId: Int, day:Long, price: Int) extends Command
+case class SavePriceForSingleDay(userId: String, unitId: Int, day: Long, price: Int) extends Command
 
 /*
 * Events
