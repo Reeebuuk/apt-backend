@@ -1,10 +1,8 @@
 package hr.com.blanka.apartments.price
 
 import akka.actor.Props
-import akka.cluster.sharding.ShardRegion
 import akka.persistence.PersistentActor
-import hr.com.blanka.apartments.price.DailyPriceAggregateActor._
-import hr.com.blanka.apartments.price.protocol.{PriceDayFetched, LookupPriceForDay, SavePriceForSingleDay, Command}
+import hr.com.blanka.apartments.price.protocol.{LookupPriceForDay, PriceDayFetched, SavePriceForSingleDay}
 import org.joda.time.DateTime
 
 case class Price(value: Int, timeSaved: Long)
@@ -19,15 +17,6 @@ object DailyPriceAggregateActor {
 
   def apply() = Props(new DailyPriceAggregateActor())
 
-  val idExtractor: ShardRegion.ExtractEntityId = {
-    case cmd: Command => (cmd.userId, cmd)
-  }
-
-  val shardResolver: ShardRegion.ExtractShardId = {
-    case cmd: Command => "Main"
-  }
-
-  val shardName: String = "DailyPriceAggregateActor"
 }
 
 class DailyPriceAggregateActor extends PersistentActor {
