@@ -15,8 +15,7 @@ resolvers += "Sonatype releases" at "http://repo.typesafe.com/typesafe/releases/
 resolvers += "Sonatype OSS Snapshots" at "https://oss.sonatype.org/content/repositories/snapshots"
 
 libraryDependencies ++= {
-  val akkaExperimentalV  = "2.0.2"
-  val akkaV              = "2.4.1"
+  val akkaV              = "2.4.2"
   val scalaTestV         = "2.2.4"
   val slf4jV             = "1.6.4"
   val rMongoV            = "0.11.9"
@@ -30,23 +29,18 @@ libraryDependencies ++= {
 
   Seq(
     "com.typesafe.akka" %% "akka-contrib" % akkaV,
-    "com.typesafe.akka" %% "akka-stream-experimental" % akkaExperimentalV,
-    "com.typesafe.akka" %% "akka-http-core-experimental" % akkaExperimentalV,
-    "com.typesafe.akka" %% "akka-http-spray-json-experimental" % akkaExperimentalV,
-    "com.typesafe.akka" %% "akka-cluster" % akkaV,
-    "com.typesafe.akka" %% "akka-cluster-tools" % akkaV,
-    "com.typesafe.akka" %% "akka-cluster-sharding" % akkaV,
+    "com.typesafe.akka" %% "akka-stream" % akkaV,
+    "com.typesafe.akka" %% "akka-http-core" % akkaV,
+    "com.typesafe.akka" %% "akka-http-spray-json-experimental" % akkaV,
     "com.typesafe.scala-logging" %% "scala-logging" % scalaLoggingV,
     "org.json4s" %% "json4s-jackson" % json4sV,
-    "org.reactivemongo" %% "reactivemongo" % rMongoV,
-    "org.reactivemongo" %% "reactivemongo-bson-macros" % rMongoV,
     "com.github.nscala-time" %% "nscala-time" % nscalaV,
     "org.scalactic" %% "scalactic" % scalacticV,
     "com.github.ironfish" %% "akka-persistence-mongo"  % mongoPersistV % "compile",
   
     "de.flapdoodle.embed" % "de.flapdoodle.embed.mongo" % inMemMongoV % "test",
     "org.scalatest" %% "scalatest" % scalaTestV % "test",
-    "com.typesafe.akka" %% "akka-http-testkit-experimental" % akkaExperimentalV % "test",
+    "com.typesafe.akka" %% "akka-http-testkit" % akkaV % "test",
 
     "io.kamon" %% "kamon-core" % kamonV,
     "io.kamon" %% "kamon-scala" % kamonV,

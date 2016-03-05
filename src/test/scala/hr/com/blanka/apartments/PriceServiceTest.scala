@@ -1,16 +1,15 @@
 package hr.com.blanka.apartments
 
 import akka.actor.{ActorSystem, Props}
-import akka.cluster.sharding.{ClusterSharding, ClusterShardingSettings}
 import akka.event.{LoggingAdapter, NoLogging}
 import akka.http.scaladsl.model.{HttpEntity, MediaTypes}
 import akka.http.scaladsl.testkit.{RouteTestTimeout, ScalatestRouteTest}
 import hr.com.blanka.apartments.Main._
-import hr.com.blanka.apartments.http.routes.{SavePriceForRange, CalculatePriceForRangeDto, ErrorResponse, PriceForRangeResponse}
-import hr.com.blanka.apartments.price.{DailyPriceAggregateActor, QueryPriceRangeActor}
+import hr.com.blanka.apartments.http.routes.{CalculatePriceForRangeDto, ErrorResponse, PriceForRangeResponse, SavePriceForRange}
+import hr.com.blanka.apartments.price.QueryPriceRangeActor
 import org.joda.time.{DateTime, DateTimeZone}
 import org.json4s.DefaultFormats
-import org.scalatest.{WordSpecLike, Matchers}
+import org.scalatest.{Matchers, WordSpecLike}
 import spray.json._
 
 import scala.concurrent.duration._
@@ -28,15 +27,6 @@ class PriceServiceTest extends WordSpecLike with Matchers with ScalatestRouteTes
 
   implicit val format = DefaultFormats.withBigDecimal
   val midYearDate = new DateTime().toDateTime(DateTimeZone.UTC).withMonthOfYear(6).withDayOfMonth(5).withTime(12, 0, 0, 0)
-
-  ClusterSharding(system).start(
-    typeName = DailyPriceAggregateActor.shardName,
-    entityProps = DailyPriceAggregateActor(),
-    settings = ClusterShardingSettings(system),
-    extractEntityId = DailyPriceAggregateActor.idExtractor,
-    extractShardId = DailyPriceAggregateActor.shardResolver)
-
-  import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport._
 
   "Price service" should {
     "save price " in {

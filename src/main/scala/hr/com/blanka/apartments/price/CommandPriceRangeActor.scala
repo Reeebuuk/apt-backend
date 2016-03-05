@@ -1,9 +1,7 @@
 package hr.com.blanka.apartments.price
 
 import akka.actor._
-import akka.cluster.sharding.ClusterSharding
 import hr.com.blanka.apartments.http.routes.SavePriceForRange
-import hr.com.blanka.apartments.price.protocol.SavePriceForSingleDay
 import org.joda.time.{DateTime, DateTimeZone, Days}
 
 object CommandPriceRangeActor {
@@ -15,7 +13,6 @@ class CommandPriceRangeActor extends Actor with ActorLogging {
 
   var as = Map.empty[Int, ActorRef]
 
-  lazy val postRegion = ClusterSharding(context.system).shardRegion(DailyPriceAggregateActor.shardName)
 
   override def receive: Receive = {
     case SavePriceForRange(userId, unitId, from, to, price) => {
@@ -26,7 +23,7 @@ class CommandPriceRangeActor extends Actor with ActorLogging {
       (0 until duration).foreach(daysFromStart => {
         val day = new DateTime(from).toDateTime(DateTimeZone.UTC).plusDays(daysFromStart).getMillis
 
-        postRegion ! SavePriceForSingleDay(userId, unitId, day, price)
+//        postRegion ! SavePriceForSingleDay(userId, unitId, day, price)
       })
     }
     case Terminated(ref) => as = as filterNot { case (_, v) => v == ref }
