@@ -6,12 +6,13 @@ import akka.util.Timeout
 import hr.com.blanka.apartments.http.routes.SavePriceForRange
 import hr.com.blanka.apartments.price.protocol.SavePriceForSingleDay
 import org.joda.time.{DateTime, DateTimeZone, Days}
-import org.scalactic.Good
+import org.scalactic.{Bad, Good}
 
 import scala.collection.immutable.IndexedSeq
 import scala.concurrent.Future
 import scala.concurrent.duration._
 import scala.language.postfixOps
+import scala.util.{Failure, Success}
 
 object CommandPriceRangeActor {
 
@@ -20,11 +21,11 @@ object CommandPriceRangeActor {
 
 class CommandPriceRangeActor extends Actor with ActorLogging {
 
-  implicit val timeout = Timeout(2 seconds)
+  implicit val timeout = Timeout(10 seconds)
 
   import context.dispatcher
 
-  val dailyPriceActor = context.actorOf(Props(classOf[DailyPriceAggregateActor]))
+  lazy val dailyPriceActor = context.actorOf(Props(classOf[DailyPriceAggregateActor]))
 
   override def receive: Receive = {
     case SavePriceForRange(userId, unitId, from, to, price) => {
@@ -38,7 +39,8 @@ class CommandPriceRangeActor extends Actor with ActorLogging {
         dailyPriceActor ? SavePriceForSingleDay(userId, unitId, day, price)
       })
 
-      Future.sequence(newDailyPrices).onSuccess({ case _ => sender() ! Good })
+      sender() ! Future.sequence(newDailyPrices)\
+
     }
   }
 

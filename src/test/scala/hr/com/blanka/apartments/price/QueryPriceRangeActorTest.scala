@@ -1,4 +1,4 @@
-package hr.com.blanka.apartments.price.query
+package hr.com.blanka.apartments.price
 
 import akka.actor.ActorSystem
 import akka.testkit.{ImplicitSender, TestKit}

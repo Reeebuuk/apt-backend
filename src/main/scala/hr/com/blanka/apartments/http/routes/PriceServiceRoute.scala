@@ -12,6 +12,7 @@ import org.scalactic.{Bad, Good}
 import scala.concurrent.Promise
 import scala.concurrent.duration._
 import scala.language.postfixOps
+import scala.util.{Failure, Success}
 
 final case class CalculatePriceForRangeDto(unitId: Int, from: Long, to: Long)
 
@@ -23,7 +24,7 @@ final case class ErrorResponse(msg: String)
 
 trait PriceServiceRoute extends BaseServiceRoute with MarshallingSupport {
 
-  implicit val timeout = Timeout(2 seconds)
+  implicit val timeout = Timeout(9 seconds)
 
   import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport._
 
@@ -56,11 +57,12 @@ trait PriceServiceRoute extends BaseServiceRoute with MarshallingSupport {
         post {
           decodeRequest {
             entity(as[SavePriceForRange]) { savePriceForRange =>
-              onSuccess(command ? savePriceForRange) {
-                case Good(_) => complete(StatusCodes.BadRequest, "Saved")
+              onSuccess(command ? savePriceForRange){
+                case Good(_) => complete(StatusCodes.OK, "Saved")
                 case Bad(response) => response match {
                   case _ => complete(StatusCodes.BadRequest, "UnknownError")
                 }
+                case _ => complete(StatusCodes.OK, "Not the right one :/")
               }
             }
           }
