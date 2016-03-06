@@ -6,7 +6,7 @@ import akka.http.scaladsl.model.{HttpEntity, MediaTypes}
 import akka.http.scaladsl.testkit.{RouteTestTimeout, ScalatestRouteTest}
 import hr.com.blanka.apartments.Main._
 import hr.com.blanka.apartments.http.routes.{CalculatePriceForRangeDto, ErrorResponse, PriceForRangeResponse, SavePriceForRange}
-import hr.com.blanka.apartments.price.QueryPriceRangeActor
+import hr.com.blanka.apartments.price.{CommandPriceRangeActor, QueryPriceRangeActor}
 import org.joda.time.{DateTime, DateTimeZone}
 import org.json4s.DefaultFormats
 import org.scalatest.{Matchers, WordSpecLike}
@@ -22,7 +22,7 @@ class PriceServiceTest extends WordSpecLike with Matchers with ScalatestRouteTes
 
   implicit def default(implicit system: ActorSystem) = RouteTestTimeout(new DurationInt(10).second)
 
-  val command = system.actorOf(Props(classOf[QueryPriceRangeActor]), "commandActor")
+  val command = system.actorOf(Props(classOf[CommandPriceRangeActor]), "commandActor")
   val query = system.actorOf(Props(classOf[QueryPriceRangeActor]), "queryActor")
 
   import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport._
