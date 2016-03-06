@@ -39,9 +39,9 @@ class CommandPriceRangeActor extends Actor with ActorLogging {
         dailyPriceActor ? SavePriceForSingleDay(userId, unitId, day, price)
       })
 
-      sender() ! Future.sequence(newDailyPrices).onComplete {
-        case Success(result) => result
-        case Failure(t) => Bad("An error has occured: " + t.getMessage)
+      Future.sequence(newDailyPrices).onComplete {
+        case Success(result) => sender() ! result
+        case Failure(t) => sender() ! Bad("An error has occured: " + t.getMessage)
       }
 
     }
