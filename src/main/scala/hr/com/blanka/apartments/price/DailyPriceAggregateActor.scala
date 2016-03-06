@@ -37,7 +37,7 @@ class DailyPriceAggregateActor extends PersistentActor {
     }
 
     context become active(currentDailyPrices + (unitId -> newDailyPrices))
-    sender() ! Good
+    sender() ! Good("Saved")
   }
 
   override def receiveCommand = active(Map[Int, Map[Long, List[Price]]]())

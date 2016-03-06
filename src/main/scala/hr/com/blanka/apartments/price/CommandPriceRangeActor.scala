@@ -29,6 +29,7 @@ class CommandPriceRangeActor extends Actor with ActorLogging {
 
   override def receive: Receive = {
     case SavePriceForRange(userId, unitId, from, to, price) => {
+      val msqSender = sender()
       val fromDate = new DateTime(from).toDateTime(DateTimeZone.UTC)
       val toDate = new DateTime(to).toDateTime(DateTimeZone.UTC)
       val duration = Days.daysBetween(fromDate.toLocalDate, toDate.toLocalDate).getDays
@@ -40,8 +41,8 @@ class CommandPriceRangeActor extends Actor with ActorLogging {
       })
 
       Future.sequence(newDailyPrices).onComplete {
-        case Success(result) => sender() ! result
-        case Failure(t) => sender() ! Bad("An error has occured: " + t.getMessage)
+        case Success(result) => msqSender ! result.head
+        case Failure(t) => msqSender ! Bad("An error has occurred: " + t.getMessage)
       }
 
     }
