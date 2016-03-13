@@ -27,11 +27,11 @@ class CommandPriceRangeActor extends Actor with ActorLogging {
 
   import context.dispatcher
 
-  lazy val dailyPriceActor = context.actorOf(Props(classOf[DailyPriceAggregateActor]))
+  lazy val dailyPriceActor = context.actorOf(Props(classOf[DailyPriceAggregateActor]), "lala")
 
   override def receive: Receive = {
     case SavePriceForRange(userId, unitId, from, to, price) => {
-      val msqSender = sender()
+      val msgSender = sender()
       val fromDate = new DateTime(from).toDateTime(DateTimeZone.UTC)
       val toDate = new DateTime(to).toDateTime(DateTimeZone.UTC)
 
@@ -44,13 +44,13 @@ class CommandPriceRangeActor extends Actor with ActorLogging {
           })
 
           Future.sequence(newDailyPrices).onComplete {
-            case Success(result) => msqSender ! result.head
-            case Failure(t) => msqSender ! Bad("An error has occurred: " + t.getMessage)
+            case Success(result) => msgSender ! result.head
+            case Failure(t) => msgSender ! Bad("An error has occurred: " + t.getMessage)
           }
         }
       }
 
-      validationResult.badMap(msqSender ! Bad(_))
+      validationResult.badMap(msgSender ! Bad(_))
     }
   }
 

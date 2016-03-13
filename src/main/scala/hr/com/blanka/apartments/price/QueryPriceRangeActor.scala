@@ -6,12 +6,13 @@ import akka.pattern.ask
 import akka.util.Timeout
 import hr.com.blanka.apartments.price.protocol._
 import org.joda.time.{DateTime, DateTimeZone, Days}
-import org.scalactic.Good
+import org.scalactic.{Good, Bad}
 
 import scala.collection.immutable.Map
 import scala.concurrent.duration.DurationInt
 import scala.concurrent.{Future, Promise}
 import scala.language.postfixOps
+import scala.util.{Failure, Success}
 
 object QueryPriceRangeActor {
 
@@ -23,11 +24,11 @@ case class CalculationData(singleDayCalculations: Map[Long, Option[Int]], result
 
 class QueryPriceRangeActor extends Actor {
 
-  implicit val timeout = Timeout(2 seconds)
+  implicit val timeout = Timeout(10 seconds)
 
   import context.dispatcher
 
-  val dailyPriceActor = context.actorOf(Props(classOf[DailyPriceAggregateActor]))
+  val dailyPriceActor = context.actorOf(Props(classOf[DailyPriceAggregateActor]), "lala")
 
   override def receive = active(Map[Long, CalculationData]())
 
@@ -48,9 +49,13 @@ class QueryPriceRangeActor extends Actor {
   def active(priceRangeCalculations: Map[Long, CalculationData]): Receive = {
     case cpfr: LookupPriceForRange => {
 
+      val msgSender = sender()
       val newlySentDailyCalculationMessages = sendMessagesForSingleDayCalculations(cpfr)
 
-      Future.sequence(newlySentDailyCalculationMessages).onSuccess({ case _ => sender() ! Good })
+      Future.sequence(newlySentDailyCalculationMessages).onComplete {
+        case Success(result) => msgSender ! Good(result.foldLeft(0)((sum, next) => next.asInstanceOf[PriceDayFetched].price + sum))
+        case Failure(t) => msgSender ! Bad("An error has occurred: " + t.getMessage)
+      }
 
     }
   }

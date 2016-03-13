@@ -6,7 +6,8 @@ import akka.http.scaladsl.model._
 import akka.http.scaladsl.model.StatusCodes._
 import akka.http.scaladsl.testkit.{RouteTestTimeout, ScalatestRouteTest}
 import hr.com.blanka.apartments.Main._
-import hr.com.blanka.apartments.http.routes.SavePriceForRange
+import hr.com.blanka.apartments.http.routes.{ErrorResponse, PriceForRangeResponse, SavePriceForRange}
+import hr.com.blanka.apartments.price.protocol.LookupPriceForRange
 import hr.com.blanka.apartments.price.{CommandPriceRangeActor, QueryPriceRangeActor}
 import org.joda.time.{DateTime, DateTimeZone}
 import org.json4s.DefaultFormats
@@ -17,6 +18,7 @@ import scala.concurrent.duration._
 
 class PriceServiceTest extends WordSpecLike with Matchers with ScalatestRouteTest {
 
+  import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport._
   protected val log: LoggingAdapter = NoLogging
 
   implicit val ec = system.dispatcher
@@ -78,41 +80,50 @@ class PriceServiceTest extends WordSpecLike with Matchers with ScalatestRouteTes
     }
   }
 
-  /*"Price service fetcing" should {
+  "Price service fetching" should {
     "retrieve price for single day" in {
       val today = midYearDate
       val tomorrow = midYearDate.plusDays(1)
-      val requestEntity = HttpEntity(MediaTypes.`application/json`, CalculatePriceForRangeDto(1, today, tomorrow).toJson.toString())
+      val newPrice = SavePriceForRange("user", 1, today, tomorrow, 35)
+      val saveEntity = HttpEntity(MediaTypes.`application/json`, newPrice.toJson.toString())
+
+      Post("/v1/price", saveEntity) ~> routes(command, query) ~> check {
+        responseAs[String] should be("Saved")
+        status should be (OK)
+      }
+
+      val requestEntity = HttpEntity(MediaTypes.`application/json`, LookupPriceForRange("user", 1, today, tomorrow).toJson.toString())
 
       Post("/v1/price/calculate", requestEntity) ~> routes(command, query) ~> check {
-        responseAs[PriceForRangeResponse] should be(PriceForRangeResponse(BigDecimal(35)))
+        responseAs[PriceForRangeResponse] should be(PriceForRangeResponse(35))
+        status should be (OK)
       }
     }
 
     "return correct price if the duration is 7 day in same price range" in {
       val today = midYearDate
       val tomorrow = new DateTime(today).plusDays(7)
-      val requestEntity = HttpEntity(MediaTypes.`application/json`, CalculatePriceForRangeDto(1, today, tomorrow).toJson.toString())
+      val requestEntity = HttpEntity(MediaTypes.`application/json`, LookupPriceForRange("user", 1, today, tomorrow).toJson.toString())
 
       Post("/v1/price/calculate", requestEntity) ~> routes(command, query) ~> check {
-        responseAs[PriceForRangeResponse] should be(PriceForRangeResponse(BigDecimal(245)))
+        responseAs[PriceForRangeResponse] should be(PriceForRangeResponse(245))
       }
     }
 
     "return correct price if the duration is 7 day in different price ranges" in {
       val today = midYearDate.withMonthOfYear(7).withDayOfMonth(19)
       val tomorrow = new DateTime(today).plusDays(7)
-      val requestEntity = HttpEntity(MediaTypes.`application/json`, CalculatePriceForRangeDto(1, today, tomorrow).toJson.toString())
+      val requestEntity = HttpEntity(MediaTypes.`application/json`, LookupPriceForRange("user", 1, today, tomorrow).toJson.toString())
 
       Post("/v1/price/calculate", requestEntity) ~> routes(command, query) ~> check {
-        responseAs[PriceForRangeResponse] should be(PriceForRangeResponse(BigDecimal(340)))
+        responseAs[PriceForRangeResponse] should be(PriceForRangeResponse(340))
       }
     }
 
     "return correct price if the duration is 7 day in different years" in {
       val today = midYearDate.withMonthOfYear(12).withDayOfMonth(30)
       val tomorrow = new DateTime(today).plusDays(7)
-      val requestEntity = HttpEntity(MediaTypes.`application/json`, CalculatePriceForRangeDto(1, today, tomorrow).toJson.toString())
+      val requestEntity = HttpEntity(MediaTypes.`application/json`, LookupPriceForRange("user", 1, today, tomorrow).toJson.toString())
 
       Post("/v1/price/calculate", requestEntity) ~> routes(command, query) ~> check {
         responseAs[ErrorResponse] should be(ErrorResponse("UnknownError"))
@@ -122,20 +133,20 @@ class PriceServiceTest extends WordSpecLike with Matchers with ScalatestRouteTes
     "return correct prices for sequential requests" in {
       val today = midYearDate
       val tomorrow = new DateTime(today).plusDays(7)
-      val requestEntity = HttpEntity(MediaTypes.`application/json`, CalculatePriceForRangeDto(1, today, tomorrow).toJson.toString())
+      val requestEntity = HttpEntity(MediaTypes.`application/json`, LookupPriceForRange("user", 1, today, tomorrow).toJson.toString())
 
       Post("/v1/price/calculate", requestEntity) ~> routes(command, query) ~> check {
-        responseAs[PriceForRangeResponse] should be(PriceForRangeResponse(BigDecimal(245)))
+        responseAs[PriceForRangeResponse] should be(PriceForRangeResponse(245))
       }
 
       val today1 = midYearDate.withMonthOfYear(7).withDayOfMonth(19)
       val tomorrow1 = new DateTime(today1).plusDays(7)
-      val requestEntity1 = HttpEntity(MediaTypes.`application/json`, CalculatePriceForRangeDto(1, today1, tomorrow1).toJson.toString())
+      val requestEntity1 = HttpEntity(MediaTypes.`application/json`, LookupPriceForRange("user", 1, today1, tomorrow1).toJson.toString())
 
       Post("/v1/price/calculate", requestEntity1) ~> routes(command, query) ~> check {
-        responseAs[PriceForRangeResponse] should be(PriceForRangeResponse(BigDecimal(340)))
+        responseAs[PriceForRangeResponse] should be(PriceForRangeResponse(340))
       }
     }
-  }*/
+  }
 }
 
