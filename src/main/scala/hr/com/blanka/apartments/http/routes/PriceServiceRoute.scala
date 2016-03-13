@@ -5,19 +5,16 @@ import akka.http.scaladsl.model.StatusCodes
 import akka.http.scaladsl.server.Directives._
 import akka.pattern.ask
 import akka.util.Timeout
-import hr.com.blanka.apartments.price.protocol.{InvalidRange, LookupPriceForRange, PriceForRangeCalculated, PriceQueryResponse}
+import hr.com.blanka.apartments.price.protocol.{LookupPriceForRange, InvalidRange, PriceForRangeCalculated}
 import hr.com.blanka.apartments.utils.MarshallingSupport
 import org.scalactic._
 
-import scala.concurrent.Promise
 import scala.concurrent.duration._
 import scala.language.postfixOps
 
-final case class CalculatePriceForRangeDto(unitId: Int, from: Long, to: Long)
-
 final case class SavePriceForRange(userId: String, unitId: Int, from: Long, to: Long, price: Int)
 
-final case class PriceForRangeResponse(price: BigDecimal)
+final case class PriceForRangeResponse(price: Int)
 
 final case class ErrorResponse(msg: String)
 
@@ -31,21 +28,14 @@ trait PriceServiceRoute extends BaseServiceRoute with MarshallingSupport {
     path("calculate") {
       post {
         decodeRequest {
-          entity(as[CalculatePriceForRangeDto]) { priceForRange: CalculatePriceForRangeDto =>
-            val pricePromise = Promise[PriceQueryResponse]()
-
-            query ! LookupPriceForRange(
-              "user",
-              priceForRange.unitId,
-              priceForRange.from,
-              priceForRange.to,
-              pricePromise
-            )
-
-            onSuccess(pricePromise.future) {
-              case PriceForRangeCalculated(price) => complete(PriceForRangeResponse(price))
-              case InvalidRange => complete(StatusCodes.Conflict, "InvalidRange")
-              case _ => complete(StatusCodes.BadRequest, "UnknownError")
+          entity(as[LookupPriceForRange]) { lookupPriceForRange =>
+            onSuccess(query ? lookupPriceForRange) {
+              case Good(result) => complete(StatusCodes.OK, PriceForRangeResponse(result.asInstanceOf[Int]))
+              case Bad(response) => response match {
+                case One(error) => complete(StatusCodes.BadRequest, error.toString)
+                case Many(first, second) => complete(StatusCodes.BadRequest, Seq(first, second).mkString(", "))
+              }
+              case _ => complete(StatusCodes.BadRequest, "Not the right one :/")
             }
 
           }
