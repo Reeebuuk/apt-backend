@@ -5,8 +5,10 @@ import akka.pattern.ask
 import akka.util.Timeout
 import hr.com.blanka.apartments.http.routes.SavePriceForRange
 import hr.com.blanka.apartments.price.protocol.SavePriceForSingleDay
-import org.joda.time.{DateTime, DateTimeZone, Days}
-import org.scalactic.{Bad, Good}
+import hr.com.blanka.apartments.validation.BasicValidation._
+import org.joda.time.{DateTime, DateTimeZone}
+import org.scalactic.Accumulation._
+import org.scalactic._
 
 import scala.collection.immutable.IndexedSeq
 import scala.concurrent.Future
@@ -32,19 +34,23 @@ class CommandPriceRangeActor extends Actor with ActorLogging {
       val msqSender = sender()
       val fromDate = new DateTime(from).toDateTime(DateTimeZone.UTC)
       val toDate = new DateTime(to).toDateTime(DateTimeZone.UTC)
-      val duration = Days.daysBetween(fromDate.toLocalDate, toDate.toLocalDate).getDays
 
-      val newDailyPrices: IndexedSeq[Future[Any]] = (0 until duration).map(daysFromStart => {
-        val day = new DateTime(from).toDateTime(DateTimeZone.UTC).plusDays(daysFromStart).getMillis
+      val validationResult = withGood(validDuration(fromDate, toDate), validUnitId(unitId)) {
+        (duration, unitId) => {
+          val newDailyPrices: IndexedSeq[Future[Any]] = (0 until duration).map(daysFromStart => {
+            val day = fromDate.plusDays(daysFromStart).getMillis
 
-        dailyPriceActor ? SavePriceForSingleDay(userId, unitId, day, price)
-      })
+            dailyPriceActor ? SavePriceForSingleDay(userId, unitId, day, price)
+          })
 
-      Future.sequence(newDailyPrices).onComplete {
-        case Success(result) => msqSender ! result.head
-        case Failure(t) => msqSender ! Bad("An error has occurred: " + t.getMessage)
+          Future.sequence(newDailyPrices).onComplete {
+            case Success(result) => msqSender ! result.head
+            case Failure(t) => msqSender ! Bad("An error has occurred: " + t.getMessage)
+          }
+        }
       }
 
+      validationResult.badMap(msqSender ! Bad(_))
     }
   }
 

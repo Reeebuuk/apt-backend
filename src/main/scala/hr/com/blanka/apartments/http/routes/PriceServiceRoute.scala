@@ -7,12 +7,11 @@ import akka.pattern.ask
 import akka.util.Timeout
 import hr.com.blanka.apartments.price.protocol.{InvalidRange, LookupPriceForRange, PriceForRangeCalculated, PriceQueryResponse}
 import hr.com.blanka.apartments.utils.MarshallingSupport
-import org.scalactic.{Bad, Good}
+import org.scalactic._
 
 import scala.concurrent.Promise
 import scala.concurrent.duration._
 import scala.language.postfixOps
-import scala.util.{Failure, Success}
 
 final case class CalculatePriceForRangeDto(unitId: Int, from: Long, to: Long)
 
@@ -60,9 +59,10 @@ trait PriceServiceRoute extends BaseServiceRoute with MarshallingSupport {
               onSuccess(command ? savePriceForRange){
                 case Good(_) => complete(StatusCodes.OK, "Saved")
                 case Bad(response) => response match {
-                  case _ => complete(StatusCodes.BadRequest, "UnknownError")
+                  case One(error) => complete(StatusCodes.BadRequest, error.toString)
+                  case Many(first, second) => complete(StatusCodes.BadRequest, Seq(first, second).mkString(", "))
                 }
-                case _ => complete(StatusCodes.OK, "Not the right one :/")
+                case _ => complete(StatusCodes.BadRequest, "Not the right one :/")
               }
             }
           }
