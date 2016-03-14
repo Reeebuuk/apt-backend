@@ -5,14 +5,12 @@ import akka.http.scaladsl.model.StatusCodes
 import akka.http.scaladsl.server.Directives._
 import akka.pattern.ask
 import akka.util.Timeout
-import hr.com.blanka.apartments.price.protocol.{LookupPriceForRange, InvalidRange, PriceForRangeCalculated}
+import hr.com.blanka.apartments.price.protocol.{SavePriceRange, LookupPriceForRange, InvalidRange, PriceForRangeCalculated}
 import hr.com.blanka.apartments.utils.MarshallingSupport
 import org.scalactic._
 
 import scala.concurrent.duration._
 import scala.language.postfixOps
-
-final case class SavePriceForRange(userId: String, unitId: Int, from: Long, to: Long, price: Int)
 
 final case class PriceForRangeResponse(price: Int)
 
@@ -45,8 +43,8 @@ trait PriceServiceRoute extends BaseServiceRoute with MarshallingSupport {
       pathEndOrSingleSlash {
         post {
           decodeRequest {
-            entity(as[SavePriceForRange]) { savePriceForRange =>
-              onSuccess(command ? savePriceForRange){
+            entity(as[SavePriceRange]) { savePriceRange =>
+              onSuccess(command ? savePriceRange){
                 case Good(_) => complete(StatusCodes.OK, "Saved")
                 case Bad(response) => response match {
                   case One(error) => complete(StatusCodes.BadRequest, error.toString)

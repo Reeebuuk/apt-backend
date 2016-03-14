@@ -6,8 +6,8 @@ import akka.http.scaladsl.model._
 import akka.http.scaladsl.model.StatusCodes._
 import akka.http.scaladsl.testkit.{RouteTestTimeout, ScalatestRouteTest}
 import hr.com.blanka.apartments.Main._
-import hr.com.blanka.apartments.http.routes.{ErrorResponse, PriceForRangeResponse, SavePriceForRange}
-import hr.com.blanka.apartments.price.protocol.LookupPriceForRange
+import hr.com.blanka.apartments.http.routes.{ErrorResponse, PriceForRangeResponse}
+import hr.com.blanka.apartments.price.protocol.{SavePriceRange, LookupPriceForRange}
 import hr.com.blanka.apartments.price.{CommandPriceRangeActor, QueryPriceRangeActor}
 import org.joda.time.{DateTime, DateTimeZone}
 import org.json4s.DefaultFormats
@@ -36,7 +36,7 @@ class PriceServiceTest extends WordSpecLike with Matchers with ScalatestRouteTes
     "save valid price range" in {
       val today = midYearDate
       val tomorrow = midYearDate.plusDays(1)
-      val newPrice = SavePriceForRange("user", 1, today, tomorrow, 35)
+      val newPrice = SavePriceRange("user", 1, today, tomorrow, 35)
       val requestEntity = HttpEntity(MediaTypes.`application/json`, newPrice.toJson.toString())
 
       Post("/v1/price", requestEntity) ~> routes(command, query) ~> check {
@@ -48,7 +48,7 @@ class PriceServiceTest extends WordSpecLike with Matchers with ScalatestRouteTes
     "return error message if from is later than to date" in {
       val today = midYearDate
       val tomorrow = midYearDate.plusDays(1)
-      val newPrice = SavePriceForRange("user", 1, tomorrow, today, 35)
+      val newPrice = SavePriceRange("user", 1, tomorrow, today, 35)
       val requestEntity = HttpEntity(MediaTypes.`application/json`, newPrice.toJson.toString())
 
       Post("/v1/price", requestEntity) ~> routes(command, query) ~> check {
@@ -58,7 +58,7 @@ class PriceServiceTest extends WordSpecLike with Matchers with ScalatestRouteTes
     }
 
     "return error message if dates are not valid" in {
-      val newPrice = SavePriceForRange("user", 1, 0, 0, 35)
+      val newPrice = SavePriceRange("user", 1, 0, 0, 35)
       val requestEntity = HttpEntity(MediaTypes.`application/json`, newPrice.toJson.toString())
 
       Post("/v1/price", requestEntity) ~> routes(command, query) ~> check {
@@ -70,7 +70,7 @@ class PriceServiceTest extends WordSpecLike with Matchers with ScalatestRouteTes
     "return error message if unit id is wrong" in {
       val today = midYearDate
       val tomorrow = midYearDate.plusDays(1)
-      val newPrice = SavePriceForRange("user", 15, today, tomorrow, 35)
+      val newPrice = SavePriceRange("user", 15, today, tomorrow, 35)
       val requestEntity = HttpEntity(MediaTypes.`application/json`, newPrice.toJson.toString())
 
       Post("/v1/price", requestEntity) ~> routes(command, query) ~> check {
@@ -84,7 +84,7 @@ class PriceServiceTest extends WordSpecLike with Matchers with ScalatestRouteTes
     "retrieve price for single day" in {
       val today = midYearDate
       val tomorrow = midYearDate.plusDays(1)
-      val newPrice = SavePriceForRange("user", 1, today, tomorrow, 35)
+      val newPrice = SavePriceRange("user", 1, today, tomorrow, 35)
       val saveEntity = HttpEntity(MediaTypes.`application/json`, newPrice.toJson.toString())
 
       Post("/v1/price", saveEntity) ~> routes(command, query) ~> check {
