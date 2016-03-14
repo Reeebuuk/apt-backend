@@ -30,10 +30,10 @@ trait PriceServiceRoute extends BaseServiceRoute with MarshallingSupport {
             onSuccess(query ? lookupPriceForRange) {
               case Good(result) => complete(StatusCodes.OK, PriceForRangeResponse(result.asInstanceOf[Int]))
               case Bad(response) => response match {
-                case One(error) => complete(StatusCodes.BadRequest, error.toString)
-                case Many(first, second) => complete(StatusCodes.BadRequest, Seq(first, second).mkString(", "))
+                case One(error) => complete(StatusCodes.BadRequest, ErrorResponse(error.toString))
+                case Many(first, second) => complete(StatusCodes.BadRequest, ErrorResponse(Seq(first, second).mkString(", ")))
+                case error => complete(StatusCodes.BadRequest, ErrorResponse(error.toString))
               }
-              case _ => complete(StatusCodes.BadRequest, "Not the right one :/")
             }
 
           }
@@ -45,12 +45,12 @@ trait PriceServiceRoute extends BaseServiceRoute with MarshallingSupport {
           decodeRequest {
             entity(as[SavePriceRange]) { savePriceRange =>
               onSuccess(command ? savePriceRange){
-                case Good(_) => complete(StatusCodes.OK, "Saved")
+                case Good(_) => complete(StatusCodes.OK)
                 case Bad(response) => response match {
-                  case One(error) => complete(StatusCodes.BadRequest, error.toString)
-                  case Many(first, second) => complete(StatusCodes.BadRequest, Seq(first, second).mkString(", "))
+                  case One(error) => complete(StatusCodes.BadRequest, ErrorResponse(error.toString))
+                  case Many(first, second) => complete(StatusCodes.BadRequest, ErrorResponse(Seq(first, second).mkString(", ")))
+                  case error => complete(StatusCodes.BadRequest, ErrorResponse(error.toString))
                 }
-                case _ => complete(StatusCodes.BadRequest, "Not the right one :/")
               }
             }
           }

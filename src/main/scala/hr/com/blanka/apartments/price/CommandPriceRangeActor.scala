@@ -3,8 +3,7 @@ package hr.com.blanka.apartments.price
 import akka.actor._
 import akka.pattern.ask
 import akka.util.Timeout
-import hr.com.blanka.apartments.http.routes.SavePriceForRange
-import hr.com.blanka.apartments.price.protocol.SavePriceForSingleDay
+import hr.com.blanka.apartments.price.protocol.{SavePriceRange, SavePriceForSingleDay}
 import hr.com.blanka.apartments.validation.BasicValidation._
 import org.joda.time.{DateTime, DateTimeZone}
 import org.scalactic.Accumulation._
@@ -30,7 +29,7 @@ class CommandPriceRangeActor extends Actor with ActorLogging {
   lazy val dailyPriceActor = context.actorOf(Props(classOf[DailyPriceAggregateActor]), "lala")
 
   override def receive: Receive = {
-    case SavePriceForRange(userId, unitId, from, to, price) => {
+    case SavePriceRange(userId, unitId, from, to, price) => {
       val msgSender = sender()
       val fromDate = new DateTime(from).toDateTime(DateTimeZone.UTC)
       val toDate = new DateTime(to).toDateTime(DateTimeZone.UTC)
