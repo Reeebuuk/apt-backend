@@ -40,7 +40,6 @@ class PriceServiceTest extends WordSpecLike with Matchers with ScalatestRouteTes
       val requestEntity = HttpEntity(MediaTypes.`application/json`, newPrice.toJson.toString())
 
       Post("/v1/price", requestEntity) ~> routes(command, query) ~> check {
-        responseAs[String] should be("Saved")
         status should be (OK)
       }
     }
@@ -52,7 +51,7 @@ class PriceServiceTest extends WordSpecLike with Matchers with ScalatestRouteTes
       val requestEntity = HttpEntity(MediaTypes.`application/json`, newPrice.toJson.toString())
 
       Post("/v1/price", requestEntity) ~> routes(command, query) ~> check {
-        responseAs[String] should be("Invalid date range")
+        responseAs[ErrorResponse] should be(ErrorResponse("Invalid date range"))
         status should be (BadRequest)
       }
     }
@@ -62,7 +61,7 @@ class PriceServiceTest extends WordSpecLike with Matchers with ScalatestRouteTes
       val requestEntity = HttpEntity(MediaTypes.`application/json`, newPrice.toJson.toString())
 
       Post("/v1/price", requestEntity) ~> routes(command, query) ~> check {
-        responseAs[String] should be("From date is in the past, To date is in the past")
+        responseAs[ErrorResponse] should be(ErrorResponse("From date is in the past, To date is in the past"))
         status should be (BadRequest)
       }
     }
@@ -74,7 +73,7 @@ class PriceServiceTest extends WordSpecLike with Matchers with ScalatestRouteTes
       val requestEntity = HttpEntity(MediaTypes.`application/json`, newPrice.toJson.toString())
 
       Post("/v1/price", requestEntity) ~> routes(command, query) ~> check {
-        responseAs[String] should be("Unit id doesn't exist")
+        responseAs[ErrorResponse] should be(ErrorResponse("Unit id doesn't exist"))
         status should be (BadRequest)
       }
     }
@@ -88,7 +87,6 @@ class PriceServiceTest extends WordSpecLike with Matchers with ScalatestRouteTes
       val saveEntity = HttpEntity(MediaTypes.`application/json`, newPrice.toJson.toString())
 
       Post("/v1/price", saveEntity) ~> routes(command, query) ~> check {
-        responseAs[String] should be("Saved")
         status should be (OK)
       }
 

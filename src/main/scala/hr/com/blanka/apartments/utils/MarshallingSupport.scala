@@ -4,12 +4,12 @@ import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
 import hr.com.blanka.apartments.http.routes._
-import hr.com.blanka.apartments.price.protocol.LookupPriceForRange
+import hr.com.blanka.apartments.price.protocol.{SavePriceRange, LookupPriceForRange}
 import spray.json.{DefaultJsonProtocol, JsString, JsValue, JsonFormat}
 
 trait MarshallingSupport extends DefaultJsonProtocol {
   implicit val LookupPriceForRangeFormat = jsonFormat4(LookupPriceForRange.apply)
-  implicit val SavePriceForRangeDtoFormat = jsonFormat5(SavePriceForRange.apply)
+  implicit val SavePriceRangeDtoFormat = jsonFormat5(SavePriceRange.apply)
   implicit val PriceForRangeDtoFormat = jsonFormat1(PriceForRangeResponse.apply)
   implicit val ErrorDtoFormat = jsonFormat1(ErrorResponse.apply)
 
