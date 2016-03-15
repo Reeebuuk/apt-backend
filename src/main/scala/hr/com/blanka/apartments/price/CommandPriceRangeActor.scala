@@ -14,19 +14,16 @@ import scala.concurrent.Future
 import scala.concurrent.duration._
 import scala.language.postfixOps
 import scala.util.{Failure, Success}
+import scala.concurrent.ExecutionContext.Implicits.global
 
 object CommandPriceRangeActor {
 
-  def apply() = Props(classOf[CommandPriceRangeActor])
+  def apply(dailyPriceActor: ActorRef) = Props(classOf[CommandPriceRangeActor], dailyPriceActor)
 }
 
-class CommandPriceRangeActor extends Actor with ActorLogging {
+class CommandPriceRangeActor(dailyPriceActor: ActorRef) extends Actor with ActorLogging {
 
   implicit val timeout = Timeout(10 seconds)
-
-  import context.dispatcher
-
-  lazy val dailyPriceActor = context.actorOf(Props(classOf[DailyPriceAggregateActor]), "lala")
 
   override def receive: Receive = {
     case SavePriceRange(userId, unitId, from, to, price) => {

@@ -6,29 +6,26 @@ import akka.pattern.ask
 import akka.util.Timeout
 import hr.com.blanka.apartments.price.protocol._
 import org.joda.time.{DateTime, DateTimeZone, Days}
-import org.scalactic.{Good, Bad}
+import org.scalactic.{Bad, Good}
 
 import scala.collection.immutable.Map
+import scala.concurrent.Future
 import scala.concurrent.duration.DurationInt
-import scala.concurrent.{Future, Promise}
 import scala.language.postfixOps
 import scala.util.{Failure, Success}
+import scala.concurrent.ExecutionContext.Implicits.global
 
 object QueryPriceRangeActor {
 
-  def apply() = Props(classOf[QueryPriceRangeActor])
+  def apply(dailyPriceActor: ActorRef) = Props(classOf[QueryPriceRangeActor], dailyPriceActor)
 
 }
 
-case class CalculationData(singleDayCalculations: Map[Long, Option[Int]], resultPromise: Promise[PriceQueryResponse])
+case class CalculationData(singleDayCalculations: Map[Long, Option[Int]])
 
-class QueryPriceRangeActor extends Actor {
+class QueryPriceRangeActor(dailyPriceActor: ActorRef) extends Actor {
 
   implicit val timeout = Timeout(10 seconds)
-
-  import context.dispatcher
-
-  val dailyPriceActor = context.actorOf(Props(classOf[DailyPriceAggregateActor]), "lala")
 
   override def receive = active(Map[Long, CalculationData]())
 
