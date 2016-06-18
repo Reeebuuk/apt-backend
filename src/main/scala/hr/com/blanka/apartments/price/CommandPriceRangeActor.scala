@@ -3,11 +3,11 @@ package hr.com.blanka.apartments.price
 import akka.actor._
 import akka.pattern.ask
 import akka.util.Timeout
-import hr.com.blanka.apartments.price.protocol.{SavePriceRange, SavePriceForSingleDay}
+import hr.com.blanka.apartments.price.protocol.{SavePriceForSingleDay, SavePriceRange}
 import hr.com.blanka.apartments.validation.BasicValidation._
 import org.joda.time.{DateTime, DateTimeZone}
 import org.scalactic.Accumulation._
-import org.scalactic._
+import org.scalactic.{Bad, _}
 
 import scala.collection.immutable.IndexedSeq
 import scala.concurrent.Future
@@ -26,28 +26,20 @@ class CommandPriceRangeActor(dailyPriceActor: ActorRef) extends Actor with Actor
   implicit val timeout = Timeout(10 seconds)
 
   override def receive: Receive = {
-    case SavePriceRange(userId, unitId, from, to, price) => {
+    case SavePriceRange(userId, unitId, from, to, price) =>
       val msgSender = sender()
       val fromDate = new DateTime(from).toDateTime(DateTimeZone.UTC)
       val toDate = new DateTime(to).toDateTime(DateTimeZone.UTC)
 
-      val validationResult = withGood(validDuration(fromDate, toDate), validUnitId(unitId)) {
+      withGood(validDuration(fromDate, toDate), validUnitId(unitId)) {
         (duration, unitId) => {
-          val newDailyPrices: IndexedSeq[Future[Any]] = (0 until duration).map(daysFromStart => {
+          (0 until duration).foreach(daysFromStart => {
             val day = fromDate.plusDays(daysFromStart).getMillis
 
-            dailyPriceActor ? SavePriceForSingleDay(userId, unitId, day, price)
+            dailyPriceActor ! SavePriceForSingleDay(userId, unitId, day, price)
           })
-
-          Future.sequence(newDailyPrices).onComplete {
-            case Success(result) => msgSender ! result.head
-            case Failure(t) => msgSender ! Bad("An error has occurred: " + t.getMessage)
-          }
+          msgSender ! Good
         }
-      }
-
-      validationResult.badMap(msgSender ! Bad(_))
-    }
+      } recover ((err) => err.map(x => msgSender ! Bad(x)))
   }
-
 }

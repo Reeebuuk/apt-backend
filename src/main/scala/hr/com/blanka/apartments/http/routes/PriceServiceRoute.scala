@@ -45,7 +45,7 @@ trait PriceServiceRoute extends BaseServiceRoute with MarshallingSupport {
           decodeRequest {
             entity(as[SavePriceRange]) { savePriceRange =>
               onSuccess(command ? savePriceRange){
-                case Good(_) => complete(StatusCodes.OK)
+                case Good => complete(StatusCodes.OK)
                 case Bad(response) => response match {
                   case One(error) => complete(StatusCodes.BadRequest, ErrorResponse(error.toString))
                   case Many(first, second) => complete(StatusCodes.BadRequest, ErrorResponse(Seq(first, second).mkString(", ")))
