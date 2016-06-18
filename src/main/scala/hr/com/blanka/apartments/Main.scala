@@ -11,7 +11,7 @@ import hr.com.blanka.apartments.utils.AppConfig
 object Main extends App with KamonSupport with AppConfig with BaseService {
 
   implicit val system = ActorSystem("booking")
-  val aggregate = system.actorOf(Props(classOf[DailyPriceAggregateActor]), "aggregatedActor")
+  val aggregate = system.actorOf(Props(classOf[DailyPriceAggregateActor]), "dailyPriceActor")
 
   val command = system.actorOf(Props(classOf[CommandPriceRangeActor], aggregate), "commandActor")
   val query = system.actorOf(Props(classOf[QueryPriceRangeActor], aggregate), "queryActor")

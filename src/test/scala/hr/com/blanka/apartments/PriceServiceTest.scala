@@ -7,14 +7,15 @@ import akka.http.scaladsl.model.StatusCodes._
 import akka.http.scaladsl.testkit.{RouteTestTimeout, ScalatestRouteTest}
 import hr.com.blanka.apartments.Main._
 import hr.com.blanka.apartments.http.routes.{ErrorResponse, PriceForRangeResponse}
-import hr.com.blanka.apartments.price.protocol.{SavePriceRange, LookupPriceForRange}
-import hr.com.blanka.apartments.price.{DailyPriceAggregateActor, CommandPriceRangeActor, QueryPriceRangeActor}
+import hr.com.blanka.apartments.price.protocol.{LookupPriceForRange, SavePriceRange}
+import hr.com.blanka.apartments.price.{CommandPriceRangeActor, DailyPriceAggregateActor, QueryPriceRangeActor}
 import org.joda.time.{DateTime, DateTimeZone}
 import org.json4s.DefaultFormats
 import org.scalatest.{Matchers, WordSpecLike}
 import spray.json._
 
 import scala.concurrent.duration._
+import scala.language.implicitConversions
 
 class PriceServiceTest extends WordSpecLike with Matchers with ScalatestRouteTest {
 
@@ -32,7 +33,7 @@ class PriceServiceTest extends WordSpecLike with Matchers with ScalatestRouteTes
 
   implicit val format = DefaultFormats.withBigDecimal
   implicit def toMillis(date: DateTime): Long = date.getMillis
-  val midYearDate = new DateTime().toDateTime(DateTimeZone.UTC).withMonthOfYear(6).withDayOfMonth(5).withTime(12, 0, 0, 0)
+  val midYearDate = new DateTime().toDateTime(DateTimeZone.UTC).withMonthOfYear(8).withDayOfMonth(5).withTime(12, 0, 0, 0)
 
   "Price service save" should {
     "save valid price range" in {
@@ -42,6 +43,13 @@ class PriceServiceTest extends WordSpecLike with Matchers with ScalatestRouteTes
       val requestEntity = HttpEntity(MediaTypes.`application/json`, newPrice.toJson.toString())
 
       Post("/v1/price", requestEntity) ~> routes(command, query) ~> check {
+        status should be (OK)
+      }
+
+      val lookupRequest = HttpEntity(MediaTypes.`application/json`, LookupPriceForRange("user", 1, today, tomorrow).toJson.toString())
+
+      Post("/v1/price/calculate", lookupRequest) ~> routes(command, query) ~> check {
+        responseAs[PriceForRangeResponse] should be(PriceForRangeResponse(35))
         status should be (OK)
       }
     }

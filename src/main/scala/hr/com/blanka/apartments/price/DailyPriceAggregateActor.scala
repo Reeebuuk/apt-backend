@@ -1,6 +1,6 @@
 package hr.com.blanka.apartments.price
 
-import akka.actor.Props
+import akka.actor.{Actor, Props}
 import akka.persistence.PersistentActor
 import hr.com.blanka.apartments.price.protocol.{LookupPriceForDay, PriceDayFetched, SavePriceForSingleDay}
 import org.joda.time.DateTime
@@ -20,9 +20,9 @@ object DailyPriceAggregateActor {
 
 }
 
-class DailyPriceAggregateActor extends PersistentActor {
+class DailyPriceAggregateActor extends Actor {
 
-  override def persistenceId: String = self.path.parent.name + "-" + self.path.name
+//  override def persistenceId: String = self.path.parent.name + "-" + self.path.name
 
   def updateState(newDailyPrice: DailyPriceSaved, currentDailyPrices: Map[Int, Map[Long, List[Price]]]): Unit = {
     import newDailyPrice._
@@ -37,16 +37,16 @@ class DailyPriceAggregateActor extends PersistentActor {
     }
 
     context become active(currentDailyPrices + (unitId -> newDailyPrices))
-    sender() ! Good("Saved")
   }
 
-  override def receiveCommand = active(Map[Int, Map[Long, List[Price]]]())
+  override def receive = active(Map[Int, Map[Long, List[Price]]]())
 
   def active(currentDailyPrices: Map[Int, Map[Long, List[Price]]]): Receive = {
-    case SavePriceForSingleDay(userId, unitId, day, price) => {
-      persist(DailyPriceSaved(unitId, day, Price(price)))(updateState(_, currentDailyPrices))
-    }
-    case LookupPriceForDay(_, unitId, day) => {
+    case SavePriceForSingleDay(userId, unitId, day, price) =>
+//      persist(DailyPriceSaved(unitId, day, Price(price)))(updateState(_, currentDailyPrices))
+      updateState(DailyPriceSaved(unitId, day, Price(price)), currentDailyPrices)
+
+    case LookupPriceForDay(_, unitId, day) =>
       val lastPrice: Int = currentDailyPrices.get(unitId) match {
         case None => 0
         case Some(priceForDay) =>
@@ -57,10 +57,10 @@ class DailyPriceAggregateActor extends PersistentActor {
       }
 
       sender() ! PriceDayFetched(lastPrice)
-    }
+
   }
 
-  override def receiveRecover: Receive = {
-    case _ =>
-  }
+//  override def receiveRecover: Receive = {
+//    case _ =>
+//  }
 }
