@@ -8,7 +8,7 @@ import hr.com.blanka.apartments.http.BaseService
 import hr.com.blanka.apartments.price.{DailyPriceAggregateActor, CommandPriceRangeActor, QueryPriceRangeActor}
 import hr.com.blanka.apartments.utils.AppConfig
 
-object Main extends App with KamonSupport with AppConfig with BaseService {
+object Main extends App with AppConfig with BaseService {
 
   implicit val system = ActorSystem("booking")
   val aggregate = system.actorOf(Props(classOf[DailyPriceAggregateActor]), "dailyPriceActor")
@@ -22,9 +22,3 @@ object Main extends App with KamonSupport with AppConfig with BaseService {
 
   Http().bindAndHandle(routes(command, query), httpInterface, httpPort)
 }
-
-trait KamonSupport {
-  //  Kamon.start()
-  //  sys.addShutdownHook(Kamon.shutdown())
-}
-
