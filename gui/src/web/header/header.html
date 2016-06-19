@@ -1,0 +1,27 @@
+<div class="container" ng-class="{'header-transparent': isActive('/'), 'header-blue' : !isActive('/')}">
+    <nav>
+        <div class="" id="navigation">
+            <div class="navbar-brand">
+            </div>
+            <!-- Single button -->
+            <div class="btn-group language-bar" dropdown is-open="status.isOpen">
+                <button type="button" class="btn btn-primary dropdown-toggle" dropdown-toggle>
+                    <i class="glyphicon" ng-class="selectedLanguage.class"></i> {{selectedLanguage.name}}<span class="caret"></span>
+                </button>
+                <ul class="dropdown-menu" role="menu">
+                    <li ng-repeat="lang in languages" ng-click="changeLanguage(lang)"><i class="glyphicon" ng-class="lang.class"></i>{{lang.name}}</li>
+                </ul>
+            </div>
+            <div class=" links">
+                <ul class="nav navbar-nav navbar-right">
+                    <li ng-class="{ active: isActive('/')}"><a href="/" translate="home" analytics-on="click"></a></li>
+                    <li ng-class="{ active: isActive('/apartments')}"><a href="/apartments" translate="apartments" analytics-on="click"></a></li>
+                    <li ng-class="{ active: isActive('/boat')}"><a href="/boat" translate="rent_a_boat" analytics-on="click"></a></li>
+                    <li ng-class="{ active: isActive('/surroundings')}"><a href="/surroundings" translate="surroundings" analytics-on="click"></a></li>
+                    <li ng-class="{ active: isActive('/location')}"><a href="/location" translate="how_to_find_us" analytics-on="click"></a></li>
+                    <li ng-class="{ active: isActive('/contact')}"><a href="/contact" translate="contact" analytics-on="click"></a></li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+</div>

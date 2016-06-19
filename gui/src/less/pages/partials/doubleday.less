@@ -1,0 +1,45 @@
+.doubleday {
+
+  display: table;
+
+  .one-month-calendar {
+    display: table-cell;
+    padding: 10px;
+  }
+
+  .secondary {
+    color: lightgrey;
+  }
+
+  .full button.secondary, .first button.secondary, .last button.secondary {
+    background-color: white !important;
+    background: none;
+  }
+
+  .btn-sm {
+    color: black;
+    opacity: 1;
+  }
+}
+
+.full button.btn-default[disabled] {
+  background-color: @coffie-c-hash;
+  opacity: 1 !important;
+  color: black;
+  font-weight: 100 !important;
+}
+
+.first button {
+  background: linear-gradient(-30deg, @coffie-c-hash 50%, white 50%,);
+  color: black;
+}
+
+.first button.btn-default[disabled] {
+  background-color: lightgray;
+  color: black;
+}
+
+.last button {
+  background: linear-gradient(-30deg, white 50%, @coffie-c-hash 50%,);
+  color: black;
+}
