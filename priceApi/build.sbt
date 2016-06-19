@@ -1,18 +1,9 @@
-enablePlugins(SbtNativePackager)
-enablePlugins(JavaServerAppPackaging)
-
-name          := "Apartments Blanka backend"
-
-organization  := "com.apt"
-
-version       := "1.0.0"
-
-scalaVersion  := "2.11.8"
-
-scalacOptions := Seq("-unchecked", "-feature", "-deprecation", "-encoding", "utf8")
+name := "PriceApi"
 
 resolvers += "Sonatype releases" at "http://repo.typesafe.com/typesafe/releases/"
 resolvers += "Sonatype OSS Snapshots" at "https://oss.sonatype.org/content/repositories/snapshots"
+
+scalaVersion  := "2.11.8"
 
 libraryDependencies ++= {
   val akkaV              = "2.4.7"
@@ -38,21 +29,9 @@ libraryDependencies ++= {
     "org.fusesource.leveldbjni" % "leveldbjni-all" % "1.8",
 
     "com.typesafe.akka" %% "akka-persistence-cassandra" % cassandraPersistV,
-  
+
     "org.scalatest" %% "scalatest" % scalaTestV % "test",
     "com.typesafe.akka" %% "akka-http-testkit" % akkaV % "test"
 
   )
 }
-
-initialCommands := """|import akka.actor._
-                     |import akka.pattern._
-                     |import akka.util._
-                     |import scala.concurrent._
-                     |import scala.concurrent.duration._""".stripMargin
-
-parallelExecution in Test := false
-
-fork in run := false
-
-kamon.aspectj.sbt.AspectjRunner.testSettings
