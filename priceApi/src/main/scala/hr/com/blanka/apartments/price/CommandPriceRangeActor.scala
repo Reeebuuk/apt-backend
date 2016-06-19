@@ -40,6 +40,6 @@ class CommandPriceRangeActor(dailyPriceActor: ActorRef) extends Actor with Actor
           })
           msgSender ! Good
         }
-      } recover ((err) => err.map(x => msgSender ! Bad(x)))
+      } recover (err => msgSender ! Bad(err.mkString(", ")))
   }
 }

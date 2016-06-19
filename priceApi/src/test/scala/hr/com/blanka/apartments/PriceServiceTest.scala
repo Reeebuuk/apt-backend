@@ -33,7 +33,7 @@ class PriceServiceTest extends WordSpecLike with Matchers with ScalatestRouteTes
 
   implicit val format = DefaultFormats.withBigDecimal
   implicit def toMillis(date: DateTime): Long = date.getMillis
-  val midYearDate = new DateTime().toDateTime(DateTimeZone.UTC).withMonthOfYear(8).withDayOfMonth(5).withTime(12, 0, 0, 0)
+  val midYearDate = new DateTime().toDateTime(DateTimeZone.UTC).withMonthOfYear(11).withDayOfMonth(5).withTime(12, 0, 0, 0)
 
   "Price service save" should {
     "save valid price range" in {
