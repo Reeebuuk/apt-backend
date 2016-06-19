@@ -3,7 +3,7 @@ package hr.com.blanka.apartments.price.protocol
 sealed trait PriceQuery
 
 case class LookupPriceForRange(userId: String, unitId: Int, from: Long, to: Long) extends PriceQuery
-case class LookupPriceForDay(userId: String, unitId: Int, from: Long) extends PriceQuery
+case class LookupPriceForDay(userId: String, unitId: Int, day: Long) extends PriceQuery
 
 sealed trait PriceQueryResponse
 
