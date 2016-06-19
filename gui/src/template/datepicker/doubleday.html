@@ -1,0 +1,44 @@
+<div>
+    <table role="grid" aria-labelledby="{{uniqueId}}-title" aria-activedescendant="{{activeDateId}}"
+           ng-repeat="app in calendars" class="one-month-calendar">
+        <thead>
+        <tr>
+            <th ng-show="$index == 0">
+                <button type="button" class="btn btn-default btn-sm pull-left" ng-click="move(-1)" tabindex="-1">
+                    <i class="glyphicon glyphicon-chevron-left"></i>
+                </button>
+            </th>
+
+            <th colspan="{{app.titleColspan}}">
+                <div class="empty-arrow" ng-show="$index > 0"></div>
+                <button id="{{uniqueId}}-title" role="heading" aria-live="assertive" aria-atomic="true" type="button"
+                        class="btn btn-default btn-sm" ng-disabled="true" tabindex="-1" style="width:100%;"><strong>{{app.title}}</strong>
+                </button>
+            </th>
+            <th ng-show="$index == (calendars.length - 1)">
+                <button type="button" class="btn btn-default btn-sm pull-right" ng-click="move(1)" tabindex="-1">
+                    <i class="glyphicon glyphicon-chevron-right"></i>
+                </button>
+            </th>
+        </tr>
+        <tr>
+            <th ng-show="showWeeks" class="text-center"></th>
+            <th ng-repeat="label in app.labels track by $index" class="text-center">
+                <small aria-label="{{label.full}}">{{label.abbr}}</small>
+            </th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr ng-repeat="row in app.rows track by $index">
+            <td ng-show="showWeeks" class="text-center h6"><em>{{ app.weekNumbers[$index] }}</em></td>
+            <td ng-repeat="dt in row track by dt.date" class="text-center" role="gridcell" id="{{dt.uid}}"
+                aria-disabled="{{!!dt.disabled}}" ng-class="dt.customClass">
+                <button type="button" style="width:100%;" class="btn btn-default btn-sm"
+                        tabindex="-1" ng-disabled="true" ng-class="{'secondary': dt.secondary}">
+                    <span ng-class="{'secondary': dt.secondary}">{{dt.label}}</span>
+                </button>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+</div>

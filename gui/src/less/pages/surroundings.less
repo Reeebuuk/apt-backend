@@ -1,0 +1,61 @@
+.surroundings {
+
+  padding-top: 50px;
+
+  .directions {
+    background: url(../img/gmaps.gif) no-repeat center 40%;
+    width: 40px;
+    height: 32px;
+    display: inline-block;
+  }
+
+  .directions:hover {
+    cursor: pointer;
+  }
+
+  .container {
+    padding-top: 40px;
+    background-color: @odd-section-c;
+    width: 100%;
+  }
+
+  .choice-box {
+    text-align: center;
+    cursor: pointer;
+    background-color: @odd-section-c;
+    width: 100%;
+    height: 70px;
+
+    .button {
+      color: #fff;
+      background-color: @light-blue-c-hash;
+      border-color: @light-blue-c-hash;
+      height: 40px;
+      font-size: large;
+    }
+
+    .button:hover, .button:focus, .selected {
+      background-color: @dark-blue-c-hash;
+      border-color: @dark-blue-c-hash;
+    }
+  }
+
+  .selected {
+    background-color: @dark-blue-c-hash;
+    border-color: @dark-blue-c-hash;
+  }
+
+  .item-details {
+    padding-top: 10px;
+
+    .desc-wrapper {
+      //width: 60%;
+    }
+  }
+
+  .bottom {
+    padding-top: 20px;
+    padding-bottom: 40px;
+
+  }
+}
