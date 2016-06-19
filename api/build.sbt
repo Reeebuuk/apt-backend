@@ -1,4 +1,4 @@
-name := "PriceApi"
+name := "Api"
 
 resolvers += "Sonatype releases" at "http://repo.typesafe.com/typesafe/releases/"
 resolvers += "Sonatype OSS Snapshots" at "https://oss.sonatype.org/content/repositories/snapshots"
