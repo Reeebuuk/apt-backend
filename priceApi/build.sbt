@@ -14,6 +14,8 @@ libraryDependencies ++= {
   val json4sV            = "3.3.0"
   val scalacticV         = "2.2.6"
   val cassandraPersistV  = "0.11"
+  val levelDbV  = "0.7"
+  val levelDbJniV  = "1.8"
 
   Seq(
     "com.typesafe.akka" %% "akka-contrib" % akkaV,
@@ -25,8 +27,8 @@ libraryDependencies ++= {
     "com.github.nscala-time" %% "nscala-time" % nscalaV,
     "org.scalactic" %% "scalactic" % scalacticV,
 
-    "org.iq80.leveldb" % "leveldb" % "0.7",
-    "org.fusesource.leveldbjni" % "leveldbjni-all" % "1.8",
+    "org.iq80.leveldb" % "leveldb" % levelDbV,
+    "org.fusesource.leveldbjni" % "leveldbjni-all" % levelDbJniV,
 
     "com.typesafe.akka" %% "akka-persistence-cassandra" % cassandraPersistV,
 
