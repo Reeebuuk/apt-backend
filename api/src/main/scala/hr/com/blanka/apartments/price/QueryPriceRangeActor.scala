@@ -44,8 +44,7 @@ class QueryPriceRangeActor(dailyPriceActor: ActorRef) extends Actor {
   }
 
   def active(priceRangeCalculations: Map[Long, CalculationData]): Receive = {
-    case cpfr: LookupPriceForRange => {
-
+    case cpfr: LookupPriceForRange =>
       val msgSender = sender()
       val newlySentDailyCalculationMessages = sendMessagesForSingleDayCalculations(cpfr)
 
@@ -53,8 +52,6 @@ class QueryPriceRangeActor(dailyPriceActor: ActorRef) extends Actor {
         case Success(result) => msgSender ! Good(result.foldLeft(0)((sum, next) => next.asInstanceOf[PriceDayFetched].price + sum))
         case Failure(t) => msgSender ! Bad("An error has occurred: " + t.getMessage)
       }
-
-    }
   }
 
   override val supervisorStrategy =
