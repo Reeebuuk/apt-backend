@@ -2,29 +2,10 @@ package hr.com.blanka.apartments.price
 
 import akka.actor.{Actor, Props}
 import akka.persistence.PersistentActor
-import hr.com.blanka.apartments.price.protocol.{LookupPriceForDay, PriceDayFetched, SavePriceForSingleDay}
+import hr.com.blanka.apartments.price.protocol._
 import org.joda.time.{DateTime, DateTimeZone}
 
 import scala.annotation.tailrec
-
-case class Price(value: Int, timeSaved: Long)
-object Price {
-  def apply(value: Int) = new Price(value, DateTime.now().getMillis)
-}
-
-case class DayMonth(day: Int, month: Long)
-object DayMonth {
-  def apply(day: Long) = {
-    val date = new DateTime(day).toDateTime(DateTimeZone.UTC)
-    new DayMonth(date.getDayOfMonth, date.getMonthOfYear)
-  }
-}
-
-case class DailyPriceSaved(unitId: Int, dayMonth: DayMonth, newPrice: Price)
-object DailyPriceSaved {
-  def apply(unitId: Int, day: Long, price: Int) =
-    new DailyPriceSaved(unitId, DayMonth(day), Price(price))
-}
 
 object DailyPriceAggregateActor {
   def apply() = Props(classOf[DailyPriceAggregateActor])
