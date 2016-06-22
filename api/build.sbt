@@ -22,6 +22,7 @@ libraryDependencies ++= {
     "com.typesafe.akka" %% "akka-stream" % akkaV,
     "com.typesafe.akka" %% "akka-http-core" % akkaV,
     "com.typesafe.akka" %% "akka-http-spray-json-experimental" % akkaV,
+    "com.typesafe.akka" %% "akka-persistence-query-experimental" % akkaV,
     "com.typesafe.scala-logging" %% "scala-logging" % scalaLoggingV,
     "org.json4s" %% "json4s-jackson" % json4sV,
     "com.github.nscala-time" %% "nscala-time" % nscalaV,
