@@ -10,15 +10,11 @@ import hr.com.blanka.apartments.utils.AppConfig
 
 object Main extends App with AppConfig with BaseService {
 
-  implicit val system = ActorSystem("booking")
-  val aggregate = system.actorOf(Props(classOf[DailyPriceAggregateActor]), "dailyPriceActor")
-
-  val command = system.actorOf(Props(classOf[CommandPriceRangeActor], aggregate), "commandActor")
-  val query = system.actorOf(Props(classOf[QueryPriceRangeActor], aggregate), "queryActor")
+  implicit val system: ActorSystem = ActorSystem("booking")
 
   override protected implicit val executor = system.dispatcher
   override protected val log: LoggingAdapter = Logging(system, getClass)
   override protected implicit val materializer: ActorMaterializer = ActorMaterializer()
 
-  Http().bindAndHandle(routes(command, query), httpInterface, httpPort)
+  Http().bindAndHandle(routes, httpInterface, httpPort)
 }
