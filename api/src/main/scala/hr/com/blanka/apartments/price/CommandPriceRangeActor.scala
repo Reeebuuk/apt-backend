@@ -1,7 +1,6 @@
 package hr.com.blanka.apartments.price
 
 import akka.actor._
-import akka.pattern.ask
 import akka.util.Timeout
 import hr.com.blanka.apartments.price.protocol.{SavePriceForSingleDay, SavePriceRange}
 import hr.com.blanka.apartments.validation.BasicValidation._
@@ -9,12 +8,8 @@ import org.joda.time.{DateTime, DateTimeZone}
 import org.scalactic.Accumulation._
 import org.scalactic.{Bad, _}
 
-import scala.collection.immutable.IndexedSeq
-import scala.concurrent.Future
 import scala.concurrent.duration._
 import scala.language.postfixOps
-import scala.util.{Failure, Success}
-import scala.concurrent.ExecutionContext.Implicits.global
 
 object CommandPriceRangeActor {
 
