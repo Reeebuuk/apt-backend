@@ -1,27 +1,25 @@
-package hr.com.blanka.apartments.price
+package hr.com.blanka.apartments.query.price
 
 import akka.actor.SupervisorStrategy.Restart
 import akka.actor._
 import akka.pattern.ask
 import akka.util.Timeout
-import hr.com.blanka.apartments.price.protocol._
+import hr.com.blanka.apartments.command.price.DayMonth
 import org.joda.time.{DateTime, DateTimeZone, Days}
 import org.scalactic.{Bad, Good}
 
 import scala.collection.immutable.Map
+import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.concurrent.duration.DurationInt
 import scala.language.postfixOps
 import scala.util.{Failure, Success}
-import scala.concurrent.ExecutionContext.Implicits.global
 
 object QueryPriceRangeActor {
-
   def apply(dailyPriceActor: ActorRef) = Props(classOf[QueryPriceRangeActor], dailyPriceActor)
-
 }
 
-case class CalculationData(singleDayCalculations: Map[Long, Option[Int]])
+case class CalculationData(singleDayCalculations: Map[Long, Option[Double]])
 
 class QueryPriceRangeActor(dailyPriceActor: ActorRef) extends Actor {
 
@@ -37,7 +35,7 @@ class QueryPriceRangeActor(dailyPriceActor: ActorRef) extends Actor {
     val duration = Days.daysBetween(fromDate.toLocalDate, toDate.toLocalDate).getDays
 
     (0 until duration).map(daysFromStart => {
-      val day = new DateTime(from).toDateTime(DateTimeZone.UTC).plusDays(daysFromStart).getMillis
+      val day = DayMonth(new DateTime(from).toDateTime(DateTimeZone.UTC).plusDays(daysFromStart).getMillis)
       dailyPriceActor ? LookupPriceForDay(userId, unitId, day)
     })
 
@@ -49,7 +47,7 @@ class QueryPriceRangeActor(dailyPriceActor: ActorRef) extends Actor {
       val newlySentDailyCalculationMessages = sendMessagesForSingleDayCalculations(cpfr)
 
       Future.sequence(newlySentDailyCalculationMessages).onComplete {
-        case Success(result) => msgSender ! Good(result.foldLeft(0)((sum, next) => next.asInstanceOf[PriceDayFetched].price + sum))
+        case Success(result) => msgSender ! Good(result.foldLeft(0.0)((sum, next) => next.asInstanceOf[PriceDayFetched].price + sum))
         case Failure(t) => msgSender ! Bad("An error has occurred: " + t.getMessage)
       }
   }
