@@ -2,13 +2,15 @@ package hr.com.blanka.apartments
 
 import akka.actor.{ActorSystem, Props}
 import akka.event.{LoggingAdapter, NoLogging}
-import akka.http.scaladsl.model._
 import akka.http.scaladsl.model.StatusCodes._
+import akka.http.scaladsl.model._
 import akka.http.scaladsl.testkit.{RouteTestTimeout, ScalatestRouteTest}
 import hr.com.blanka.apartments.Main._
+import hr.com.blanka.apartments.command.CommandActor
+import hr.com.blanka.apartments.command.price.SavePriceRange
 import hr.com.blanka.apartments.http.routes.{ErrorResponse, PriceForRangeResponse}
-import hr.com.blanka.apartments.price.protocol.{LookupPriceForRange, SavePriceRange}
-import hr.com.blanka.apartments.price.{CommandPriceRangeActor, DailyPriceAggregateActor, QueryPriceRangeActor}
+import hr.com.blanka.apartments.query.QueryActor
+import hr.com.blanka.apartments.query.price.LookupPriceForRange
 import org.joda.time.{DateTime, DateTimeZone}
 import org.json4s.DefaultFormats
 import org.scalatest.concurrent.Eventually
@@ -27,10 +29,8 @@ class PriceServiceTest extends WordSpecLike with Matchers with ScalatestRouteTes
 
   implicit def default(implicit system: ActorSystem) = RouteTestTimeout(new DurationInt(10).second)
 
-  val aggregate = system.actorOf(Props(classOf[DailyPriceAggregateActor]), "aggregatedActor")
-
-  val command = system.actorOf(Props(classOf[CommandPriceRangeActor], aggregate), "commandActor")
-  val query = system.actorOf(Props(classOf[QueryPriceRangeActor], aggregate), "queryActor")
+  val command = system.actorOf(Props(classOf[CommandActor]), "commandActor")
+  val query = system.actorOf(Props(classOf[QueryActor]), "queryActor")
 
   implicit val format = DefaultFormats.withBigDecimal
   implicit def toMillis(date: DateTime): Long = date.getMillis
