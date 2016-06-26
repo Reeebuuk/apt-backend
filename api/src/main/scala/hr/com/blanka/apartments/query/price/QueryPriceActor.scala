@@ -14,15 +14,15 @@ import scala.concurrent.duration._
 import scala.language.postfixOps
 
 object QueryPriceActor {
-  def apply(system: ActorSystem) = Props(classOf[QueryPriceActor], system)
+  def apply() = Props(classOf[QueryPriceActor])
 }
 
-class QueryPriceActor(system: ActorSystem) extends Actor with ActorLogging {
+class QueryPriceActor extends Actor with ActorLogging {
 
   implicit val timeout = Timeout(3 seconds)
 
   def startSync(actor: ActorRef)(implicit mat: ActorMaterializer) = {
-    val queries = PersistenceQuery(system).readJournalFor[LeveldbReadJournal](
+    val queries = PersistenceQuery(context.system).readJournalFor[LeveldbReadJournal](
       LeveldbReadJournal.Identifier)
 
     val src: Source[EventEnvelope, NotUsed] =
