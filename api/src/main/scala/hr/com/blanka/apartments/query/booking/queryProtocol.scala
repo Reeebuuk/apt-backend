@@ -1,4 +1,4 @@
-package hr.com.blanka.apartments.booking.protocol
+package hr.com.blanka.apartments.query.booking
 
 sealed trait BookingQuery
 

@@ -1,4 +1,4 @@
-package hr.com.blanka.apartments.booking.protocol
+package hr.com.blanka.apartments.command.booking
 
 import org.joda.time.DateTime
 
@@ -6,12 +6,12 @@ import org.joda.time.DateTime
 * Commands
 */
 
-sealed trait Command {
+sealed trait BookingCommand {
   def unitId: Int
   def userId: String
 }
 
-case class SaveBooking(booking: Booking) extends Command {
+case class SaveBooking(booking: Booking) extends BookingCommand {
   override def unitId: Int = booking.unitId
 
   override def userId: String = booking.userId
