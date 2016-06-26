@@ -10,14 +10,14 @@ import scala.concurrent.duration._
 import scala.language.postfixOps
 
 object QueryActor {
-  def apply(implicit system: ActorSystem) = Props(classOf[QueryActor])
+  def apply() = Props(classOf[QueryActor])
 }
 
-class QueryActor(system: ActorSystem) extends Actor with ActorLogging {
+class QueryActor extends Actor with ActorLogging {
 
   implicit val timeout = Timeout(3 seconds)
 
-  val priceActor = context.actorOf(QueryPriceActor(system), "QueryPriceActor")
+  val priceActor = context.actorOf(QueryPriceActor(), "QueryPriceActor")
   val bookingActor = context.actorOf(QueryBookingActor(), "QueryBookingActor")
 
   override def receive: Receive = {
