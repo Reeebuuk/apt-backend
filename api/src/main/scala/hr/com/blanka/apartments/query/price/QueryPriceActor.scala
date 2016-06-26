@@ -1,27 +1,27 @@
 package hr.com.blanka.apartments.query.price
 
 import akka.NotUsed
-import akka.actor.{Actor, ActorLogging, ActorRef, ActorSystem, Props}
+import akka.actor.{Actor, ActorLogging, ActorRef, Props}
+import akka.pattern.ask
 import akka.persistence.query.journal.leveldb.scaladsl.LeveldbReadJournal
 import akka.persistence.query.{EventEnvelope, PersistenceQuery}
 import akka.stream.ActorMaterializer
 import akka.stream.scaladsl.Source
-import hr.com.blanka.apartments.command.price.PriceAggregateActor
-import akka.pattern.ask
 import akka.util.Timeout
+import hr.com.blanka.apartments.command.price.PriceAggregateActor
 
 import scala.concurrent.duration._
 import scala.language.postfixOps
 
 object QueryPriceActor {
-  def apply() = Props(classOf[QueryPriceActor])
+  def apply(materializer: ActorMaterializer) = Props(classOf[QueryPriceActor], materializer)
 }
 
-class QueryPriceActor extends Actor with ActorLogging {
+class QueryPriceActor(implicit materializer: ActorMaterializer) extends Actor with ActorLogging {
 
   implicit val timeout = Timeout(3 seconds)
 
-  def startSync(actor: ActorRef)(implicit mat: ActorMaterializer) = {
+  def startSync(actor: ActorRef) = {
     val queries = PersistenceQuery(context.system).readJournalFor[LeveldbReadJournal](
       LeveldbReadJournal.Identifier)
 
