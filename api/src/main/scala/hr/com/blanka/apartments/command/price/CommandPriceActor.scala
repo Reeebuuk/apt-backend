@@ -1,24 +1,22 @@
-package hr.com.blanka.apartments.price
+package hr.com.blanka.apartments.command.price
 
 import akka.actor._
-import akka.util.Timeout
-import hr.com.blanka.apartments.price.protocol.{SavePriceForSingleDay, SavePriceRange}
+import hr.com.blanka.apartments.query.price.DailyPriceAggregateActor
 import hr.com.blanka.apartments.validation.BasicValidation._
 import org.joda.time.{DateTime, DateTimeZone}
 import org.scalactic.Accumulation._
 import org.scalactic.{Bad, _}
 
-import scala.concurrent.duration._
 import scala.language.postfixOps
 
-object CommandPriceRangeActor {
+object CommandPriceActor {
 
-  def apply(dailyPriceActor: ActorRef) = Props(classOf[CommandPriceRangeActor], dailyPriceActor)
+  def apply() = Props(classOf[CommandPriceActor])
 }
 
-class CommandPriceRangeActor(dailyPriceActor: ActorRef) extends Actor with ActorLogging {
+class CommandPriceActor extends Actor with ActorLogging {
 
-  implicit val timeout = Timeout(10 seconds)
+  val dailyPriceActor = context.actorOf(DailyPriceAggregateActor(), "DailyPriceAggregateActor")
 
   override def receive: Receive = {
     case SavePriceRange(userId, unitId, from, to, price) =>
@@ -29,7 +27,7 @@ class CommandPriceRangeActor(dailyPriceActor: ActorRef) extends Actor with Actor
       withGood(validDuration(fromDate, toDate), validUnitId(unitId)) {
         (duration, unitId) => {
           (0 until duration).foreach(daysFromStart => {
-            val day = fromDate.plusDays(daysFromStart).getMillis
+            val day = DayMonth(fromDate.plusDays(daysFromStart).getMillis)
 
             dailyPriceActor ! SavePriceForSingleDay(userId, unitId, day, price)
           })
