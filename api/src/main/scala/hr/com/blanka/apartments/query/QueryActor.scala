@@ -7,6 +7,7 @@ import akka.util.Timeout
 import hr.com.blanka.apartments.query.booking.{BookingQuery, QueryBookingActor}
 import hr.com.blanka.apartments.query.price.{PriceQuery, QueryPriceActor}
 
+import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration._
 import scala.language.postfixOps
 
@@ -22,7 +23,11 @@ class QueryActor(materializer: ActorMaterializer) extends Actor with ActorLoggin
   val bookingActor = context.actorOf(QueryBookingActor(), "QueryBookingActor")
 
   override def receive: Receive = {
-    case e : PriceQuery => priceActor ? e
-    case e : BookingQuery => bookingActor ? e
+    case e : PriceQuery =>
+      val msgSender = sender()
+      (priceActor ? e).map(msgSender ! _)
+    case e : BookingQuery =>
+      val msgSender = sender()
+      (bookingActor ? e).map(msgSender ! _)
   }
 }

@@ -10,6 +10,7 @@ import akka.stream.scaladsl.Source
 import akka.util.Timeout
 import hr.com.blanka.apartments.command.price.PriceAggregateActor
 
+import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration._
 import scala.language.postfixOps
 
@@ -38,6 +39,7 @@ class QueryPriceActor(implicit materializer: ActorMaterializer) extends Actor wi
 
   override def receive: Receive = {
     case e :LookupPriceForRange =>
-      queryPriceRangeActor ? e
+      val msgSender = sender()
+      (queryPriceRangeActor ? e).map(msgSender ! _)
   }
 }
