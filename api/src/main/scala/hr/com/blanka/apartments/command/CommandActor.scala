@@ -6,6 +6,7 @@ import akka.util.Timeout
 import hr.com.blanka.apartments.command.booking.{BookingCommand, CommandBookingActor}
 import hr.com.blanka.apartments.command.price.{CommandPriceActor, PriceCommand}
 
+import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration._
 import scala.language.postfixOps
 
@@ -21,7 +22,11 @@ class CommandActor extends Actor with ActorLogging {
   val bookingActor = context.actorOf(CommandBookingActor(), "CommandBookingActor")
 
   override def receive: Receive = {
-    case e : PriceCommand => priceActor ? e
-    case e : BookingCommand => bookingActor ? e
+    case e : PriceCommand =>
+      val msgSender = sender()
+      (priceActor ? e).map(msgSender ! _)
+    case e : BookingCommand =>
+      val msgSender = sender()
+      (bookingActor ? e).map(msgSender ! _)
   }
 }
