@@ -5,6 +5,7 @@ import akka.event.{LoggingAdapter, NoLogging}
 import akka.http.scaladsl.model.StatusCodes._
 import akka.http.scaladsl.model._
 import akka.http.scaladsl.testkit.{RouteTestTimeout, ScalatestRouteTest}
+import akka.stream.ActorMaterializer
 import hr.com.blanka.apartments.Main._
 import hr.com.blanka.apartments.command.CommandActor
 import hr.com.blanka.apartments.command.price.SavePriceRange
@@ -28,9 +29,10 @@ class PriceServiceTest extends WordSpecLike with Matchers with ScalatestRouteTes
   implicit val ec = system.dispatcher
 
   implicit def default(implicit system: ActorSystem) = RouteTestTimeout(new DurationInt(10).second)
+//  override implicit val materializer: ActorMaterializer = ActorMaterializer()
 
-  val command = system.actorOf(Props(classOf[CommandActor]), "commandActor")
-  val query = system.actorOf(Props(classOf[QueryActor]), "queryActor")
+  val command = system.actorOf(CommandActor(), "commandActor")
+  val query = system.actorOf(QueryActor(materializer), "queryActor")
 
   implicit val format = DefaultFormats.withBigDecimal
   implicit def toMillis(date: DateTime): Long = date.getMillis
@@ -49,9 +51,11 @@ class PriceServiceTest extends WordSpecLike with Matchers with ScalatestRouteTes
 
       val lookupRequest = HttpEntity(MediaTypes.`application/json`, LookupPriceForRange("user", 1, from, to).toJson.toString())
 
-      Post("/price/calculate", lookupRequest) ~> priceRoute(command, query) ~> check {
-        responseAs[PriceForRangeResponse] should be(PriceForRangeResponse(35))
-        status should be (OK)
+      eventually {
+        Post("/price/calculate", lookupRequest) ~> priceRoute(command, query) ~> check {
+          responseAs[PriceForRangeResponse] should be(PriceForRangeResponse(35))
+          status should be(OK)
+        }
       }
     }
 

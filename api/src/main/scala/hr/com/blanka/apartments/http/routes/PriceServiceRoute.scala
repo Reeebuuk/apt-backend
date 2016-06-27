@@ -9,7 +9,7 @@ import hr.com.blanka.apartments.query.price.LookupPriceForRange
 import hr.com.blanka.apartments.utils.MarshallingSupport
 import org.scalactic._
 
-final case class PriceForRangeResponse(price: Int)
+final case class PriceForRangeResponse(price: Double)
 
 trait PriceServiceRoute extends BaseServiceRoute with MarshallingSupport {
 
@@ -37,7 +37,7 @@ trait PriceServiceRoute extends BaseServiceRoute with MarshallingSupport {
           decodeRequest {
             entity(as[LookupPriceForRange]) { lookupPriceForRange =>
               onSuccess(query ? lookupPriceForRange) {
-                case Good(result) => complete(StatusCodes.OK, PriceForRangeResponse(result.asInstanceOf[Int]))
+                case Good(result) => complete(StatusCodes.OK, PriceForRangeResponse(result.asInstanceOf[Double]))
                 case Bad(response) => response match {
                   case One(error) => complete(StatusCodes.BadRequest, ErrorResponse(error.toString))
                   case Many(first, second) => complete(StatusCodes.BadRequest, ErrorResponse(Seq(first, second).mkString(", ")))
