@@ -27,5 +27,7 @@ class QueryBookingActor extends Actor with ActorLogging {
   val bookedDatesActor = context.actorOf(BookedDatesActor(), "BookedDatesActor")
   val unitAvailabilityActor = context.actorOf(UnitAvailabilityActor(), "unitAvailabilityActor")
 
-  override def receive: Receive = ???
+  override def receive: Receive = {
+    case _ =>
+  }
 }
