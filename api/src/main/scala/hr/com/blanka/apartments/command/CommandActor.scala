@@ -1,7 +1,7 @@
 package hr.com.blanka.apartments.command
 
 import akka.actor.{Actor, ActorLogging, Props}
-import akka.pattern.ask
+import akka.pattern.{ask, pipe}
 import akka.util.Timeout
 import hr.com.blanka.apartments.command.booking.{BookingCommand, CommandBookingActor}
 import hr.com.blanka.apartments.command.price.{CommandPriceActor, PriceCommand}
@@ -24,9 +24,9 @@ class CommandActor extends Actor with ActorLogging {
   override def receive: Receive = {
     case e : PriceCommand =>
       val msgSender = sender()
-      (priceActor ? e).map(msgSender ! _)
+      priceActor ? e pipeTo msgSender
     case e : BookingCommand =>
       val msgSender = sender()
-      (bookingActor ? e).map(msgSender ! _)
+      bookingActor ? e pipeTo msgSender
   }
 }
