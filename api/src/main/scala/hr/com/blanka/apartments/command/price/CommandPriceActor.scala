@@ -16,7 +16,7 @@ object CommandPriceActor {
 
 class CommandPriceActor extends Actor with ActorLogging {
 
-  val dailyPriceActor = context.actorOf(DailyPriceAggregateActor(), "DailyPriceAggregateActor")
+  val dailyPriceActor = context.actorOf(PriceAggregateActor(), "PriceAggregateActor")
 
   override def receive: Receive = {
     case SavePriceRange(userId, unitId, from, to, price) =>
