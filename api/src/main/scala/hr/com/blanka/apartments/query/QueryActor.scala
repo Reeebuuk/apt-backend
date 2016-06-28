@@ -1,7 +1,7 @@
 package hr.com.blanka.apartments.query
 
 import akka.actor.{Actor, ActorLogging, Props}
-import akka.pattern.ask
+import akka.pattern.{ask, pipe}
 import akka.stream.ActorMaterializer
 import akka.util.Timeout
 import hr.com.blanka.apartments.query.booking.{BookingQuery, QueryBookingActor}
@@ -25,9 +25,9 @@ class QueryActor(materializer: ActorMaterializer) extends Actor with ActorLoggin
   override def receive: Receive = {
     case e : PriceQuery =>
       val msgSender = sender()
-      (priceActor ? e).map(msgSender ! _)
+      priceActor ? e pipeTo msgSender
     case e : BookingQuery =>
       val msgSender = sender()
-      (bookingActor ? e).map(msgSender ! _)
+      bookingActor ? e pipeTo msgSender
   }
 }

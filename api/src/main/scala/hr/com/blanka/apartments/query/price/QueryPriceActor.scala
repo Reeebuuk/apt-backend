@@ -2,7 +2,7 @@ package hr.com.blanka.apartments.query.price
 
 import akka.NotUsed
 import akka.actor.{Actor, ActorLogging, ActorRef, Props}
-import akka.pattern.ask
+import akka.pattern.{ask, pipe}
 import akka.persistence.query.journal.leveldb.scaladsl.LeveldbReadJournal
 import akka.persistence.query.{EventEnvelope, PersistenceQuery}
 import akka.stream.ActorMaterializer
@@ -40,6 +40,6 @@ class QueryPriceActor(implicit materializer: ActorMaterializer) extends Actor wi
   override def receive: Receive = {
     case e :LookupPriceForRange =>
       val msgSender = sender()
-      (queryPriceRangeActor ? e).map(msgSender ! _)
+      queryPriceRangeActor ? e pipeTo msgSender
   }
 }
