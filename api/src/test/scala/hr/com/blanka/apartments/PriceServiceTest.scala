@@ -1,11 +1,10 @@
 package hr.com.blanka.apartments
 
-import akka.actor.{ActorSystem, Props}
+import akka.actor.ActorSystem
 import akka.event.{LoggingAdapter, NoLogging}
 import akka.http.scaladsl.model.StatusCodes._
 import akka.http.scaladsl.model._
 import akka.http.scaladsl.testkit.{RouteTestTimeout, ScalatestRouteTest}
-import akka.stream.ActorMaterializer
 import hr.com.blanka.apartments.Main._
 import hr.com.blanka.apartments.command.CommandActor
 import hr.com.blanka.apartments.command.price.SavePriceRange
@@ -15,6 +14,7 @@ import hr.com.blanka.apartments.query.price.LookupPriceForRange
 import org.joda.time.{DateTime, DateTimeZone}
 import org.json4s.DefaultFormats
 import org.scalatest.concurrent.Eventually
+import org.scalatest.time.{Millis, Span}
 import org.scalatest.{Matchers, WordSpecLike}
 import spray.json._
 
@@ -29,7 +29,6 @@ class PriceServiceTest extends WordSpecLike with Matchers with ScalatestRouteTes
   implicit val ec = system.dispatcher
 
   implicit def default(implicit system: ActorSystem) = RouteTestTimeout(new DurationInt(10).second)
-//  override implicit val materializer: ActorMaterializer = ActorMaterializer()
 
   val command = system.actorOf(CommandActor(), "commandActor")
   val query = system.actorOf(QueryActor(materializer), "queryActor")
