@@ -31,7 +31,7 @@ class CommandPriceActor extends Actor with ActorLogging {
       val fromDate = new DateTime(from).toDateTime(DateTimeZone.UTC)
       val toDate = new DateTime(to).toDateTime(DateTimeZone.UTC)
 
-      withGood(validDuration(fromDate, toDate), validUnitId(unitId)) {
+      withGood(validateAndGetDurationInDays(fromDate, toDate), validUnitId(unitId)) {
         (duration, unitId) => {
           val savedPrices = (0 until duration).map(daysFromStart => {
             val day = DayMonth(fromDate.plusDays(daysFromStart).getMillis)
