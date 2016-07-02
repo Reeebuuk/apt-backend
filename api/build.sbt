@@ -14,6 +14,7 @@ libraryDependencies ++= {
   val scalacticV         = "2.2.6"
   val scullxbonesMongoV  = "1.2.5"
   val mongoCasbahV       = "3.1.1"
+  val embeddedMongoV     = "1.50.5"
 
   Seq(
     "com.github.scullxbones" %% "akka-persistence-mongo-casbah" % scullxbonesMongoV,
@@ -29,6 +30,7 @@ libraryDependencies ++= {
     "org.scalactic" %% "scalactic" % scalacticV,
 
     "org.scalatest" %% "scalatest" % scalaTestV % "test",
-    "com.typesafe.akka" %% "akka-http-testkit" % akkaV % "test"
+    "com.typesafe.akka" %% "akka-http-testkit" % akkaV % "test",
+    "de.flapdoodle.embed" % "de.flapdoodle.embed.mongo" % embeddedMongoV % "test"
   )
 }
