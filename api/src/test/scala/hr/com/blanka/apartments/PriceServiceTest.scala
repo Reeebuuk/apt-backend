@@ -5,6 +5,7 @@ import akka.event.{LoggingAdapter, NoLogging}
 import akka.http.scaladsl.model.StatusCodes._
 import akka.http.scaladsl.model._
 import akka.http.scaladsl.testkit.{RouteTestTimeout, ScalatestRouteTest}
+import com.typesafe.config.Config
 import hr.com.blanka.apartments.Main._
 import hr.com.blanka.apartments.command.CommandActor
 import hr.com.blanka.apartments.command.price.SavePriceRange
@@ -14,17 +15,19 @@ import hr.com.blanka.apartments.query.price.LookupPriceForRange
 import org.joda.time.{DateTime, DateTimeZone}
 import org.json4s.DefaultFormats
 import org.scalatest.concurrent.Eventually
-import org.scalatest.time.{Millis, Span}
+import org.scalatest.time.{Millis, Second, Seconds, Span}
 import org.scalatest.{Matchers, WordSpecLike}
 import spray.json._
 
 import scala.concurrent.duration._
 import scala.language.implicitConversions
 
-class PriceServiceTest extends WordSpecLike with Matchers with ScalatestRouteTest with Eventually {
+class PriceServiceTest extends WordSpecLike with Matchers with ScalatestRouteTest with Eventually with IntegrationTestMongoDbSupport{
 
   import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport._
   protected val log: LoggingAdapter = NoLogging
+
+  override def testConfig: Config = BenefitsSpec.config(BenefitsSpec.freePort)
 
   implicit val ec = system.dispatcher
 
@@ -36,6 +39,8 @@ class PriceServiceTest extends WordSpecLike with Matchers with ScalatestRouteTes
   implicit val format = DefaultFormats.withBigDecimal
   implicit def toMillis(date: DateTime): Long = date.getMillis
   val midYearDate = new DateTime().toDateTime(DateTimeZone.UTC).withMonthOfYear(11).withDayOfMonth(5).withTime(12, 0, 0, 0)
+
+  implicit val config = PatienceConfig(Span(10, Seconds), Span(1, Second))
 
   "Price service save" should {
     "save valid price range" in {
