@@ -13,6 +13,7 @@ import scala.concurrent.duration._
 import scala.language.postfixOps
 import scala.util.{Failure, Success}
 import scala.concurrent.ExecutionContext.Implicits.global
+import hr.com.blanka.apartments.validation.ErrorMessages._
 
 object CommandPriceActor {
 
@@ -41,7 +42,9 @@ class CommandPriceActor extends Actor with ActorLogging {
 
           Future.sequence(savedPrices).onComplete {
             case Success(result) => msgSender ! Good
-            case Failure(t) => msgSender ! Bad("An error has occurred: " + t.getMessage)
+            case Failure(t) =>
+              log.error(t.getMessage)
+              msgSender ! Bad(persistingDailyPricesErrorMessage)
           }
         }
       } recover (err => msgSender ! Bad(err.mkString(", ")))
