@@ -8,8 +8,11 @@ import org.joda.time.{DateTime, DateTimeZone}
 import org.scalactic.Accumulation._
 import org.scalactic.{Bad, _}
 
+import scala.concurrent.Future
 import scala.concurrent.duration._
 import scala.language.postfixOps
+import scala.util.{Failure, Success}
+import scala.concurrent.ExecutionContext.Implicits.global
 
 object CommandPriceActor {
 
@@ -18,7 +21,7 @@ object CommandPriceActor {
 
 class CommandPriceActor extends Actor with ActorLogging {
 
-  implicit val timeout = Timeout(10 seconds)
+  implicit val timeout = Timeout(3 seconds)
 
   val priceAggregateActor = context.actorOf(PriceAggregateActor(), "PriceAggregateActor")
 
@@ -30,12 +33,16 @@ class CommandPriceActor extends Actor with ActorLogging {
 
       withGood(validDuration(fromDate, toDate), validUnitId(unitId)) {
         (duration, unitId) => {
-          (0 until duration).foreach(daysFromStart => {
+          val savedPrices = (0 until duration).map(daysFromStart => {
             val day = DayMonth(fromDate.plusDays(daysFromStart).getMillis)
 
             priceAggregateActor ? SavePriceForSingleDay(userId, unitId, day, price)
           })
-          msgSender ! Good
+
+          Future.sequence(savedPrices).onComplete {
+            case Success(result) => msgSender ! Good
+            case Failure(t) => msgSender ! Bad("An error has occurred: " + t.getMessage)
+          }
         }
       } recover (err => msgSender ! Bad(err.mkString(", ")))
   }
