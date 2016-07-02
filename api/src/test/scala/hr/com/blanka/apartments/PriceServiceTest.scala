@@ -9,25 +9,25 @@ import com.typesafe.config.Config
 import hr.com.blanka.apartments.Main._
 import hr.com.blanka.apartments.command.CommandActor
 import hr.com.blanka.apartments.command.price.SavePriceRange
-import hr.com.blanka.apartments.http.routes.{ErrorResponse, PriceForRangeResponse}
+import hr.com.blanka.apartments.http.routes.PriceForRangeResponse
 import hr.com.blanka.apartments.query.QueryActor
 import hr.com.blanka.apartments.query.price.LookupPriceForRange
 import org.joda.time.{DateTime, DateTimeZone}
 import org.json4s.DefaultFormats
 import org.scalatest.concurrent.Eventually
-import org.scalatest.time.{Millis, Second, Seconds, Span}
-import org.scalatest.{Matchers, WordSpecLike}
+import org.scalatest.time.{Second, Seconds, Span}
+import org.scalatest.{FlatSpec, Matchers}
 import spray.json._
 
 import scala.concurrent.duration._
 import scala.language.implicitConversions
 
-class PriceServiceTest extends WordSpecLike with Matchers with ScalatestRouteTest with Eventually with IntegrationTestMongoDbSupport{
+class PriceServiceTest extends IntegrationTestMongoDbSupport with Matchers with ScalatestRouteTest with Eventually {
 
   import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport._
   protected val log: LoggingAdapter = NoLogging
 
-  override def testConfig: Config = BenefitsSpec.config(BenefitsSpec.freePort)
+  override def testConfig: Config = IntegrationConf.config(IntegrationConf.freePort)
 
   implicit val ec = system.dispatcher
 
@@ -42,155 +42,40 @@ class PriceServiceTest extends WordSpecLike with Matchers with ScalatestRouteTes
 
   implicit val config = PatienceConfig(Span(10, Seconds), Span(1, Second))
 
-  "Price service save" should {
-    "save valid price range" in {
-      val from = midYearDate
-      val to = midYearDate.plusDays(1)
-      val price = SavePriceRange("user", 1, from, to, 35)
-      val requestEntity = HttpEntity(MediaTypes.`application/json`, price.toJson.toString())
+  "Price service" should "save multiple prices and fetch results" in {
+      val userId = "user"
+      val unitId = 1
 
-      Post("/price", requestEntity) ~> priceRoute(command, query) ~> check {
+      val firstFrom = midYearDate
+      val firstTo = firstFrom.plusDays(5)
+      val firstPrice = SavePriceRange(userId, unitId, firstFrom, firstTo, 35)
+      val firstRequestEntity = HttpEntity(MediaTypes.`application/json`, firstPrice.toJson.toString())
+
+      Post("/price", firstRequestEntity) ~> priceRoute(command, query) ~> check {
         status should be (OK)
       }
 
-      val lookupRequest = HttpEntity(MediaTypes.`application/json`, LookupPriceForRange("user", 1, from, to).toJson.toString())
+      val secondFrom = firstTo
+      val secondTo = secondFrom.plusDays(5)
+      val secondPrice = SavePriceRange(userId, unitId, secondFrom, secondTo, 40)
+      val secondRequestEntity = HttpEntity(MediaTypes.`application/json`, secondPrice.toJson.toString())
+
+      Post("/price", secondRequestEntity) ~> priceRoute(command, query) ~> check {
+        status should be (OK)
+      }
+
+
+      val from = midYearDate.plusDays(3)
+      val to = from.plusDays(4)
+      val lookupRequest = HttpEntity(MediaTypes.`application/json`,
+        LookupPriceForRange(userId, unitId, from, to).toJson.toString())
 
       eventually {
         Post("/price/calculate", lookupRequest) ~> priceRoute(command, query) ~> check {
-          responseAs[PriceForRangeResponse] should be(PriceForRangeResponse(35))
+          responseAs[PriceForRangeResponse] should be(PriceForRangeResponse(150))
           status should be(OK)
         }
       }
     }
-
-    "return error message if from is later than to date" in {
-      val from = midYearDate
-      val to = midYearDate.plusDays(1)
-      val price = SavePriceRange("user", 1, to, from, 35)
-      val requestEntity = HttpEntity(MediaTypes.`application/json`, price.toJson.toString())
-
-      Post("/price", requestEntity) ~> priceRoute(command, query) ~> check {
-        responseAs[ErrorResponse] should be(ErrorResponse("Invalid date range"))
-        status should be (BadRequest)
-      }
-    }
-
-    "return error message if dates are not valid" in {
-      val price = SavePriceRange("user", 1, 0, 0, 35)
-      val requestEntity = HttpEntity(MediaTypes.`application/json`, price.toJson.toString())
-
-      Post("/price", requestEntity) ~> priceRoute(command, query) ~> check {
-        responseAs[ErrorResponse] should be(ErrorResponse("From date is in the past, To date is in the past"))
-        status should be (BadRequest)
-      }
-    }
-
-    "return error message if unit id is wrong" in {
-      val from = midYearDate
-      val to = midYearDate.plusDays(1)
-      val price = SavePriceRange("user", 15, from, to, 35)
-      val requestEntity = HttpEntity(MediaTypes.`application/json`, price.toJson.toString())
-
-      Post("/price", requestEntity) ~> priceRoute(command, query) ~> check {
-        responseAs[ErrorResponse] should be(ErrorResponse("Unit id doesn't exist"))
-        status should be (BadRequest)
-      }
-    }
-  }
-
-  "Price service fetching" should {
-    "retrieve price for single day" in {
-      val from = midYearDate
-      val to = midYearDate.plusDays(1)
-      val price = SavePriceRange("user", 1, from, to, 35)
-      val saveEntity = HttpEntity(MediaTypes.`application/json`, price.toJson.toString())
-
-      Post("/price", saveEntity) ~> priceRoute(command, query) ~> check {
-        status should be (OK)
-      }
-
-      val requestEntity = HttpEntity(MediaTypes.`application/json`, LookupPriceForRange("user", 1, from, to).toJson.toString())
-
-      Post("/price/calculate", requestEntity) ~> priceRoute(command, query) ~> check {
-        responseAs[PriceForRangeResponse] should be(PriceForRangeResponse(35))
-        status should be (OK)
-      }
-    }
-
-    "return correct price if the duration is 7 day in same price range" in {
-      val from = midYearDate
-      val to = new DateTime(from).plusDays(7)
-      val savePrice = HttpEntity(MediaTypes.`application/json`, SavePriceRange("user", 1, from, to, 35).toJson.toString())
-
-      Post("/price", savePrice) ~> priceRoute(command, query) ~> check {
-        status should be (OK)
-      }
-
-      val queryPrice = HttpEntity(MediaTypes.`application/json`, LookupPriceForRange("user", 1, from, to).toJson.toString())
-
-      eventually {
-        Post("/price/calculate", queryPrice) ~> priceRoute(command, query) ~> check {
-          responseAs[PriceForRangeResponse] should be(PriceForRangeResponse(245))
-        }
-      }
-    }
-
-    "return correct price if the duration is 7 day in different price ranges" in {
-      val saveFrom = midYearDate.minusDays(1)
-      val saveTo = new DateTime(saveFrom).plusDays(3)
-      val savePrice = HttpEntity(MediaTypes.`application/json`, SavePriceRange("user", 1, saveFrom, saveTo, 35).toJson.toString())
-
-      Post("/price", savePrice) ~> priceRoute(command, query) ~> check {
-        status should be (OK)
-      }
-
-      val saveFrom1 = saveTo
-      val saveTo1 = new DateTime(saveFrom1).plusDays(7)
-      val savePrice1 = HttpEntity(MediaTypes.`application/json`, SavePriceRange("user", 1, saveFrom1, saveTo1, 30).toJson.toString())
-
-      Post("/price", savePrice1) ~> priceRoute(command, query) ~> check {
-        status should be (OK)
-      }
-
-
-      val from = midYearDate
-      val to = new DateTime(from).plusDays(7)
-      val requestEntity = HttpEntity(MediaTypes.`application/json`, LookupPriceForRange("user", 1, from, to).toJson.toString())
-
-      eventually {
-        Post("/price/calculate", requestEntity) ~> priceRoute(command, query) ~> check {
-          responseAs[PriceForRangeResponse] should be(PriceForRangeResponse(220))
-        }
-      }
-    }
-
-    "return correct price if the duration is 7 day in different years" in {
-      val from = midYearDate.withMonthOfYear(12).withDayOfMonth(30)
-      val to = new DateTime(from).plusDays(7)
-      val requestEntity = HttpEntity(MediaTypes.`application/json`, LookupPriceForRange("user", 1, from, to).toJson.toString())
-
-      Post("/price/calculate", requestEntity) ~> priceRoute(command, query) ~> check {
-        responseAs[ErrorResponse] should be(ErrorResponse("UnknownError"))
-      }
-    }
-
-    "return correct prices for sequential requests" in {
-      val from = midYearDate
-      val to = new DateTime(from).plusDays(7)
-      val requestEntity = HttpEntity(MediaTypes.`application/json`, LookupPriceForRange("user", 1, from, to).toJson.toString())
-
-      Post("/price/calculate", requestEntity) ~> priceRoute(command, query) ~> check {
-        responseAs[PriceForRangeResponse] should be(PriceForRangeResponse(245))
-      }
-
-      val from1 = midYearDate.withMonthOfYear(7).withDayOfMonth(19)
-      val to1 = new DateTime(from1).plusDays(7)
-      val requestEntity1 = HttpEntity(MediaTypes.`application/json`, LookupPriceForRange("user", 1, from1, to1).toJson.toString())
-
-      Post("/price/calculate", requestEntity1) ~> priceRoute(command, query) ~> check {
-        responseAs[PriceForRangeResponse] should be(PriceForRangeResponse(340))
-      }
-    }
-  }
 }
 
