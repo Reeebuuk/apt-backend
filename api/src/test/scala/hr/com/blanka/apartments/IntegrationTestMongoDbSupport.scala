@@ -8,7 +8,7 @@ import de.flapdoodle.embed.mongo.distribution.Version
 import de.flapdoodle.embed.process.runtime.Network
 import org.scalatest._
 
-object BenefitsSpec {
+object IntegrationConf {
 
   def config(port: Int) = ConfigFactory.parseString(
     s"""
@@ -28,9 +28,9 @@ object BenefitsSpec {
   lazy val freePort = Network.getFreeServerPort
 }
 
-trait IntegrationTestMongoDbSupport extends WordSpecLike with BeforeAndAfterAll {
+trait IntegrationTestMongoDbSupport extends FlatSpec with BeforeAndAfterAll {
 
-  import BenefitsSpec._
+  import IntegrationConf._
 
   lazy val version = Version.V3_2_1
   lazy val host = "localhost"
@@ -57,12 +57,12 @@ trait IntegrationTestMongoDbSupport extends WordSpecLike with BeforeAndAfterAll 
   var employeeProcessor: ActorRef = _
   var benefitsView: ActorRef = _
 
-  override def beforeAll() = {
+  override protected def beforeAll() = {
     mongodExe
     super.beforeAll()
   }
 
-  override def afterAll() = {
+  override protected def afterAll() = {
     super.afterAll()
     mongod.stop()
     mongodExe.stop()
