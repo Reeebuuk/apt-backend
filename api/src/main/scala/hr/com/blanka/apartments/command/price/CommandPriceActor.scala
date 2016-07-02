@@ -1,12 +1,14 @@
 package hr.com.blanka.apartments.command.price
 
 import akka.actor._
-import hr.com.blanka.apartments.query.price.DailyPriceAggregateActor
+import akka.pattern.ask
+import akka.util.Timeout
 import hr.com.blanka.apartments.validation.BasicValidation._
 import org.joda.time.{DateTime, DateTimeZone}
 import org.scalactic.Accumulation._
 import org.scalactic.{Bad, _}
 
+import scala.concurrent.duration._
 import scala.language.postfixOps
 
 object CommandPriceActor {
@@ -16,7 +18,9 @@ object CommandPriceActor {
 
 class CommandPriceActor extends Actor with ActorLogging {
 
-  val dailyPriceActor = context.actorOf(PriceAggregateActor(), "PriceAggregateActor")
+  implicit val timeout = Timeout(10 seconds)
+
+  val priceAggregateActor = context.actorOf(PriceAggregateActor(), "PriceAggregateActor")
 
   override def receive: Receive = {
     case SavePriceRange(userId, unitId, from, to, price) =>
@@ -29,7 +33,7 @@ class CommandPriceActor extends Actor with ActorLogging {
           (0 until duration).foreach(daysFromStart => {
             val day = DayMonth(fromDate.plusDays(daysFromStart).getMillis)
 
-            dailyPriceActor ! SavePriceForSingleDay(userId, unitId, day, price)
+            priceAggregateActor ? SavePriceForSingleDay(userId, unitId, day, price)
           })
           msgSender ! Good
         }

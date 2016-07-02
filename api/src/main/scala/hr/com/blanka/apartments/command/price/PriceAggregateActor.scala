@@ -17,7 +17,10 @@ class PriceAggregateActor extends PersistentActor with ActorLogging {
 
   override def receiveCommand: Receive = {
     case SavePriceForSingleDay(userId, unitId, day, price) =>
-      persist(DailyPriceSaved(userId, unitId, day, price, new DateTime())) _
+      val msgSender = sender()
+      persist(DailyPriceSaved(userId, unitId, day, price, new DateTime())) { event =>
+        msgSender ! event
+      }
   }
 
   override def persistenceId: String = PriceAggregateActor.persistenceId
