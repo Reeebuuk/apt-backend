@@ -11,24 +11,23 @@ sealed trait BookingCommand {
   def userId: String
 }
 
-case class SaveBooking(booking: Booking) extends BookingCommand {
-  override def unitId: Int = booking.unitId
+case class SaveEnquiry(enquiry: Enquiry) extends BookingCommand {
+  override def unitId: Int = enquiry.unitId
 
-  override def userId: String = booking.userId
+  override def userId: String = enquiry.userId
 }
 
 /*
 * Events
 */
 
-case class BookingSaved(booking: Booking, timeSaved: DateTime)
+case class EnquirySaved(enquiry: Enquiry, timeSaved: DateTime)
 
 
-case class Booking(userId: String,
+case class Enquiry(userId: String,
                    unitId: Int,
                    dateFrom: Long,
                    dateTo: Long,
-                   depositPaid: Boolean,
                    name: String,
                    surname: String,
                    phoneNumber: String,
