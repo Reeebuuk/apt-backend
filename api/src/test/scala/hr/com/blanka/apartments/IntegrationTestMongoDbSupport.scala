@@ -12,16 +12,23 @@ object IntegrationConf {
 
   def config(port: Int) = ConfigFactory.parseString(
     s"""
-       |akka.persistence.journal.plugin = "akka-contrib-mongodb-persistence-journal"
-       |akka.persistence.snapshot-store.plugin = "akka-contrib-mongodb-persistence-snapshot"
+       |akka{
+       |  actor {
+       |    provider = "akka.cluster.ClusterActorRefProvider"
+       |  }
+       |  persistence {
+       |    journal.plugin = "akka-contrib-mongodb-persistence-journal"
+       |    snapshot-store.plugin = "akka-contrib-mongodb-persistence-snapshot"
+       |  }
        |
-       |akka.contrib.persistence.mongodb.mongo {
-       |  mongouri = "mongodb://localhost:$port"
-       |  journal-collection = "my_persistent_journal"
-       |  journal-index = "my_journal_index"
-       |  snaps-collection = "my_persistent_snapshots"
-       |  snaps-index = "my_snaps_index"
-       |  journal-write-concern = "Acknowledged"
+       |  contrib.persistence.mongodb.mongo {
+       |    mongouri = "mongodb://localhost:$port"
+       |    journal-collection = "my_persistent_journal"
+       |    journal-index = "my_journal_index"
+       |    snaps-collection = "my_persistent_snapshots"
+       |    snaps-index = "my_snaps_index"
+       |    journal-write-concern = "Acknowledged"
+       |  }
        |}
     """.stripMargin)
 
