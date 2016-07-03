@@ -2,11 +2,10 @@ package hr.com.blanka.apartments.query.price
 
 import akka.actor.{Actor, Props}
 import akka.cluster.sharding.ShardRegion
-import akka.stream.ActorMaterializer
 import hr.com.blanka.apartments.command.price.{DailyPriceSaved, DayMonth}
 
 object DailyPriceAggregateActor {
-  def apply(materializer: ActorMaterializer) = Props(classOf[DailyPriceAggregateActor], materializer)
+  def apply() = Props(classOf[DailyPriceAggregateActor])
 
   val extractEntityId: ShardRegion.ExtractEntityId = {
     case e @ DailyPriceSaved(userId, unitId, _, _, _) => (s"$userId$unitId", e)
@@ -19,7 +18,7 @@ object DailyPriceAggregateActor {
   }
 }
 
-class DailyPriceAggregateActor(implicit materializer: ActorMaterializer) extends Actor {
+class DailyPriceAggregateActor extends Actor {
 
   def updateState(newDailyPrice: DailyPriceSaved, currentDailyPrices: Map[String, Map[Int, Map[DayMonth, Double]]]): Unit = {
 

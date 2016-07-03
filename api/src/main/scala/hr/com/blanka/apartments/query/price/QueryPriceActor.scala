@@ -32,17 +32,16 @@ class QueryPriceActor(implicit materializer: ActorMaterializer) extends Actor wi
     src.runForeach(actor ! _.event)
   }
 
-  override def preStart() = startSync(dailyPriceAggregateActor)
-
   val dailyPriceAggregateActor: ActorRef = ClusterSharding(context.system).start(
     typeName = "DailyPriceAggregateActor",
-    entityProps = DailyPriceAggregateActor(materializer),
+    entityProps = DailyPriceAggregateActor(),
     settings = ClusterShardingSettings(context.system),
     extractEntityId = DailyPriceAggregateActor.extractEntityId,
     extractShardId = DailyPriceAggregateActor.extractShardId)
 
-//  val dailyPriceAggregateActor = context.actorOf(DailyPriceAggregateActor(materializer), "DailyPriceAggregateActor")
   val queryPriceRangeActor = context.actorOf(QueryPriceRangeActor(dailyPriceAggregateActor), "QueryPriceRangeActor")
+
+  override def preStart() = startSync(dailyPriceAggregateActor)
 
   override def receive: Receive = {
     case e: LookupPriceForRange =>
