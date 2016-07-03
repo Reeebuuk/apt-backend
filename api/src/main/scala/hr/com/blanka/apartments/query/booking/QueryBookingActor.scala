@@ -9,7 +9,7 @@ object QueryBookingActor {
 
 class QueryBookingActor(materializer: ActorMaterializer) extends Actor with ActorLogging {
 
-  val bookedDatesActor = context.actorOf(BookedDatesActor(materializer), "BookedDatesActor")
+  val bookedDatesActor = context.actorOf(BookedDatesActor(context.parent, materializer), "bookedDatesActor")
   val unitAvailabilityActor = context.actorOf(UnitAvailabilityActor(), "unitAvailabilityActor")
 
   override def receive: Receive = {
