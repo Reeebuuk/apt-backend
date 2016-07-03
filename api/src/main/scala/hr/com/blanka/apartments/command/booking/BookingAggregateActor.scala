@@ -16,7 +16,9 @@ class BookingAggregateActor extends PersistentActor with ActorLogging {
   }
 
   override def receiveCommand: Receive = {
-    case SaveBooking(booking) => persist(BookingSaved(booking, new DateTime())) _
+    case SaveBooking(booking) => persist(BookingSaved(booking, new DateTime())) {
+      event => event
+    }
   }
 
   override def persistenceId: String = BookingAggregateActor.persistenceId
