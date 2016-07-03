@@ -4,7 +4,7 @@ import akka.actor.ActorRef
 import akka.http.scaladsl.model.StatusCodes
 import akka.http.scaladsl.server.Directives._
 import akka.pattern.ask
-import hr.com.blanka.apartments.command.booking.SaveBooking
+import hr.com.blanka.apartments.command.booking.SaveEnquiry
 import hr.com.blanka.apartments.query.booking.{GetAvailableApartments, GetBookedDates}
 import hr.com.blanka.apartments.utils.MarshallingSupport
 import org.scalactic._
@@ -19,7 +19,7 @@ trait BookingServiceRoute extends BaseServiceRoute with MarshallingSupport {
     pathEndOrSingleSlash {
       post {
         decodeRequest {
-          entity(as[SaveBooking]) { booking =>
+          entity(as[SaveEnquiry]) { booking =>
             onSuccess(command ? booking) {
               case Good => complete(StatusCodes.OK)
               case Bad(response) => response match {

@@ -8,10 +8,10 @@ object CommandBookingActor {
 
 class CommandBookingActor extends Actor with ActorLogging {
 
-  val bookingAggregateActor = context.actorOf(Props(classOf[BookingAggregateActor]), "commandBookingAggregateActor")
+  val bookingAggregateActor = context.actorOf(Props(classOf[EnquiryAggregateActor]), "commandBookingAggregateActor")
 
   override def receive: Receive = {
-    case sb : SaveBooking =>
+    case sb : SaveEnquiry =>
       bookingAggregateActor ! sb
   }
 }
