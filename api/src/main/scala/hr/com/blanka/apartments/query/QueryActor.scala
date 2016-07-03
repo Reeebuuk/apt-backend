@@ -20,7 +20,7 @@ class QueryActor(materializer: ActorMaterializer) extends Actor with ActorLoggin
   implicit val timeout = Timeout(3 seconds)
 
   val priceActor = context.actorOf(QueryPriceActor(materializer), "QueryPriceActor")
-  val bookingActor = context.actorOf(QueryBookingActor(), "QueryBookingActor")
+  val bookingActor = context.actorOf(QueryBookingActor(materializer), "QueryBookingActor")
 
   override def receive: Receive = {
     case e : PriceQuery =>
