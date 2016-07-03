@@ -1,29 +1,25 @@
 package hr.com.blanka.apartments.query.price
 
-import akka.NotUsed
-import akka.actor.{Actor, ActorRef, Props}
-import akka.contrib.persistence.mongodb.{MongoReadJournal, ScalaDslMongoReadJournal}
-import akka.persistence.query.{EventEnvelope, PersistenceQuery}
+import akka.actor.{Actor, Props}
+import akka.cluster.sharding.ShardRegion
 import akka.stream.ActorMaterializer
-import akka.stream.scaladsl.Source
-import hr.com.blanka.apartments.command.price.{DailyPriceSaved, DayMonth, PriceAggregateActor}
+import hr.com.blanka.apartments.command.price.{DailyPriceSaved, DayMonth}
 
 object DailyPriceAggregateActor {
   def apply(materializer: ActorMaterializer) = Props(classOf[DailyPriceAggregateActor], materializer)
+
+  val extractEntityId: ShardRegion.ExtractEntityId = {
+    case e @ DailyPriceSaved(userId, unitId, _, _, _) => (s"$userId$unitId", e)
+    case e @ LookupPriceForDay(userId, unitId, _) => (s"$userId$unitId", e)
+  }
+
+  val extractShardId: ShardRegion.ExtractShardId = {
+    case e @ DailyPriceSaved(userId, unitId, _, _, _) => s"$userId$unitId"
+    case e @ LookupPriceForDay(userId, unitId, _) => s"$userId$unitId"
+  }
 }
 
 class DailyPriceAggregateActor(implicit materializer: ActorMaterializer) extends Actor {
-
-  def startSync(actor: ActorRef) = {
-    val queries = PersistenceQuery(context.system).readJournalFor[ScalaDslMongoReadJournal](MongoReadJournal.Identifier)
-
-    val src: Source[EventEnvelope, NotUsed] =
-      queries.eventsByPersistenceId(PriceAggregateActor.persistenceId, 0L, Long.MaxValue)
-
-    src.runForeach(actor ! _.event)
-  }
-
-  override def preStart() = startSync(self)
 
   def updateState(newDailyPrice: DailyPriceSaved, currentDailyPrices: Map[String, Map[Int, Map[DayMonth, Double]]]): Unit = {
 
