@@ -9,8 +9,8 @@ case class LookupPriceForDay(userId: String, unitId: Int, day: DayMonth) extends
 
 sealed trait PriceQueryResponse
 
-case class PriceForRangeCalculated(price: Double) extends PriceQueryResponse
-case class PriceDayFetched(price: Double) extends PriceQueryResponse
+case class PriceForRangeCalculated(price: BigDecimal) extends PriceQueryResponse
+case class PriceDayFetched(price: BigDecimal) extends PriceQueryResponse
 
 case object InvalidRange extends PriceQueryResponse
 case object PriceForRangeCannotBeCalculated extends PriceQueryResponse
