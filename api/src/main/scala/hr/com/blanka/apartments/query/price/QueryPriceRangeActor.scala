@@ -19,7 +19,7 @@ object QueryPriceRangeActor {
   def apply(dailyPriceActor: ActorRef) = Props(classOf[QueryPriceRangeActor], dailyPriceActor)
 }
 
-case class CalculationData(singleDayCalculations: Map[Long, Option[Double]])
+case class CalculationData(singleDayCalculations: Map[Long, Option[BigDecimal]])
 
 class QueryPriceRangeActor(dailyPriceActor: ActorRef) extends Actor {
 
@@ -47,7 +47,7 @@ class QueryPriceRangeActor(dailyPriceActor: ActorRef) extends Actor {
       val newlySentDailyCalculationMessages = sendMessagesForSingleDayCalculations(cpfr)
 
       Future.sequence(newlySentDailyCalculationMessages).onComplete {
-        case Success(result) => msgSender ! Good(result.foldLeft(0.0)((sum, next) => next.asInstanceOf[PriceDayFetched].price + sum))
+        case Success(result) => msgSender ! Good(result.foldLeft(BigDecimal(0))((sum, next) => next.asInstanceOf[PriceDayFetched].price + sum))
         case Failure(t) => msgSender ! Bad("An error has occurred: " + t.getMessage)
       }
   }
