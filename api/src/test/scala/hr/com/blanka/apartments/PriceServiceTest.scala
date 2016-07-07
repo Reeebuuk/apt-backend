@@ -40,7 +40,7 @@ class PriceServiceTest extends IntegrationTestMongoDbSupport with Matchers with 
   implicit def toMillis(date: DateTime): Long = date.getMillis
   val midYearDate = new DateTime().toDateTime(DateTimeZone.UTC).withMonthOfYear(11).withDayOfMonth(5).withTime(12, 0, 0, 0)
 
-  implicit val config = PatienceConfig(Span(10, Seconds), Span(1, Second))
+  implicit val config = PatienceConfig(Span(5, Seconds), Span(1, Second))
 
   "Price service" should "save multiple prices and fetch results" in {
       val userId = "user"
