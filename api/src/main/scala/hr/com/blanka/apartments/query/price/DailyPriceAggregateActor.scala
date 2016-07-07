@@ -25,9 +25,9 @@ class DailyPriceAggregateActor(implicit materializer: ActorMaterializer) extends
 
   override def preStart() = startSync(self)
 
-  def updateState(newDailyPrice: DailyPriceSaved, currentDailyPrices: Map[String, Map[Int, Map[DayMonth, Double]]]): Unit = {
+  def updateState(newDailyPrice: DailyPriceSaved, currentDailyPrices: Map[String, Map[Int, Map[DayMonth, BigDecimal]]]): Unit = {
 
-    val newPrices : Map[String, Map[Int, Map[DayMonth, Double]]] = currentDailyPrices.get(newDailyPrice.userId) match {
+    val newPrices : Map[String, Map[Int, Map[DayMonth, BigDecimal]]] = currentDailyPrices.get(newDailyPrice.userId) match {
       case None => currentDailyPrices + (newDailyPrice.userId -> Map(newDailyPrice.unitId -> Map(newDailyPrice.dayMonth -> newDailyPrice.price)))
       case Some(currentPricesForUser) => currentPricesForUser.get(newDailyPrice.unitId) match {
         case None => currentDailyPrices + (newDailyPrice.userId -> (currentPricesForUser ++ Map(newDailyPrice.unitId -> Map(newDailyPrice.dayMonth -> newDailyPrice.price))))
@@ -38,14 +38,14 @@ class DailyPriceAggregateActor(implicit materializer: ActorMaterializer) extends
     context become active(newPrices)
   }
 
-  override def receive = active(Map[String, Map[Int, Map[DayMonth, Double]]]())
+  override def receive = active(Map[String, Map[Int, Map[DayMonth, BigDecimal]]]())
 
-  def active(currentDailyPrices: Map[String, Map[Int, Map[DayMonth, Double]]]): Receive = {
+  def active(currentDailyPrices: Map[String, Map[Int, Map[DayMonth, BigDecimal]]]): Receive = {
     case e : DailyPriceSaved =>
       updateState(e, currentDailyPrices)
 
     case LookupPriceForDay(userId, unitId, day) =>
-      val lastPrice: Double = currentDailyPrices.get(userId) match {
+      val lastPrice: BigDecimal = currentDailyPrices.get(userId) match {
         case None => 0
         case Some(priceForUnit) => priceForUnit.get(unitId) match {
           case None => 0
