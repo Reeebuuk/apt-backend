@@ -47,7 +47,7 @@ class QueryPriceRangeActor(dailyPriceActor: ActorRef) extends Actor {
       val newlySentDailyCalculationMessages = sendMessagesForSingleDayCalculations(cpfr)
 
       Future.sequence(newlySentDailyCalculationMessages).onComplete {
-        case Success(result) => msgSender ! Good(result.foldLeft(0.0)((sum, next) => next.asInstanceOf[PriceDayFetched].price + sum))
+        case Success(result) => msgSender ! Good(result.foldLeft(BigDecimal(0))((sum, next) => next.asInstanceOf[PriceDayFetched].price + sum))
         case Failure(t) => msgSender ! Bad("An error has occurred: " + t.getMessage)
       }
   }
