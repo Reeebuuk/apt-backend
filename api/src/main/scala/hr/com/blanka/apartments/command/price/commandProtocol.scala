@@ -11,18 +11,14 @@ sealed trait PriceCommand {
   def userId: String
 }
 
-case class SavePriceRange(userId: String, unitId: Int, from: Long, to: Long, price: Double) extends PriceCommand
-case class SavePriceForSingleDay(userId: String, unitId: Int, day: DayMonth, price: Double) extends PriceCommand
+case class SavePriceRange(userId: String, unitId: Int, from: Long, to: Long, price: BigDecimal) extends PriceCommand
+case class SavePriceForSingleDay(userId: String, unitId: Int, day: DayMonth, price: BigDecimal) extends PriceCommand
 
 /*
 * Events
 */
 
-sealed trait PriceCommandEvents{
-  def unitId: Int
-  def userId: String
-}
-case class PriceRangeSaved(userId: String, unitId: Int, from: Long, to: Long, price: Double) extends PriceCommandEvents
+case class PriceRangeSaved(userId: String, unitId: Int, from: Long, to: Long, price: BigDecimal)
 
 case class DayMonth(day: Int, month: Long)
 object DayMonth {
@@ -32,4 +28,4 @@ object DayMonth {
   }
 }
 
-case class DailyPriceSaved(userId: String, unitId: Int, dayMonth: DayMonth, price: Double, dttm: DateTime) extends PriceCommandEvents
+case class DailyPriceSaved(userId: String, unitId: Int, dayMonth: DayMonth, price: BigDecimal, dttm: DateTime)
