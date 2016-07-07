@@ -20,9 +20,9 @@ object DailyPriceAggregateActor {
 
 class DailyPriceAggregateActor extends Actor {
 
-  def updateState(newDailyPrice: DailyPriceSaved, currentDailyPrices: Map[DayMonth, List[Double]]): Unit = {
+  def updateState(newDailyPrice: DailyPriceSaved, currentDailyPrices: Map[DayMonth, List[BigDecimal]]): Unit = {
 
-    val newPrices: List[Double] = currentDailyPrices.get(newDailyPrice.dayMonth) match {
+    val newPrices: List[BigDecimal] = currentDailyPrices.get(newDailyPrice.dayMonth) match {
       case Some(priceForDay) => newDailyPrice.price :: priceForDay
       case None => List(newDailyPrice.price)
     }
@@ -30,14 +30,14 @@ class DailyPriceAggregateActor extends Actor {
     context become active(currentDailyPrices + (newDailyPrice.dayMonth -> newPrices))
   }
 
-  override def receive = active(Map[DayMonth, List[Double]]())
+  override def receive = active(Map[DayMonth, List[BigDecimal]]())
 
-  def active(currentDailyPrices: Map[DayMonth, List[Double]]): Receive = {
+  def active(currentDailyPrices: Map[DayMonth, List[BigDecimal]]): Receive = {
     case e: DailyPriceSaved =>
       updateState(e, currentDailyPrices)
 
     case LookupPriceForDay(userId, unitId, day) =>
-      val lastPrice: Double = currentDailyPrices.get(day) match {
+      val lastPrice: BigDecimal = currentDailyPrices.get(day) match {
         case None => 0
         case Some(price) => price.head
       }
