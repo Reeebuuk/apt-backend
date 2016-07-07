@@ -19,7 +19,7 @@ object QueryPriceRangeActor {
   def apply(dailyPriceActor: ActorRef) = Props(classOf[QueryPriceRangeActor], dailyPriceActor)
 }
 
-case class CalculationData(singleDayCalculations: Map[Long, Option[Double]])
+case class CalculationData(singleDayCalculations: Map[Long, Option[BigDecimal]])
 
 class QueryPriceRangeActor(dailyPriceActor: ActorRef) extends Actor {
 
