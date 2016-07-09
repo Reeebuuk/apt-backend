@@ -11,7 +11,7 @@ import hr.com.blanka.apartments.utils.AppConfig
 
 object Main extends App with AppConfig with BaseService {
 
-  implicit val system: ActorSystem = ActorSystem("backend")
+  implicit val system: ActorSystem = ActorSystem("BookingSystem")
 
   override protected implicit val executor = system.dispatcher
   override protected val log: LoggingAdapter = Logging(system, getClass)
