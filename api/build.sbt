@@ -22,6 +22,7 @@ libraryDependencies ++= {
     "com.typesafe.akka" %% "akka-contrib" % akkaV,
     "com.typesafe.akka" %% "akka-stream" % akkaV,
     "com.typesafe.akka" %% "akka-http-core" % akkaV,
+    "com.typesafe.akka" %% "akka-cluster" % akkaV,
     "com.typesafe.akka" %% "akka-cluster-sharding" % akkaV,
     "com.typesafe.akka" %% "akka-http-spray-json-experimental" % akkaV,
     "com.typesafe.akka" %% "akka-persistence-query-experimental" % akkaV,

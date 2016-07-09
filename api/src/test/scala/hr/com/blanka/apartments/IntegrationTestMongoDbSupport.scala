@@ -20,7 +20,21 @@ object IntegrationConf {
        |    journal.plugin = "akka-contrib-mongodb-persistence-journal"
        |    snapshot-store.plugin = "akka-contrib-mongodb-persistence-snapshot"
        |  }
+       |  remote {
+       |    log-remote-lifecycle-events = off
+       |    netty.tcp {
+       |      hostname = "127.0.0.1"
+       |      port = 8999
+       |    }
+       |  }
        |
+       |  cluster {
+       |    seed-nodes = [
+       |      "akka.tcp://hr-com-blanka-apartments-PriceServiceTest@127.0.0.1:8999"
+       |    ]
+       |  }
+       |
+       |  extensions=["akka.cluster.metrics.ClusterMetricsExtension"]
        |  contrib.persistence.mongodb.mongo {
        |    mongouri = "mongodb://localhost:$port"
        |    journal-collection = "my_persistent_journal"

@@ -13,8 +13,7 @@ object DailyPriceAggregateActor {
   }
 
   val extractShardId: ShardRegion.ExtractShardId = {
-    case e@DailyPriceSaved(userId, unitId, _, _, _) => s"$userId$unitId"
-    case e@LookupPriceForDay(userId, unitId, _) => s"$userId$unitId"
+    case _ => "one"
   }
 }
 
