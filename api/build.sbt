@@ -28,7 +28,6 @@ libraryDependencies ++= {
     "com.typesafe.akka" %% "akka-persistence-query-experimental" % akkaV,
     "com.typesafe.scala-logging" %% "scala-logging" % scalaLoggingV,
     "org.json4s" %% "json4s-jackson" % json4sV,
-    "com.github.nscala-time" %% "nscala-time" % nscalaV,
     "org.scalactic" %% "scalactic" % scalacticV,
 
     "org.scalatest" %% "scalatest" % scalaTestV % "test",

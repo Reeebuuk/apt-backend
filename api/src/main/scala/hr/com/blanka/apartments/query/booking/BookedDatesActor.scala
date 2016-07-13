@@ -2,14 +2,24 @@ package hr.com.blanka.apartments.query.booking
 
 import akka.NotUsed
 import akka.actor.{Actor, ActorLogging, ActorRef, Props}
+import akka.cluster.sharding.ShardRegion
 import akka.contrib.persistence.mongodb.{MongoReadJournal, ScalaDslMongoReadJournal}
 import akka.persistence.query.{EventEnvelope, PersistenceQuery}
 import akka.stream.ActorMaterializer
 import akka.stream.scaladsl.Source
-import hr.com.blanka.apartments.command.booking.{BookingAggregateActor, EnquirySaved}
+import hr.com.blanka.apartments.command.booking.{BookingAggregateActor, EnquiryBooked, EnquirySaved}
 
 object BookedDatesActor {
   def apply(queryActor: ActorRef, materializer: ActorMaterializer) = Props(classOf[BookedDatesActor], queryActor, materializer)
+
+  val extractEntityId: ShardRegion.ExtractEntityId = {
+    case e : EnquiryBooked => (e.bookingId.toString, e)
+  }
+
+  val extractShardId: ShardRegion.ExtractShardId = {
+    case _ => "one"
+  }
+
 }
 
 class BookedDatesActor(queryActor: ActorRef)(implicit materializer: ActorMaterializer) extends Actor with ActorLogging {
@@ -26,6 +36,6 @@ class BookedDatesActor(queryActor: ActorRef)(implicit materializer: ActorMateria
   override def preStart() = startSync(self)
 
   def receive: Receive = {
-    case bs : EnquirySaved =>
+    case bs : EnquiryBooked =>
   }
 }
