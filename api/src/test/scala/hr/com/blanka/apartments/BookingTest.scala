@@ -14,15 +14,15 @@ import hr.com.blanka.apartments.query.QueryActor
 import hr.com.blanka.apartments.query.price.LookupPriceForRange
 import org.joda.time.{DateTime, DateTimeZone}
 import org.json4s.DefaultFormats
+import org.scalatest.Matchers
 import org.scalatest.concurrent.Eventually
 import org.scalatest.time.{Second, Seconds, Span}
-import org.scalatest.Matchers
 import spray.json._
 
 import scala.concurrent.duration._
 import scala.language.implicitConversions
 
-class PriceServiceTest extends IntegrationTestMongoDbSupport with Matchers with ScalatestRouteTest with Eventually {
+class BookingTest extends IntegrationTestMongoDbSupport with Matchers with ScalatestRouteTest with Eventually {
 
   import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport._
   protected val log: LoggingAdapter = NoLogging

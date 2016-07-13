@@ -6,33 +6,29 @@ import org.joda.time.DateTime
 * API
 */
 
-case class EnquiryReceived(enquiry: Enquiry)
+case class EnquiryReceived(userId: String, enquiry: Enquiry)
 
 /*
 * Commands
 */
 
 sealed trait BookingCommand {
-  def unitId: Int
-  def userId: String
+  def bookingId: Long
 }
 
-case class SaveEnquiry(id: Long, enquiry: Enquiry) extends BookingCommand {
-  override def unitId: Int = enquiry.unitId
+case class SaveEnquiry(userId: String, bookingId: Long, enquiry: Enquiry) extends BookingCommand
 
-  override def userId: String = enquiry.userId
-}
+case class MarkEnquiryAsBooked(userId: String, bookingId: Long) extends BookingCommand
 
 /*
 * Events
 */
 
 case class NewBookingIdAssigned(id: Long)
-case class EnquirySaved(id: Long, enquiry: Enquiry, timeSaved: DateTime)
+case class EnquirySaved(userId: String, id: Long, enquiry: Enquiry, timeSaved: DateTime)
+case class EnquiryBooked(userId: String, id: Long, enquiry: Enquiry, timeSaved: DateTime)
 
-
-case class Enquiry(userId: String,
-                   unitId: Int,
+case class Enquiry(unitId: Int,
                    dateFrom: Long,
                    dateTo: Long,
                    name: String,
