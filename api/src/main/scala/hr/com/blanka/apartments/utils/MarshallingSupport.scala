@@ -14,8 +14,8 @@ trait MarshallingSupport extends DefaultJsonProtocol {
   implicit val SavePriceRangeDtoFormat = jsonFormat5(SavePriceRange.apply)
   implicit val PriceForRangeDtoFormat = jsonFormat1(PriceForRangeResponse.apply)
   implicit val ErrorDtoFormat = jsonFormat1(ErrorResponse.apply)
-  implicit val EnquiryFormat = jsonFormat14(Enquiry.apply)
-  implicit val SaveBookingFormat = jsonFormat1(EnquiryReceived.apply)
+  implicit val EnquiryFormat = jsonFormat13(Enquiry.apply)
+  implicit val SaveBookingFormat = jsonFormat2(EnquiryReceived.apply)
 
   implicit val LocalDateTimeFormat = new JsonFormat[LocalDateTime] {
 

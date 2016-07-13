@@ -11,7 +11,7 @@ object BookingAggregateActor {
   def apply() = Props(classOf[BookingAggregateActor])
 
   val extractEntityId: ShardRegion.ExtractEntityId = {
-    case e @ SaveEnquiry(id, _) => (id.toString, e)
+    case e : BookingCommand => (e.bookingId.toString, e)
   }
 
   val extractShardId: ShardRegion.ExtractShardId = {
@@ -25,16 +25,32 @@ class BookingAggregateActor extends PersistentActor with ActorLogging {
 
   var entityId : Long = 0
 
-  context become! state
-
   override def receiveRecover: Receive = {
     case _ =>
   }
 
-  override def receiveCommand: Receive = {
-    case SaveEnquiry(id, booking) => persist(EnquirySaved(booking, new DateTime())) {
-      event => event
+  override def receiveCommand: Receive = init
+
+  var enquiryValue: Enquiry = _
+
+  def init: Receive = {
+    case SaveEnquiry(userId, id, booking) => persist(EnquirySaved(userId, id, booking, new DateTime())) {
+      e =>
+        enquiryValue = e.enquiry
+        context become enquiry
     }
+    case e: MarkEnquiryAsBooked => log.error(s"Received MarkEnquiryAsBooked for enquiry which doesn't exit $e")
+  }
+
+  def enquiry : Receive = {
+    case MarkEnquiryAsBooked(userId, id) => persist(EnquiryBooked(userId, id, enquiryValue, new DateTime())) {
+      e => context become booking
+    }
+    case e: SaveEnquiry => log.error(s"Received SaveEnquiry with same Id $e")
+  }
+
+  def booking: Receive ={
+    case _ =>
   }
 
   override def persistenceId: String = BookingAggregateActor.persistenceId
