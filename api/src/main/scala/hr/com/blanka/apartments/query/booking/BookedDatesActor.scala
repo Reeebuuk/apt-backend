@@ -6,7 +6,7 @@ import akka.contrib.persistence.mongodb.{MongoReadJournal, ScalaDslMongoReadJour
 import akka.persistence.query.{EventEnvelope, PersistenceQuery}
 import akka.stream.ActorMaterializer
 import akka.stream.scaladsl.Source
-import hr.com.blanka.apartments.command.booking.{EnquiryAggregateActor, EnquirySaved}
+import hr.com.blanka.apartments.command.booking.{BookingAggregateActor, EnquirySaved}
 
 object BookedDatesActor {
   def apply(queryActor: ActorRef, materializer: ActorMaterializer) = Props(classOf[BookedDatesActor], queryActor, materializer)
@@ -18,7 +18,7 @@ class BookedDatesActor(queryActor: ActorRef)(implicit materializer: ActorMateria
     val queries = PersistenceQuery(context.system).readJournalFor[ScalaDslMongoReadJournal](MongoReadJournal.Identifier)
 
     val src: Source[EventEnvelope, NotUsed] =
-      queries.eventsByPersistenceId(EnquiryAggregateActor.persistenceId, 0L, Long.MaxValue)
+      queries.eventsByPersistenceId(BookingAggregateActor.persistenceId, 0L, Long.MaxValue)
 
     src.runForeach(actor ! _.event)
   }
