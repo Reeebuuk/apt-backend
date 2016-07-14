@@ -13,7 +13,7 @@ object BookedDatesActor {
   def apply(queryActor: ActorRef, materializer: ActorMaterializer) = Props(classOf[BookedDatesActor], queryActor, materializer)
 
   val extractEntityId: ShardRegion.ExtractEntityId = {
-    case e : EnquiryBooked => (e.bookingId.toString, e)
+    case e : EnquiryBooked => (e.id.toString, e)
   }
 
   val extractShardId: ShardRegion.ExtractShardId = {

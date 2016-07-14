@@ -6,9 +6,8 @@ resolvers += "Sonatype OSS Snapshots" at "https://oss.sonatype.org/content/repos
 scalaVersion  := "2.11.8"
 
 libraryDependencies ++= {
-  val akkaV              = "2.4.7"
+  val akkaV              = "2.4.8"
   val scalaTestV         = "2.2.6"
-  val nscalaV            = "2.12.0"
   val scalaLoggingV      = "3.1.0"
   val json4sV            = "3.3.0"
   val scalacticV         = "2.2.6"
