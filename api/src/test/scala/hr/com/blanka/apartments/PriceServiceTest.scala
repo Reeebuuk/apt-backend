@@ -22,7 +22,7 @@ import spray.json._
 import scala.concurrent.duration._
 import scala.language.implicitConversions
 
-class PriceTest extends IntegrationTestMongoDbSupport with Matchers with ScalatestRouteTest with Eventually {
+class PriceServiceTest extends IntegrationTestMongoDbSupport with Matchers with ScalatestRouteTest with Eventually {
 
   import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport._
   protected val log: LoggingAdapter = NoLogging
