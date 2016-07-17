@@ -1,6 +1,6 @@
 package hr.com.blanka.apartments.command.booking
 
-import org.joda.time.DateTime
+import org.joda.time.{DateTime, LocalDate}
 
 /*
 * API
@@ -24,9 +24,9 @@ case class MarkEnquiryAsBooked(userId: String, bookingId: Long) extends BookingC
 * Events
 */
 
-case class NewBookingIdAssigned(id: Long)
-case class EnquirySaved(userId: String, id: Long, enquiry: Enquiry, timeSaved: DateTime)
-case class EnquiryBooked(userId: String, id: Long, enquiry: Enquiry, timeSaved: DateTime)
+case class NewBookingIdAssigned(bookingId: Long)
+case class EnquirySaved(userId: String, bookingId: Long, enquiry: Enquiry, timeSaved: DateTime)
+case class EnquiryBooked(userId: String, bookingId: Long, enquiry: Enquiry, timeSaved: DateTime)
 
 case class Enquiry(unitId: Int,
                    dateFrom: Long,
