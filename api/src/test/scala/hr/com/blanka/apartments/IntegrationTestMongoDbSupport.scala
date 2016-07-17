@@ -10,7 +10,7 @@ import org.scalatest._
 
 object IntegrationConf {
 
-  def config(port: Int) = ConfigFactory.parseString(
+  def config(port: Int, className: String) = ConfigFactory.parseString(
     s"""
        |akka{
        |  actor {
@@ -30,7 +30,7 @@ object IntegrationConf {
        |
        |  cluster {
        |    seed-nodes = [
-       |      "akka.tcp://hr-com-blanka-apartments-PriceServiceTest@127.0.0.1:8999"
+       |      "akka.tcp://hr-com-blanka-apartments-$className@127.0.0.1:8999"
        |    ]
        |  }
        |
