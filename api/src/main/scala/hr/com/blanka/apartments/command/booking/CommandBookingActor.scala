@@ -22,7 +22,7 @@ class CommandBookingActor extends PersistentActor with ActorLogging {
   override def receiveRecover: Receive = {
     case EnquiryReceived(userId, enquiry) =>
       persist(NewBookingIdAssigned(bookingCounter + 1)) { event =>
-        bookingCounter = event.id
+        bookingCounter = event.bookingId
         bookingAggregateActor ! SaveEnquiry(userId, bookingCounter, enquiry)
       }
   }
