@@ -27,7 +27,7 @@ class BookingTest extends IntegrationTestMongoDbSupport with Matchers with Scala
   import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport._
   protected val log: LoggingAdapter = NoLogging
 
-  override def testConfig: Config = IntegrationConf.config(IntegrationConf.freePort)
+  override def testConfig: Config = IntegrationConf.config(IntegrationConf.freePort, classOf[BookingTest].getSimpleName)
 
   implicit val ec = system.dispatcher
 
