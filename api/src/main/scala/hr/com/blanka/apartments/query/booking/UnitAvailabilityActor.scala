@@ -5,6 +5,7 @@ import akka.cluster.sharding.ShardRegion
 import akka.persistence.PersistentActor
 import hr.com.blanka.apartments.command.booking.{BookingAggregateActor, EnquiryBooked}
 import org.joda.time.{Days, LocalDate}
+import org.scalactic.Good
 
 object UnitAvailabilityActor {
   def apply() = Props(classOf[UnitAvailabilityActor])
@@ -15,7 +16,7 @@ object UnitAvailabilityActor {
   }
 
   val extractShardId: ShardRegion.ExtractShardId = {
-    case _ => "one"
+    case _ => "two"
   }
 }
 
@@ -27,7 +28,7 @@ class UnitAvailabilityActor extends PersistentActor with ActorLogging {
   override def receiveCommand: Receive = {
     case GetAvailableApartments(_, from, to) =>
       val bookedUnitIds = iterateThroughDays(from, to).flatMap(bookedUnitsPerDate.getOrElse(_, Set())).toSet
-      sender() ! AvailableApartments(bookedUnitIds)
+      sender() ! Good(AvailableApartments(bookedUnitIds))
 
     case EnquiryBookedWithSeqNmr(nmbr, EnquiryBooked(userId, bookingId, enquiry, _, _ ,_)) =>
       iterateThroughDays(enquiry.dateFrom, enquiry.dateTo).foreach( date =>
