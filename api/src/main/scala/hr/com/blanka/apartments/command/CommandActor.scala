@@ -3,7 +3,7 @@ package hr.com.blanka.apartments.command
 import akka.actor.{Actor, ActorLogging, Props}
 import akka.pattern.{ask, pipe}
 import akka.util.Timeout
-import hr.com.blanka.apartments.command.booking.{BookingCommand, CommandBookingActor}
+import hr.com.blanka.apartments.command.booking.{CommandBookingActor, DepositPaid, EnquiryReceived}
 import hr.com.blanka.apartments.command.price.{CommandPriceActor, PriceCommand}
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -22,10 +22,10 @@ class CommandActor extends Actor with ActorLogging {
   val bookingActor = context.actorOf(CommandBookingActor(), "CommandBookingActor")
 
   override def receive: Receive = {
-    case e : PriceCommand =>
+    case e: PriceCommand =>
       val msgSender = sender()
       priceActor ? e pipeTo msgSender
-    case e : BookingCommand =>
+    case e@(_: EnquiryReceived | _: DepositPaid) =>
       val msgSender = sender()
       bookingActor ? e pipeTo msgSender
   }
