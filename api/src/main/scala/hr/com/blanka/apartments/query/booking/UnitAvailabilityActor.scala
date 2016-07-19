@@ -1,10 +1,10 @@
 package hr.com.blanka.apartments.query.booking
 
-import akka.actor.{Actor, ActorLogging, Props}
+import akka.actor.{ActorLogging, Props}
 import akka.cluster.sharding.ShardRegion
 import akka.persistence.PersistentActor
-import hr.com.blanka.apartments.command.booking.{BookingAggregateActor, EnquiryBooked, EnquirySaved}
-import org.joda.time.{Days, LocalDate, Period, YearMonth}
+import hr.com.blanka.apartments.command.booking.{BookingAggregateActor, EnquiryBooked}
+import org.joda.time.{Days, LocalDate}
 
 object UnitAvailabilityActor {
   def apply() = Props(classOf[UnitAvailabilityActor])
@@ -29,7 +29,7 @@ class UnitAvailabilityActor extends PersistentActor with ActorLogging {
       val bookedUnitIds = iterateThroughDays(from, to).flatMap(bookedUnitsPerDate.getOrElse(_, Set())).toSet
       sender() ! AvailableApartments(bookedUnitIds)
 
-    case EnquiryBookedWithSeqNmr(nmbr, EnquiryBooked(userId, bookingId, enquiry, _  )) =>
+    case EnquiryBookedWithSeqNmr(nmbr, EnquiryBooked(userId, bookingId, enquiry, _, _ ,_)) =>
       iterateThroughDays(enquiry.dateFrom, enquiry.dateTo).foreach( date =>
         persist(BookedUnit(userId, enquiry.unitId, date, nmbr)) { event =>
           update(event)

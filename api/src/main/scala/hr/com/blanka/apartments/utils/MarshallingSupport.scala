@@ -3,7 +3,7 @@ package hr.com.blanka.apartments.utils
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
-import hr.com.blanka.apartments.command.booking.{Enquiry, EnquiryReceived}
+import hr.com.blanka.apartments.command.booking.{DepositPaid, Enquiry, EnquiryReceived}
 import hr.com.blanka.apartments.command.price.SavePriceRange
 import hr.com.blanka.apartments.http.routes._
 import hr.com.blanka.apartments.query.price.LookupPriceForRange
@@ -16,6 +16,7 @@ trait MarshallingSupport extends DefaultJsonProtocol {
   implicit val ErrorDtoFormat = jsonFormat1(ErrorResponse.apply)
   implicit val EnquiryFormat = jsonFormat13(Enquiry.apply)
   implicit val SaveBookingFormat = jsonFormat2(EnquiryReceived.apply)
+  implicit val DepositPaidFormat = jsonFormat4(DepositPaid.apply)
 
   implicit val LocalDateTimeFormat = new JsonFormat[LocalDateTime] {
 
