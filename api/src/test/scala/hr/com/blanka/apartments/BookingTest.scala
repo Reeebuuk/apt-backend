@@ -8,10 +8,9 @@ import akka.http.scaladsl.testkit.{RouteTestTimeout, ScalatestRouteTest}
 import com.typesafe.config.Config
 import hr.com.blanka.apartments.Main._
 import hr.com.blanka.apartments.command.CommandActor
-import hr.com.blanka.apartments.command.price.SavePriceRange
+import hr.com.blanka.apartments.command.booking.{DepositPaid, Enquiry, EnquiryReceived}
 import hr.com.blanka.apartments.http.routes.PriceForRangeResponse
 import hr.com.blanka.apartments.query.QueryActor
-import hr.com.blanka.apartments.query.price.LookupPriceForRange
 import org.joda.time.{DateTime, DateTimeZone}
 import org.json4s.DefaultFormats
 import org.scalatest.Matchers
@@ -25,6 +24,7 @@ import scala.language.implicitConversions
 class BookingTest extends IntegrationTestMongoDbSupport with Matchers with ScalatestRouteTest with Eventually {
 
   import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport._
+
   protected val log: LoggingAdapter = NoLogging
 
   override def testConfig: Config = IntegrationConf.config(IntegrationConf.freePort, classOf[BookingTest].getSimpleName)
@@ -37,45 +37,40 @@ class BookingTest extends IntegrationTestMongoDbSupport with Matchers with Scala
   val query = system.actorOf(QueryActor(materializer), "queryActor")
 
   implicit val format = DefaultFormats.withBigDecimal
+
   implicit def toMillis(date: DateTime): Long = date.getMillis
+
   val midYearDate = new DateTime().toDateTime(DateTimeZone.UTC).withMonthOfYear(11).withDayOfMonth(5).withTime(12, 0, 0, 0)
 
   implicit val config = PatienceConfig(Span(5, Seconds), Span(1, Second))
 
-  "Price service" should "save multiple prices and fetch results" in {
-      val userId = "user"
-      val unitId = 1
+  "Booking service" should "save booking and update availability" in {
+    val userId = "user"
+    val unitId = 1
 
-      val firstFrom = midYearDate
-      val firstTo = firstFrom.plusDays(5)
-      val firstPrice = SavePriceRange(userId, unitId, firstFrom, firstTo, 35)
-      val firstRequestEntity = HttpEntity(MediaTypes.`application/json`, firstPrice.toJson.toString())
+    val firstFrom = midYearDate
+    val firstTo = firstFrom.plusDays(5)
+    val enquiry = Enquiry(unitId, firstFrom, firstTo, "", "", "", "", "", "", "", "", "", "")
+    val firstPrice = EnquiryReceived(userId, enquiry)
+    val firstRequestEntity = HttpEntity(MediaTypes.`application/json`, firstPrice.toJson.toString())
 
-      Post("/price", firstRequestEntity) ~> priceRoute(command, query) ~> check {
-        status should be (OK)
-      }
+    Post("/booking", firstRequestEntity) ~> bookingRoute(command, query) ~> check {
+      status should be(OK)
+    }
 
-      val secondFrom = firstTo
-      val secondTo = secondFrom.plusDays(5)
-      val secondPrice = SavePriceRange(userId, unitId, secondFrom, secondTo, 40)
-      val secondRequestEntity = HttpEntity(MediaTypes.`application/json`, secondPrice.toJson.toString())
+    val depositPaid = DepositPaid(userId, 1, BigDecimal(15), "EUR")
+    val depositPaidEntity = HttpEntity(MediaTypes.`application/json`, depositPaid.toJson.toString())
 
-      Post("/price", secondRequestEntity) ~> priceRoute(command, query) ~> check {
-        status should be (OK)
-      }
+    Post("/booking/depositPaid", depositPaidEntity) ~> bookingRoute(command, query) ~> check {
+      status should be(OK)
+    }
 
-
-      val from = midYearDate.plusDays(3)
-      val to = from.plusDays(4)
-      val lookupRequest = HttpEntity(MediaTypes.`application/json`,
-        LookupPriceForRange(userId, unitId, from, to).toJson.toString())
-
-      eventually {
-        Post("/price/calculate", lookupRequest) ~> priceRoute(command, query) ~> check {
-          responseAs[PriceForRangeResponse] should be(PriceForRangeResponse(150))
-          status should be(OK)
-        }
+    eventually {
+      Get(s"/booking/available?from=${firstFrom.getMillis}&to=${firstTo.getMillis}") ~> bookingRoute(command, query) ~> check {
+        status should be(OK)
+        responseAs[PriceForRangeResponse] should be(PriceForRangeResponse(150))
       }
     }
+  }
 }
 

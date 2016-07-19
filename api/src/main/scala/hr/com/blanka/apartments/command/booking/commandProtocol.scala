@@ -1,12 +1,13 @@
 package hr.com.blanka.apartments.command.booking
 
-import org.joda.time.{DateTime, LocalDate}
+import org.joda.time.DateTime
 
 /*
 * API
 */
 
 case class EnquiryReceived(userId: String, enquiry: Enquiry)
+case class DepositPaid(userId: String, bookingId: Long, depositAmount: BigDecimal, currency: String)
 
 /*
 * Commands
@@ -18,7 +19,7 @@ sealed trait BookingCommand {
 
 case class SaveEnquiry(userId: String, bookingId: Long, enquiry: Enquiry) extends BookingCommand
 
-case class MarkEnquiryAsBooked(userId: String, bookingId: Long) extends BookingCommand
+case class MarkEnquiryAsBooked(userId: String, bookingId: Long, depositAmount: BigDecimal, currency: String) extends BookingCommand
 
 /*
 * Events
@@ -26,7 +27,7 @@ case class MarkEnquiryAsBooked(userId: String, bookingId: Long) extends BookingC
 
 case class NewBookingIdAssigned(bookingId: Long)
 case class EnquirySaved(userId: String, bookingId: Long, enquiry: Enquiry, timeSaved: DateTime)
-case class EnquiryBooked(userId: String, bookingId: Long, enquiry: Enquiry, timeSaved: DateTime)
+case class EnquiryBooked(userId: String, bookingId: Long, enquiry: Enquiry, timeSaved: DateTime, depositAmount: BigDecimal, currency: String)
 
 case class Enquiry(unitId: Int,
                    dateFrom: Long,

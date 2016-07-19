@@ -6,12 +6,14 @@ import akka.persistence.PersistentActor
 import hr.com.blanka.apartments.command.price.DailyPriceSaved
 import hr.com.blanka.apartments.query.price.LookupPriceForDay
 import org.joda.time.DateTime
+import org.scalactic.Good
 
 object BookingAggregateActor {
   def apply() = Props(classOf[BookingAggregateActor])
 
   val extractEntityId: ShardRegion.ExtractEntityId = {
-    case e : BookingCommand => (e.bookingId.toString, e)
+    case e: BookingCommand => (e.bookingId.toString, e)
+    case e: DepositPaid => (e.bookingId.toString, e)
   }
 
   val extractShardId: ShardRegion.ExtractShardId = {
@@ -23,7 +25,7 @@ object BookingAggregateActor {
 
 class BookingAggregateActor extends PersistentActor with ActorLogging {
 
-  var entityId : Long = 0
+  var entityId: Long = 0
 
   override def receiveRecover: Receive = {
     case _ =>
@@ -38,18 +40,20 @@ class BookingAggregateActor extends PersistentActor with ActorLogging {
       e =>
         enquiryValue = e.enquiry
         context become enquiry
+        sender() ! Good
     }
     case e: MarkEnquiryAsBooked => log.error(s"Received MarkEnquiryAsBooked for enquiry which doesn't exit $e")
   }
 
-  def enquiry : Receive = {
-    case MarkEnquiryAsBooked(userId, id) => persist(EnquiryBooked(userId, id, enquiryValue, new DateTime())) {
-      e => context become booking
-    }
+  def enquiry: Receive = {
+    case MarkEnquiryAsBooked(userId, bookingId, depositAmount, currency) =>
+      persist(EnquiryBooked(userId, bookingId, enquiryValue, new DateTime(), depositAmount, currency)) {
+        e => sender() ! Good
+      }
     case e: SaveEnquiry => log.error(s"Received SaveEnquiry with same Id $e")
   }
 
-  def booking: Receive ={
+  def booking: Receive = {
     case _ =>
   }
 
