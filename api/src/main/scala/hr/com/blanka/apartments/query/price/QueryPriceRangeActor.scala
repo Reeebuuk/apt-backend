@@ -5,7 +5,7 @@ import akka.actor._
 import akka.pattern.ask
 import akka.util.Timeout
 import hr.com.blanka.apartments.command.price.DayMonth
-import org.joda.time.{DateTime, DateTimeZone, Days}
+import org.joda.time.{Days, LocalDate}
 import org.scalactic.{Bad, Good}
 
 import scala.collection.immutable.Map
@@ -30,12 +30,11 @@ class QueryPriceRangeActor(dailyPriceActor: ActorRef) extends Actor {
   def sendMessagesForSingleDayCalculations(calculatePriceForRange: LookupPriceForRange) = {
     import calculatePriceForRange._
 
-    val fromDate = new DateTime(from).toDateTime(DateTimeZone.UTC)
-    val toDate = new DateTime(to).toDateTime(DateTimeZone.UTC)
-    val duration = Days.daysBetween(fromDate.toLocalDate, toDate.toLocalDate).getDays
+    val fromDate = new LocalDate(from)
+    val toDate = new LocalDate(to)
 
-    (0 until duration).map(daysFromStart => {
-      val day = DayMonth(new DateTime(from).toDateTime(DateTimeZone.UTC).plusDays(daysFromStart).getMillis)
+    (0 until Days.daysBetween(fromDate, toDate).getDays).map(daysFromStart => {
+      val day = DayMonth(new LocalDate(from).plusDays(daysFromStart))
       dailyPriceActor ? LookupPriceForDay(userId, unitId, day)
     })
 
