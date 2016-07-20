@@ -50,7 +50,7 @@ trait BookingServiceRoute extends BaseServiceRoute with MarshallingSupport {
       } ~
       path("bookedDates") {
         parameter("apartmentId".as[Int]) { apartmentId =>
-          onSuccess(query ? GetBookedDates("", apartmentId)) {
+          onSuccess(query ? GetBookedDates("user", apartmentId)) {
             case Good(result) => complete(StatusCodes.OK, PriceForRangeResponse(result.asInstanceOf[Int]))
             case Bad(response) => response match {
               case One(error) => complete(StatusCodes.BadRequest, ErrorResponse(error.toString))
@@ -62,7 +62,7 @@ trait BookingServiceRoute extends BaseServiceRoute with MarshallingSupport {
       } ~
       path("available") {
         parameters('from.as[Long], 'to.as[Long]) { (from, to) =>
-          onSuccess(query ? GetAvailableApartments("", from, to)) {
+          onSuccess(query ? GetAvailableApartments("user", from, to)) {
             case Good(result) => complete(StatusCodes.OK, result.asInstanceOf[AvailableApartments])
             case Bad(response) => response match {
               case One(error) => complete(StatusCodes.BadRequest, ErrorResponse(error.toString))
