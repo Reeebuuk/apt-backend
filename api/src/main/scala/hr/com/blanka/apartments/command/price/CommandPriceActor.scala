@@ -4,16 +4,16 @@ import akka.actor._
 import akka.pattern.ask
 import akka.util.Timeout
 import hr.com.blanka.apartments.validation.BasicValidation._
-import org.joda.time.{DateTime, DateTimeZone}
+import hr.com.blanka.apartments.validation.ErrorMessages._
+import org.joda.time.LocalDate
 import org.scalactic.Accumulation._
 import org.scalactic.{Bad, _}
 
+import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.concurrent.duration._
 import scala.language.postfixOps
 import scala.util.{Failure, Success}
-import scala.concurrent.ExecutionContext.Implicits.global
-import hr.com.blanka.apartments.validation.ErrorMessages._
 
 object CommandPriceActor {
 
@@ -29,13 +29,13 @@ class CommandPriceActor extends Actor with ActorLogging {
   override def receive: Receive = {
     case SavePriceRange(userId, unitId, from, to, price) =>
       val msgSender = sender()
-      val fromDate = new DateTime(from).toDateTime(DateTimeZone.UTC)
-      val toDate = new DateTime(to).toDateTime(DateTimeZone.UTC)
+      val fromDate = new LocalDate(from)
+      val toDate = new LocalDate(to)
 
       withGood(validateAndGetDurationInDays(fromDate, toDate), validUnitId(unitId)) {
         (duration, unitId) => {
           val savedPrices = (0 until duration).map(daysFromStart => {
-            val day = DayMonth(fromDate.plusDays(daysFromStart).getMillis)
+            val day = DayMonth(fromDate.plusDays(daysFromStart))
 
             priceAggregateActor ? SavePriceForSingleDay(userId, unitId, day, price)
           })

@@ -1,6 +1,6 @@
 package hr.com.blanka.apartments.command.price
 
-import org.joda.time.{DateTime, DateTimeZone}
+import org.joda.time.{DateTime, LocalDate}
 
 /*
 * Commands
@@ -22,9 +22,8 @@ case class PriceRangeSaved(userId: String, unitId: Int, from: Long, to: Long, pr
 
 case class DayMonth(day: Int, month: Long)
 object DayMonth {
-  def apply(day: Long) = {
-    val date = new DateTime(day).toDateTime(DateTimeZone.UTC)
-    new DayMonth(date.getDayOfMonth, date.getMonthOfYear)
+  def apply(day: LocalDate) = {
+    new DayMonth(day.getDayOfMonth, day.getMonthOfYear)
   }
 }
 
