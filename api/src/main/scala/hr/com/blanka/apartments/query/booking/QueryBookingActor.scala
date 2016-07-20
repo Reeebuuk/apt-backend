@@ -26,15 +26,14 @@ class QueryBookingActor(materializer: ActorMaterializer) extends Actor with Acto
     extractEntityId = BookedDatesActor.extractEntityId,
     extractShardId = BookedDatesActor.extractShardId)
 
-//  val unitAvailabilityActor: ActorRef = ClusterSharding(context.system).start(
-//    typeName = "unitAvailabilityActor",
-//    entityProps = UnitAvailabilityActor(),
-//    settings = ClusterShardingSettings(context.system),
-//    extractEntityId = UnitAvailabilityActor.extractEntityId,
-//    extractShardId = UnitAvailabilityActor.extractShardId)
+  val unitAvailabilityActor: ActorRef = ClusterSharding(context.system).start(
+    typeName = "unitAvailabilityActor",
+    entityProps = UnitAvailabilityActor(),
+    settings = ClusterShardingSettings(context.system),
+    extractEntityId = UnitAvailabilityActor.extractEntityId,
+    extractShardId = UnitAvailabilityActor.extractShardId)
 
   val synchronizeBookingActor = context.actorOf(SynchronizeBookingActor(materializer), "synchronizeBookingActor")
-  val unitAvailabilityActor = context.actorOf(UnitAvailabilityActor(), "unitAvailabilityActor")
 
   override def receive: Receive = {
     case e: StartSync =>
