@@ -11,7 +11,7 @@ import hr.com.blanka.apartments.command.CommandActor
 import hr.com.blanka.apartments.command.booking.{DepositPaid, Enquiry, EnquiryReceived}
 import hr.com.blanka.apartments.http.routes.PriceForRangeResponse
 import hr.com.blanka.apartments.query.QueryActor
-import hr.com.blanka.apartments.query.booking.AvailableApartments
+import hr.com.blanka.apartments.query.booking.{AvailableApartments, BookedDays}
 import org.joda.time.{DateTime, DateTimeZone}
 import org.json4s.DefaultFormats
 import org.scalatest.Matchers
@@ -70,6 +70,13 @@ class BookingTest extends IntegrationTestMongoDbSupport with Matchers with Scala
       Get(s"/booking/available?from=${firstFrom.getMillis}&to=${firstTo.getMillis}") ~> bookingRoute(command, query) ~> check {
         status should be(OK)
         responseAs[AvailableApartments] should be(AvailableApartments(Set()))
+      }
+    }
+
+    eventually {
+      Get(s"/booking/bookedDates?unitId=$unitId") ~> bookingRoute(command, query) ~> check {
+        status should be(OK)
+        responseAs[BookedDays] should be(BookedDays(List()))
       }
     }
   }

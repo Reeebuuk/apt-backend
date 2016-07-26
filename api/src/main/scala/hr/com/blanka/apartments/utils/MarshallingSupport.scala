@@ -1,13 +1,12 @@
 package hr.com.blanka.apartments.utils
 
-import java.time.LocalDateTime
-import java.time.format.DateTimeFormatter
-
 import hr.com.blanka.apartments.command.booking.{DepositPaid, Enquiry, EnquiryReceived}
 import hr.com.blanka.apartments.command.price.SavePriceRange
 import hr.com.blanka.apartments.http.routes._
-import hr.com.blanka.apartments.query.booking.AvailableApartments
+import hr.com.blanka.apartments.query.booking.{AvailableApartments, BookedDay, BookedDays}
 import hr.com.blanka.apartments.query.price.LookupPriceForRange
+import org.joda.time.LocalDate
+import org.joda.time.format.{DateTimeFormatter, DateTimePrinter, ISODateTimeFormat}
 import spray.json.{DefaultJsonProtocol, JsString, JsValue, JsonFormat}
 
 trait MarshallingSupport extends DefaultJsonProtocol {
@@ -19,16 +18,19 @@ trait MarshallingSupport extends DefaultJsonProtocol {
   implicit val SaveBookingFormat = jsonFormat2(EnquiryReceived.apply)
   implicit val DepositPaidFormat = jsonFormat4(DepositPaid.apply)
   implicit val AvailableApartmentsFormat = jsonFormat1(AvailableApartments.apply)
+  implicit val LocalDateFormat = new JsonFormat[LocalDate] {
 
-  implicit val LocalDateTimeFormat = new JsonFormat[LocalDateTime] {
+    private val iso_date_time = ISODateTimeFormat.localDateParser()
 
-    private val iso_date_time = DateTimeFormatter.ISO_DATE_TIME
-
-    def write(x: LocalDateTime) = JsString(iso_date_time.format(x))
+    def write(x: LocalDate) = JsString(x.toString)
 
     def read(value: JsValue) = value match {
-      case JsString(x) => LocalDateTime.parse(x, iso_date_time)
+      case JsString(x) => LocalDate.parse(x, iso_date_time)
       case x => throw new RuntimeException(s"Unexpected type %s on parsing of LocalDateTime type".format(x.getClass.getName))
     }
   }
+  implicit val BookedDayFormat = jsonFormat3(BookedDay.apply)
+  implicit val BookedDaysFormat = jsonFormat1(BookedDays.apply)
+
+
 }
