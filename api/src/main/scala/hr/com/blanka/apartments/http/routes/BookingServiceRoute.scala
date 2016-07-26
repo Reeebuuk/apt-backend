@@ -5,7 +5,7 @@ import akka.http.scaladsl.model.StatusCodes
 import akka.http.scaladsl.server.Directives._
 import akka.pattern.ask
 import hr.com.blanka.apartments.command.booking.{DepositPaid, EnquiryReceived}
-import hr.com.blanka.apartments.query.booking.{AvailableApartments, GetAvailableApartments, GetBookedDates}
+import hr.com.blanka.apartments.query.booking.{AvailableApartments, BookedDays, GetAvailableApartments, GetBookedDates}
 import hr.com.blanka.apartments.utils.MarshallingSupport
 import org.scalactic._
 
@@ -49,9 +49,9 @@ trait BookingServiceRoute extends BaseServiceRoute with MarshallingSupport {
         }
       } ~
       path("bookedDates") {
-        parameter("apartmentId".as[Int]) { apartmentId =>
-          onSuccess(query ? GetBookedDates("user", apartmentId)) {
-            case Good(result) => complete(StatusCodes.OK, PriceForRangeResponse(result.asInstanceOf[Int]))
+        parameter("unitId".as[Int]) { unitId =>
+          onSuccess(query ? GetBookedDates("user", unitId)) {
+            case Good(result: BookedDays) => complete(StatusCodes.OK, result)
             case Bad(response) => response match {
               case One(error) => complete(StatusCodes.BadRequest, ErrorResponse(error.toString))
               case Many(first, second) => complete(StatusCodes.BadRequest, ErrorResponse(Seq(first, second).mkString(", ")))
@@ -63,7 +63,7 @@ trait BookingServiceRoute extends BaseServiceRoute with MarshallingSupport {
       path("available") {
         parameters('from.as[Long], 'to.as[Long]) { (from, to) =>
           onSuccess(query ? GetAvailableApartments("user", from, to)) {
-            case Good(result) => complete(StatusCodes.OK, result.asInstanceOf[AvailableApartments])
+            case Good(result: AvailableApartments) => complete(StatusCodes.OK, result)
             case Bad(response) => response match {
               case One(error) => complete(StatusCodes.BadRequest, ErrorResponse(error.toString))
               case Many(first, second) => complete(StatusCodes.BadRequest, ErrorResponse(Seq(first, second).mkString(", ")))

@@ -41,5 +41,8 @@ class QueryBookingActor(materializer: ActorMaterializer) extends Actor with Acto
     case e: GetAvailableApartments =>
       val msgSender = sender()
       unitAvailabilityActor ? e pipeTo msgSender
+    case e: GetBookedDates =>
+      val msgSender = sender()
+      bookedDatesActor ? e pipeTo msgSender
   }
 }
