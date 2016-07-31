@@ -19,25 +19,23 @@ class QueryBookingActor(materializer: ActorMaterializer) extends Actor with Acto
 
   implicit val timeout = Timeout(3 seconds)
 
+  val synchronizeBookingActor = context.actorOf(SynchronizeBookingActor(materializer), "synchronizeBookingActor")
+
   val bookedDatesActor: ActorRef = ClusterSharding(context.system).start(
     typeName = "bookedDatesActor",
-    entityProps = BookedDatesActor(),
+    entityProps = BookedDatesActor(synchronizeBookingActor),
     settings = ClusterShardingSettings(context.system),
     extractEntityId = BookedDatesActor.extractEntityId,
     extractShardId = BookedDatesActor.extractShardId)
 
   val unitAvailabilityActor: ActorRef = ClusterSharding(context.system).start(
     typeName = "unitAvailabilityActor",
-    entityProps = UnitAvailabilityActor(),
+    entityProps = UnitAvailabilityActor(synchronizeBookingActor),
     settings = ClusterShardingSettings(context.system),
     extractEntityId = UnitAvailabilityActor.extractEntityId,
     extractShardId = UnitAvailabilityActor.extractShardId)
 
-  val synchronizeBookingActor = context.actorOf(SynchronizeBookingActor(materializer), "synchronizeBookingActor")
-
   override def receive: Receive = {
-    case e: StartSync =>
-      synchronizeBookingActor ! e
     case e: GetAvailableApartments =>
       val msgSender = sender()
       unitAvailabilityActor ? e pipeTo msgSender

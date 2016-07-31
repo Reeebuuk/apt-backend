@@ -1,18 +1,19 @@
 package hr.com.blanka.apartments.query.booking
 
-import akka.actor.{ActorLogging, Props}
+import akka.actor.{ActorLogging, ActorRef, Props}
 import akka.cluster.sharding.ShardRegion
 import akka.persistence.PersistentActor
-import hr.com.blanka.apartments.command.booking.{BookingAggregateActor, EnquiryBooked}
+import hr.com.blanka.apartments.command.booking.{BookingAggregateActor, CheckIfPeriodIsAvailable, EnquiryBooked}
 import org.joda.time.{Days, LocalDate}
-import org.scalactic.Good
+import org.scalactic.{Bad, Good}
 
 object UnitAvailabilityActor {
-  def apply() = Props(classOf[UnitAvailabilityActor])
+  def apply(synchronizeBookingActor: ActorRef) = Props(classOf[UnitAvailabilityActor], synchronizeBookingActor)
 
   val extractEntityId: ShardRegion.ExtractEntityId = {
     case e : EnquiryBooked => (e.userId.toString, e)
     case e : GetAvailableApartments => (e.userId.toString, e)
+    case e : CheckIfPeriodIsAvailable => (e.userId.toString, e)
   }
 
   val extractShardId: ShardRegion.ExtractShardId = {
@@ -20,15 +21,17 @@ object UnitAvailabilityActor {
   }
 }
 
-class UnitAvailabilityActor extends PersistentActor with ActorLogging {
+class UnitAvailabilityActor(synchronizeBookingActor: ActorRef) extends PersistentActor with ActorLogging {
 
   var bookedUnitsPerDate = Map[LocalDate, Set[Int]]()
   var sequenceNmbr: Long = 0
 
   override def receiveCommand: Receive = {
+    case CheckIfPeriodIsAvailable(_, unitId, from, to) =>
+      sender() ! checkIfUnitIdIsBooked(unitId, from, to)
+
     case GetAvailableApartments(_, from, to) =>
-      val bookedUnitIds = iterateThroughDays(from, to).flatMap(bookedUnitsPerDate.getOrElse(_, Set())).toSet
-      sender() ! Good(AvailableApartments(bookedUnitIds))
+      sender() ! Good(AvailableApartments(getAvailableApartments(from, to)))
 
     case EnquiryBookedWithSeqNmr(nmbr, EnquiryBooked(userId, bookingId, enquiry, _, _ ,_)) =>
       iterateThroughDays(enquiry.dateFrom, enquiry.dateTo).foreach( date =>
@@ -38,6 +41,19 @@ class UnitAvailabilityActor extends PersistentActor with ActorLogging {
       )
   }
 
+  //currently hardcoded for 3 apartments
+  def getAvailableApartments(from: Long, to: Long) =
+    Set(1, 2, 3).diff(getBookedApartments(from, to))
+
+  def getBookedApartments(from: Long, to:Long): Set[Int] =
+    iterateThroughDays(from, to).flatMap(bookedUnitsPerDate.getOrElse(_, Set())).toSet
+
+  def checkIfUnitIdIsBooked(unitId: Int, from: Long, to: Long) =
+    getBookedApartments(from, to).toList.contains(unitId) match {
+      case true  => Bad
+      case false => Good
+    }
+
   def iterateThroughDays(from: Long, to: Long): List[LocalDate] = {
     val fromDate = new LocalDate(from)
     val toDate = new LocalDate(to)
@@ -46,15 +62,15 @@ class UnitAvailabilityActor extends PersistentActor with ActorLogging {
   }
 
   def update(e: BookedUnit) : Unit = {
-    bookedUnitsPerDate.get(e.date) match {
-      case None => bookedUnitsPerDate + (e.date -> e.unitId)
+    bookedUnitsPerDate = bookedUnitsPerDate.get(e.date) match {
+      case None => bookedUnitsPerDate + (e.date -> Set(e.unitId))
       case Some(units) => bookedUnitsPerDate + (e.date -> (units + e.unitId))
     }
     sequenceNmbr = e.sequenceNmbr
   }
 
   override def preStart() = {
-    context.parent ! StartSync(self, BookingAggregateActor.persistenceId, sequenceNmbr)
+    synchronizeBookingActor ! StartSync(self, BookingAggregateActor.persistenceId, sequenceNmbr)
   }
 
   override def receiveRecover: Receive = {

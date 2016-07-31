@@ -11,8 +11,8 @@ import hr.com.blanka.apartments.command.CommandActor
 import hr.com.blanka.apartments.command.booking.{DepositPaid, Enquiry, EnquiryReceived}
 import hr.com.blanka.apartments.http.routes.PriceForRangeResponse
 import hr.com.blanka.apartments.query.QueryActor
-import hr.com.blanka.apartments.query.booking.{AvailableApartments, BookedDays}
-import org.joda.time.{DateTime, DateTimeZone}
+import hr.com.blanka.apartments.query.booking.{AvailableApartments, BookedDay, BookedDays}
+import org.joda.time.{DateTime, DateTimeZone, LocalDate}
 import org.json4s.DefaultFormats
 import org.scalatest.Matchers
 import org.scalatest.concurrent.Eventually
@@ -43,7 +43,7 @@ class BookingTest extends IntegrationTestMongoDbSupport with Matchers with Scala
 
   val midYearDate = new DateTime().toDateTime(DateTimeZone.UTC).withMonthOfYear(11).withDayOfMonth(5).withTime(12, 0, 0, 0)
 
-  implicit val config = PatienceConfig(Span(5, Seconds), Span(1, Second))
+  implicit val config = PatienceConfig(Span(10, Seconds), Span(2, Seconds))
 
   "Booking service" should "save booking and update availability" in {
     val userId = "user"
@@ -69,14 +69,23 @@ class BookingTest extends IntegrationTestMongoDbSupport with Matchers with Scala
     eventually {
       Get(s"/booking/available?from=${firstFrom.getMillis}&to=${firstTo.getMillis}") ~> bookingRoute(command, query) ~> check {
         status should be(OK)
-        responseAs[AvailableApartments] should be(AvailableApartments(Set()))
+        responseAs[AvailableApartments] should be(AvailableApartments(Set(2, 3)))
       }
     }
+
+    val bookedDays = BookedDays(List(
+      BookedDay(firstFrom.toLocalDate, firstDay = true, lastDay = false),
+      BookedDay(firstFrom.plusDays(1).toLocalDate, firstDay = false, lastDay = false),
+      BookedDay(firstFrom.plusDays(2).toLocalDate, firstDay = false, lastDay = false),
+      BookedDay(firstFrom.plusDays(3).toLocalDate, firstDay = false, lastDay = false),
+      BookedDay(firstFrom.plusDays(4).toLocalDate, firstDay = false, lastDay = false),
+      BookedDay(firstFrom.plusDays(5).toLocalDate, firstDay = false, lastDay = true)
+    ))
 
     eventually {
       Get(s"/booking/bookedDates?unitId=$unitId") ~> bookingRoute(command, query) ~> check {
         status should be(OK)
-        responseAs[BookedDays] should be(BookedDays(List()))
+        responseAs[BookedDays] should be(bookedDays)
       }
     }
   }
