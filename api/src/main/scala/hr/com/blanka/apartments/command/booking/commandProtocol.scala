@@ -21,6 +21,17 @@ case class SaveEnquiry(userId: String, bookingId: Long, enquiry: Enquiry) extend
 
 case class MarkEnquiryAsBooked(userId: String, bookingId: Long, depositAmount: BigDecimal, currency: String) extends BookingCommand
 
+
+/*
+ * Validation
+ */
+
+sealed trait ValidationQuery {
+  def userId: String
+}
+
+case class CheckIfPeriodIsAvailable(userId: String, unitId: Int, dateFrom: Long, dateTo: Long) extends ValidationQuery
+
 /*
 * Events
 */
