@@ -1,6 +1,6 @@
 package hr.com.blanka.apartments.query.booking
 
-import akka.actor.{ActorLogging, Props}
+import akka.actor.{ActorLogging, ActorRef, Props}
 import akka.cluster.sharding.ShardRegion
 import akka.persistence.PersistentActor
 import hr.com.blanka.apartments.command.booking.{BookingAggregateActor, EnquiryBooked}
@@ -8,7 +8,7 @@ import org.joda.time.{Days, LocalDate}
 import org.scalactic.Good
 
 object BookedDatesActor {
-  def apply() = Props(classOf[BookedDatesActor])
+  def apply(synchronizeBookingActor: ActorRef) = Props(classOf[BookedDatesActor], synchronizeBookingActor)
 
   val extractEntityId: ShardRegion.ExtractEntityId = {
     case e: EnquiryBooked => (e.userId.toString, e)
@@ -22,10 +22,10 @@ object BookedDatesActor {
 
 case class PeriodBooked(unitId: Int, period: List[BookedDay], sequenceNmbr: Long)
 
-class BookedDatesActor extends PersistentActor with ActorLogging {
+class BookedDatesActor(synchronizeBookingActor: ActorRef) extends PersistentActor with ActorLogging {
 
   var bookedDatesPerUnit = Map[Int, List[BookedDay]]()
-  var sequenceNmbr: Long = 0
+  var recoverySequenceNumberForQuery: Long = 0
 
   override def receiveCommand: Receive = {
     case EnquiryBookedWithSeqNmr(nmbr, EnquiryBooked(userId, _, enquiry, _, _, _)) =>
@@ -43,7 +43,7 @@ class BookedDatesActor extends PersistentActor with ActorLogging {
 
       persist(PeriodBooked(enquiry.unitId, bookedPeriod, nmbr)) { event =>
         bookedDatesPerUnit = bookedDatesPerUnit + (event.unitId -> (currentlyBookedDates ++ event.period).distinct)
-        sequenceNmbr = nmbr
+        recoverySequenceNumberForQuery = nmbr
       }
     case GetBookedDates(_, unitId) => sender() ! Good(BookedDays(bookedDatesPerUnit.getOrElse(unitId, List.empty)))
   }
@@ -52,7 +52,7 @@ class BookedDatesActor extends PersistentActor with ActorLogging {
     case PeriodBooked(unitId, bookedPeriod, nmbr) =>
       val currentlyBookedDates: List[BookedDay] = bookedDatesPerUnit.getOrElse(unitId, List.empty)
       bookedDatesPerUnit = bookedDatesPerUnit + (unitId -> (currentlyBookedDates ++ bookedPeriod).distinct)
-      sequenceNmbr = nmbr
+      recoverySequenceNumberForQuery = nmbr
   }
 
   def iterateThroughDays(from: LocalDate, to: LocalDate): List[LocalDate] = {
@@ -60,7 +60,7 @@ class BookedDatesActor extends PersistentActor with ActorLogging {
   }
 
   override def preStart() = {
-    context.parent ! StartSync(self, BookingAggregateActor.persistenceId, sequenceNmbr)
+    synchronizeBookingActor ! StartSync(self, BookingAggregateActor.persistenceId, recoverySequenceNumberForQuery)
   }
 
   override def persistenceId: String = "BookedDatesActor"
