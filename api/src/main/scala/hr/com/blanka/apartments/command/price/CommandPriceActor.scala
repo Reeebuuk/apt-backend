@@ -17,14 +17,14 @@ import scala.util.{Failure, Success}
 
 object CommandPriceActor {
 
-  def apply() = Props(classOf[CommandPriceActor])
+  def apply() = Props(classOf[CommandPriceActor], PriceAggregateActor())
 }
 
-class CommandPriceActor extends Actor with ActorLogging {
+class CommandPriceActor(priceAggregateActorProps: Props) extends Actor with ActorLogging {
 
   implicit val timeout = Timeout(3 seconds)
 
-  val priceAggregateActor = context.actorOf(PriceAggregateActor(), "PriceAggregateActor")
+  val priceAggregateActor = context.actorOf(priceAggregateActorProps, "priceAggregateActor")
 
   override def receive: Receive = {
     case SavePriceRange(userId, unitId, from, to, price) =>
@@ -41,7 +41,8 @@ class CommandPriceActor extends Actor with ActorLogging {
           })
 
           Future.sequence(savedPrices).onComplete {
-            case Success(result) => msgSender ! Good
+            case Success(result) =>
+              msgSender ! Good
             case Failure(t) =>
               log.error(t.getMessage)
               msgSender ! Bad(persistingDailyPricesErrorMessage)
