@@ -6,7 +6,7 @@ import org.joda.time.LocalDate
 sealed trait BookingQuery
 
 case class GetBookedDates(userId: String, unitId: Int) extends BookingQuery
-case class GetAvailableApartments(userId: String, from: Long, to: Long) extends BookingQuery
+case class GetAvailableApartments(userId: String, from: LocalDate, to: LocalDate) extends BookingQuery
 
 sealed trait BookingQueryResponse
 
