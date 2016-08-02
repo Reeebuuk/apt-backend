@@ -11,14 +11,14 @@ sealed trait PriceCommand {
   def userId: String
 }
 
-case class SavePriceRange(userId: String, unitId: Int, from: Long, to: Long, price: BigDecimal) extends PriceCommand
+case class SavePriceRange(userId: String, unitId: Int, from: LocalDate, to: LocalDate, price: BigDecimal) extends PriceCommand
 case class SavePriceForSingleDay(userId: String, unitId: Int, day: DayMonth, price: BigDecimal) extends PriceCommand
 
 /*
 * Events
 */
 
-case class PriceRangeSaved(userId: String, unitId: Int, from: Long, to: Long, price: BigDecimal)
+case class PriceRangeSaved(userId: String, unitId: Int, from: LocalDate, to: LocalDate, price: BigDecimal)
 
 case class DayMonth(day: Int, month: Long)
 object DayMonth {

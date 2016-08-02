@@ -39,9 +39,7 @@ class BookingTest extends IntegrationTestMongoDbSupport with Matchers with Scala
 
   implicit val format = DefaultFormats.withBigDecimal
 
-  implicit def toMillis(date: DateTime): Long = date.getMillis
-
-  val midYearDate = new DateTime().toDateTime(DateTimeZone.UTC).withMonthOfYear(11).withDayOfMonth(5).withTime(12, 0, 0, 0)
+  val midYearDate = new LocalDate().withMonthOfYear(11).withDayOfMonth(5)
 
   implicit val config = PatienceConfig(Span(10, Seconds), Span(2, Seconds))
 
@@ -67,19 +65,19 @@ class BookingTest extends IntegrationTestMongoDbSupport with Matchers with Scala
     }
 
     eventually {
-      Get(s"/booking/available?from=${firstFrom.getMillis}&to=${firstTo.getMillis}") ~> bookingRoute(command, query) ~> check {
+      Get(s"/booking/available?from=${firstFrom.toDateTimeAtStartOfDay.getMillis}&to=${firstTo.toDateTimeAtStartOfDay.getMillis}") ~> bookingRoute(command, query) ~> check {
         status should be(OK)
         responseAs[AvailableApartments] should be(AvailableApartments(Set(2, 3)))
       }
     }
 
     val bookedDays = BookedDays(List(
-      BookedDay(firstFrom.toLocalDate, firstDay = true, lastDay = false),
-      BookedDay(firstFrom.plusDays(1).toLocalDate, firstDay = false, lastDay = false),
-      BookedDay(firstFrom.plusDays(2).toLocalDate, firstDay = false, lastDay = false),
-      BookedDay(firstFrom.plusDays(3).toLocalDate, firstDay = false, lastDay = false),
-      BookedDay(firstFrom.plusDays(4).toLocalDate, firstDay = false, lastDay = false),
-      BookedDay(firstFrom.plusDays(5).toLocalDate, firstDay = false, lastDay = true)
+      BookedDay(firstFrom, firstDay = true, lastDay = false),
+      BookedDay(firstFrom.plusDays(1), firstDay = false, lastDay = false),
+      BookedDay(firstFrom.plusDays(2), firstDay = false, lastDay = false),
+      BookedDay(firstFrom.plusDays(3), firstDay = false, lastDay = false),
+      BookedDay(firstFrom.plusDays(4), firstDay = false, lastDay = false),
+      BookedDay(firstFrom.plusDays(5), firstDay = false, lastDay = true)
     ))
 
     eventually {

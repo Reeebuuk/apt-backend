@@ -1,10 +1,11 @@
 package hr.com.blanka.apartments.query.price
 
 import hr.com.blanka.apartments.command.price.DayMonth
+import org.joda.time.LocalDate
 
 sealed trait PriceQuery
 
-case class LookupPriceForRange(userId: String, unitId: Int, from: Long, to: Long) extends PriceQuery
+case class LookupPriceForRange(userId: String, unitId: Int, from: LocalDate, to: LocalDate) extends PriceQuery
 case class LookupPriceForDay(userId: String, unitId: Int, day: DayMonth) extends PriceQuery
 
 sealed trait PriceQueryResponse

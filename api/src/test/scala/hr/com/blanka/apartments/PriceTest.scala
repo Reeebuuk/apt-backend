@@ -12,7 +12,7 @@ import hr.com.blanka.apartments.command.price.SavePriceRange
 import hr.com.blanka.apartments.http.routes.PriceForRangeResponse
 import hr.com.blanka.apartments.query.QueryActor
 import hr.com.blanka.apartments.query.price.LookupPriceForRange
-import org.joda.time.{DateTime, DateTimeZone}
+import org.joda.time.{DateTime, DateTimeZone, LocalDate}
 import org.json4s.DefaultFormats
 import org.scalatest.concurrent.Eventually
 import org.scalatest.time.{Second, Seconds, Span}
@@ -37,8 +37,8 @@ class PriceTest extends IntegrationTestMongoDbSupport with Matchers with Scalate
   val query = system.actorOf(QueryActor(materializer), "queryActor")
 
   implicit val format = DefaultFormats.withBigDecimal
-  implicit def toMillis(date: DateTime): Long = date.getMillis
-  val midYearDate = new DateTime().toDateTime(DateTimeZone.UTC).withMonthOfYear(11).withDayOfMonth(5).withTime(12, 0, 0, 0)
+
+  val midYearDate = new LocalDate().withMonthOfYear(11).withDayOfMonth(5)
 
   implicit val config = PatienceConfig(Span(5, Seconds), Span(1, Second))
 
