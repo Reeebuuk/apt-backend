@@ -1,6 +1,6 @@
 package hr.com.blanka.apartments.command.booking
 
-import org.joda.time.DateTime
+import org.joda.time.{DateTime, LocalDate}
 
 /*
 * API
@@ -30,7 +30,7 @@ sealed trait ValidationQuery {
   def userId: String
 }
 
-case class CheckIfPeriodIsAvailable(userId: String, unitId: Int, dateFrom: Long, dateTo: Long) extends ValidationQuery
+case class CheckIfPeriodIsAvailable(userId: String, unitId: Int, dateFrom: LocalDate, dateTo: LocalDate) extends ValidationQuery
 
 /*
 * Events
@@ -41,8 +41,8 @@ case class EnquirySaved(userId: String, bookingId: Long, enquiry: Enquiry, timeS
 case class EnquiryBooked(userId: String, bookingId: Long, enquiry: Enquiry, timeSaved: DateTime, depositAmount: BigDecimal, currency: String)
 
 case class Enquiry(unitId: Int,
-                   dateFrom: Long,
-                   dateTo: Long,
+                   dateFrom: LocalDate,
+                   dateTo: LocalDate,
                    name: String,
                    surname: String,
                    phoneNumber: String,

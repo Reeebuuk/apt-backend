@@ -1,10 +1,10 @@
 package hr.com.blanka.apartments.command.price
 
-import akka.actor.{Actor, ActorRefFactory, ActorSystem, Props}
+import akka.actor.{Actor, ActorSystem, Props}
 import akka.testkit.{TestActorRef, TestKit, TestProbe}
 import akka.util.Timeout
 import com.typesafe.config.ConfigFactory
-import org.joda.time.DateTime
+import org.joda.time.{DateTime, LocalDate}
 import org.scalactic.Good
 import org.scalatest.concurrent.Eventually
 import org.scalatest.{BeforeAndAfterAll, FlatSpecLike, Matchers}
@@ -37,9 +37,9 @@ class CommandPriceActorTest extends TestKit(ActorSystem("test-benefits",
     val userId = "user"
     val unitId = 1
 
-    val firstFrom = new DateTime()
+    val firstFrom = new LocalDate()
     val firstTo = firstFrom.plusDays(5)
-    val firstPrice = SavePriceRange(userId, unitId, firstFrom.getMillis, firstTo.getMillis, 35)
+    val firstPrice = SavePriceRange(userId, unitId, firstFrom, firstTo, 35)
 
     probe.send(commandPriceActor, firstPrice)
     eventually {

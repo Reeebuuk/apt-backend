@@ -42,24 +42,20 @@ class UnitAvailabilityActor(synchronizeBookingActor: ActorRef) extends Persisten
   }
 
   //currently hardcoded for 3 apartments
-  def getAvailableApartments(from: Long, to: Long) =
+  def getAvailableApartments(from: LocalDate, to: LocalDate) =
     Set(1, 2, 3).diff(getBookedApartments(from, to))
 
-  def getBookedApartments(from: Long, to:Long): Set[Int] =
+  def getBookedApartments(from: LocalDate, to:LocalDate): Set[Int] =
     iterateThroughDays(from, to).flatMap(bookedUnitsPerDate.getOrElse(_, Set())).toSet
 
-  def checkIfUnitIdIsBooked(unitId: Int, from: Long, to: Long) =
+  def checkIfUnitIdIsBooked(unitId: Int, from: LocalDate, to: LocalDate) =
     getBookedApartments(from, to).toList.contains(unitId) match {
       case true  => Bad
       case false => Good
     }
 
-  def iterateThroughDays(from: Long, to: Long): List[LocalDate] = {
-    val fromDate = new LocalDate(from)
-    val toDate = new LocalDate(to)
-
-    (0 to Days.daysBetween(fromDate, toDate).getDays).map(fromDate.plusDays).toList
-  }
+  def iterateThroughDays(from: LocalDate, to: LocalDate): List[LocalDate] =
+    (0 to Days.daysBetween(from, to).getDays).map(from.plusDays).toList
 
   def update(e: BookedUnit) : Unit = {
     bookedUnitsPerDate = bookedUnitsPerDate.get(e.date) match {

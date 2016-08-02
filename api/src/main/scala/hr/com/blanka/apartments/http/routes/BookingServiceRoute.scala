@@ -7,6 +7,7 @@ import akka.pattern.ask
 import hr.com.blanka.apartments.command.booking.{DepositPaid, EnquiryReceived}
 import hr.com.blanka.apartments.query.booking.{AvailableApartments, BookedDays, GetAvailableApartments, GetBookedDates}
 import hr.com.blanka.apartments.utils.MarshallingSupport
+import org.joda.time.LocalDate
 import org.scalactic._
 
 final case class ErrorResponse(msg: String)
@@ -62,7 +63,7 @@ trait BookingServiceRoute extends BaseServiceRoute with MarshallingSupport {
       } ~
       path("available") {
         parameters('from.as[Long], 'to.as[Long]) { (from, to) =>
-          onSuccess(query ? GetAvailableApartments("user", from, to)) {
+          onSuccess(query ? GetAvailableApartments("user", new LocalDate(from), new LocalDate(to))) {
             case Good(result: AvailableApartments) => complete(StatusCodes.OK, result)
             case Bad(response) => response match {
               case One(error) => complete(StatusCodes.BadRequest, ErrorResponse(error.toString))
