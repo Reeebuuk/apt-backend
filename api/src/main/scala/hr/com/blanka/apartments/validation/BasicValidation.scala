@@ -15,7 +15,7 @@ object BasicValidation {
       Bad(One(dateIsInPastErrorMessage(rangeSide, date)))
   }
 
-  def validateAndGetDurationInDays(from: LocalDate, to: LocalDate): Int Or Every[ErrorMessage] = {
+  def validateDuration(from: LocalDate, to: LocalDate): Int Or Every[ErrorMessage] = {
     val dates = withGood(notPastDate(from, "From"), notPastDate(to, "To")){ (from, to) => (from, to)}
 
     dates.flatMap(x => {

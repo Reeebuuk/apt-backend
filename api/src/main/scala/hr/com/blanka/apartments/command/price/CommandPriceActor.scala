@@ -3,6 +3,7 @@ package hr.com.blanka.apartments.command.price
 import akka.actor._
 import akka.pattern.ask
 import akka.util.Timeout
+import hr.com.blanka.apartments.utils.HelperMethods
 import hr.com.blanka.apartments.validation.BasicValidation._
 import hr.com.blanka.apartments.validation.ErrorMessages._
 import org.joda.time.LocalDate
@@ -20,7 +21,7 @@ object CommandPriceActor {
   def apply() = Props(classOf[CommandPriceActor], PriceAggregateActor())
 }
 
-class CommandPriceActor(priceAggregateActorProps: Props) extends Actor with ActorLogging {
+class CommandPriceActor(priceAggregateActorProps: Props) extends Actor with HelperMethods with ActorLogging {
 
   implicit val timeout = Timeout(3 seconds)
 
@@ -29,16 +30,14 @@ class CommandPriceActor(priceAggregateActorProps: Props) extends Actor with Acto
   override def receive: Receive = {
     case SavePriceRange(userId, unitId, from, to, price) =>
       val msgSender = sender()
-      val fromDate = new LocalDate(from)
-      val toDate = new LocalDate(to)
 
-      withGood(validateAndGetDurationInDays(fromDate, toDate), validUnitId(unitId)) {
-        (duration, unitId) => {
-          val savedPrices = (0 until duration).map(daysFromStart => {
-            val day = DayMonth(fromDate.plusDays(daysFromStart))
+      withGood(validateDuration(from, to), validUnitId(unitId)) {
+        (_, _) => {
+          val savedPrices = iterateThroughDays(from, to).map { localDate =>
+            val day = DayMonth(localDate)
 
             priceAggregateActor ? SavePriceForSingleDay(userId, unitId, day, price)
-          })
+          }
 
           Future.sequence(savedPrices).onComplete {
             case Success(result) =>

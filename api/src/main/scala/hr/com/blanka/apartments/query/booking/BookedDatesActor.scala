@@ -4,6 +4,7 @@ import akka.actor.{ActorLogging, ActorRef, Props}
 import akka.cluster.sharding.ShardRegion
 import akka.persistence.PersistentActor
 import hr.com.blanka.apartments.command.booking.{BookingAggregateActor, EnquiryBooked}
+import hr.com.blanka.apartments.utils.HelperMethods
 import org.joda.time.{Days, LocalDate}
 import org.scalactic.Good
 
@@ -22,7 +23,7 @@ object BookedDatesActor {
 
 case class PeriodBooked(unitId: Int, period: List[BookedDay], sequenceNmbr: Long)
 
-class BookedDatesActor(synchronizeBookingActor: ActorRef) extends PersistentActor with ActorLogging {
+class BookedDatesActor(synchronizeBookingActor: ActorRef) extends PersistentActor with HelperMethods with ActorLogging {
 
   var bookedDatesPerUnit = Map[Int, List[BookedDay]]()
   var recoverySequenceNumberForQuery: Long = 0
@@ -55,13 +56,9 @@ class BookedDatesActor(synchronizeBookingActor: ActorRef) extends PersistentActo
       recoverySequenceNumberForQuery = nmbr
   }
 
-  def iterateThroughDays(from: LocalDate, to: LocalDate): List[LocalDate] = {
-    (0 to Days.daysBetween(from, to).getDays).map(from.plusDays).toList
-  }
-
-  override def preStart() = {
+  override def preStart() =
     synchronizeBookingActor ! StartSync(self, BookingAggregateActor.persistenceId, recoverySequenceNumberForQuery)
-  }
+
 
   override def persistenceId: String = "BookedDatesActor"
 }
