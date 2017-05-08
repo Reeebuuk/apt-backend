@@ -6,7 +6,7 @@ import hr.com.blanka.apartments.http.routes._
 import hr.com.blanka.apartments.query.booking.{AvailableApartments, BookedDay, BookedDays}
 import hr.com.blanka.apartments.query.price.LookupPriceForRange
 import org.joda.time.LocalDate
-import org.joda.time.format.{DateTimeFormatter, DateTimePrinter, ISODateTimeFormat}
+import org.joda.time.format.ISODateTimeFormat
 import spray.json.{DefaultJsonProtocol, JsString, JsValue, JsonFormat}
 
 trait MarshallingSupport extends DefaultJsonProtocol {

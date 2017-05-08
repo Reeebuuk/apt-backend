@@ -1,6 +1,6 @@
 package hr.com.blanka.apartments.command.price
 
-import akka.actor.{ActorLogging, Props}
+import akka.actor.{ ActorLogging, Props }
 import akka.persistence.PersistentActor
 import org.joda.time.DateTime
 

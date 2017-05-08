@@ -5,15 +5,15 @@ import akka.actor._
 import akka.pattern.ask
 import akka.util.Timeout
 import hr.com.blanka.apartments.command.price.DayMonth
-import org.joda.time.{Days, LocalDate}
-import org.scalactic.{Bad, Good}
+import org.joda.time.{ Days, LocalDate }
+import org.scalactic.{ Bad, Good }
 
 import scala.collection.immutable.Map
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.concurrent.duration.DurationInt
 import scala.language.postfixOps
-import scala.util.{Failure, Success}
+import scala.util.{ Failure, Success }
 
 object QueryPriceRangeActor {
   def apply(dailyPriceActor: ActorRef) = Props(classOf[QueryPriceRangeActor], dailyPriceActor)

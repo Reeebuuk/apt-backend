@@ -1,8 +1,8 @@
 package hr.com.blanka.apartments.command.booking
 
-import akka.actor.{ActorLogging, ActorRef, Props}
-import akka.cluster.sharding.{ClusterSharding, ClusterShardingSettings}
-import akka.pattern.{ask, pipe}
+import akka.actor.{ ActorLogging, ActorRef, Props }
+import akka.cluster.sharding.{ ClusterSharding, ClusterShardingSettings }
+import akka.pattern.{ ask, pipe }
 import akka.persistence.PersistentActor
 import akka.util.Timeout
 
@@ -23,7 +23,8 @@ class CommandBookingActor extends PersistentActor with ActorLogging {
     entityProps = BookingAggregateActor(),
     settings = ClusterShardingSettings(context.system),
     extractEntityId = BookingAggregateActor.extractEntityId,
-    extractShardId = BookingAggregateActor.extractShardId)
+    extractShardId = BookingAggregateActor.extractShardId
+  )
 
   var bookingCounter: Long = 0l
 
@@ -34,7 +35,7 @@ class CommandBookingActor extends PersistentActor with ActorLogging {
         bookingAggregateActor ? SaveEnquiry(userId, bookingCounter, enquiry) pipeTo sender()
       }
     case DepositPaid(userId, bookingId, depositAmount, currency) =>
-        bookingAggregateActor ? MarkEnquiryAsBooked(userId, bookingId, depositAmount, currency) pipeTo sender()
+      bookingAggregateActor ? MarkEnquiryAsBooked(userId, bookingId, depositAmount, currency) pipeTo sender()
   }
 
   override def receiveRecover: Receive = {
