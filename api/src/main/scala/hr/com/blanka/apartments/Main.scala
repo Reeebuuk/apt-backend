@@ -1,7 +1,7 @@
 package hr.com.blanka.apartments
 
 import akka.actor.ActorSystem
-import akka.event.{Logging, LoggingAdapter}
+import akka.event.{ Logging, LoggingAdapter }
 import akka.http.scaladsl.Http
 import akka.stream.ActorMaterializer
 import hr.com.blanka.apartments.command.CommandActor

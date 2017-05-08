@@ -21,7 +21,6 @@ case class SaveEnquiry(userId: String, bookingId: Long, enquiry: Enquiry) extend
 
 case class MarkEnquiryAsBooked(userId: String, bookingId: Long, depositAmount: BigDecimal, currency: String) extends BookingCommand
 
-
 /*
  * Validation
  */
