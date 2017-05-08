@@ -22,7 +22,7 @@ import spray.json._
 import scala.concurrent.duration._
 import scala.language.implicitConversions
 
-class BookingTest extends IntegrationTestMongoDbSupport with Matchers with ScalatestRouteTest with Eventually {
+class BookingTest extends IntegrationTestCassandraSupport with Matchers with ScalatestRouteTest with Eventually {
 
   import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport._
 

@@ -1,17 +1,17 @@
 package hr.com.blanka.apartments.query.price
 
-import akka.NotUsed
-import akka.actor.{ Actor, ActorLogging, ActorRef, Props }
-import akka.cluster.sharding.{ ClusterSharding, ClusterShardingSettings }
-import akka.contrib.persistence.mongodb.{ MongoReadJournal, ScalaDslMongoReadJournal }
-import akka.pattern.{ ask, pipe }
-import akka.persistence.query.{ EventEnvelope, PersistenceQuery }
+import akka.Done
+import akka.actor.{Actor, ActorLogging, ActorRef, Props}
+import akka.cluster.sharding.{ClusterSharding, ClusterShardingSettings}
+import akka.pattern.{ask, pipe}
+import akka.persistence.cassandra.query.scaladsl.CassandraReadJournal
+import akka.persistence.query.PersistenceQuery
 import akka.stream.ActorMaterializer
-import akka.stream.scaladsl.Source
 import akka.util.Timeout
 import hr.com.blanka.apartments.command.price.PriceAggregateActor
 
 import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
 import scala.concurrent.duration._
 import scala.language.postfixOps
 
@@ -23,10 +23,10 @@ class QueryPriceActor(implicit materializer: ActorMaterializer) extends Actor wi
 
   implicit val timeout = Timeout(3 seconds)
 
-  def startSync(actor: ActorRef) = {
-    val queries = PersistenceQuery(context.system).readJournalFor[ScalaDslMongoReadJournal](MongoReadJournal.Identifier)
+  def startSync(actor: ActorRef): Future[Done] = {
+    val queries = PersistenceQuery(context.system).readJournalFor[CassandraReadJournal](CassandraReadJournal.Identifier)
 
-    val src: Source[EventEnvelope, NotUsed] =
+    val src =
       queries.eventsByPersistenceId(PriceAggregateActor.persistenceId, 0L, Long.MaxValue)
 
     src.runForeach(actor ! _.event)

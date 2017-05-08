@@ -1,0 +1,8 @@
+version: '2.0'
+
+services:
+
+  cassandra:
+    image: docker.dev.fastfish.io/cassandra:3
+    ports:
+      - "9042:9042"
