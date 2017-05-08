@@ -59,6 +59,5 @@ class BookedDatesActor(synchronizeBookingActor: ActorRef) extends PersistentActo
   override def preStart() =
     synchronizeBookingActor ! StartSync(self, BookingAggregateActor.persistenceId, recoverySequenceNumberForQuery)
 
-
   override def persistenceId: String = "BookedDatesActor"
 }

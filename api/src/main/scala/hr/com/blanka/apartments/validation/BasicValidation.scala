@@ -28,7 +28,7 @@ object BasicValidation {
   }
 
   // Temp until unit addition side is added
-  def validUnitId(unitId: Int) : Int Or One[ErrorMessage] = {
+  def validUnitId(unitId: Int): Int Or One[ErrorMessage] = {
     if (unitId > 0 && unitId < 4)
       Good(unitId)
     else

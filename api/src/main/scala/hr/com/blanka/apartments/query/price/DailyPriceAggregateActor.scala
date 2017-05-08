@@ -1,15 +1,15 @@
 package hr.com.blanka.apartments.query.price
 
-import akka.actor.{Actor, Props}
+import akka.actor.{ Actor, Props }
 import akka.cluster.sharding.ShardRegion
-import hr.com.blanka.apartments.command.price.{DailyPriceSaved, DayMonth}
+import hr.com.blanka.apartments.command.price.{ DailyPriceSaved, DayMonth }
 
 object DailyPriceAggregateActor {
   def apply() = Props(classOf[DailyPriceAggregateActor])
 
   val extractEntityId: ShardRegion.ExtractEntityId = {
-    case e@DailyPriceSaved(userId, unitId, _, _, _) => (s"$userId$unitId", e)
-    case e@LookupPriceForDay(userId, unitId, _) => (s"$userId$unitId", e)
+    case e @ DailyPriceSaved(userId, unitId, _, _, _) => (s"$userId$unitId", e)
+    case e @ LookupPriceForDay(userId, unitId, _) => (s"$userId$unitId", e)
   }
 
   val extractShardId: ShardRegion.ExtractShardId = {

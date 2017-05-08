@@ -1,9 +1,9 @@
 package hr.com.blanka.apartments.query.booking
 
 import akka.NotUsed
-import akka.actor.{Actor, ActorRef, Props}
-import akka.contrib.persistence.mongodb.{MongoReadJournal, ScalaDslMongoReadJournal}
-import akka.persistence.query.{EventEnvelope, PersistenceQuery}
+import akka.actor.{ Actor, ActorRef, Props }
+import akka.contrib.persistence.mongodb.{ MongoReadJournal, ScalaDslMongoReadJournal }
+import akka.persistence.query.{ EventEnvelope, PersistenceQuery }
 import akka.stream.ActorMaterializer
 import akka.stream.scaladsl.Source
 

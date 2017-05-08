@@ -6,15 +6,14 @@ import akka.util.Timeout
 import hr.com.blanka.apartments.utils.HelperMethods
 import hr.com.blanka.apartments.validation.BasicValidation._
 import hr.com.blanka.apartments.validation.ErrorMessages._
-import org.joda.time.LocalDate
 import org.scalactic.Accumulation._
-import org.scalactic.{Bad, _}
+import org.scalactic.{ Bad, _ }
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.concurrent.duration._
 import scala.language.postfixOps
-import scala.util.{Failure, Success}
+import scala.util.{ Failure, Success }
 
 object CommandPriceActor {
 
@@ -32,21 +31,22 @@ class CommandPriceActor(priceAggregateActorProps: Props) extends Actor with Help
       val msgSender = sender()
 
       withGood(validateDuration(from, to), validUnitId(unitId)) {
-        (_, _) => {
-          val savedPrices = iterateThroughDays(from, to).map { localDate =>
-            val day = DayMonth(localDate)
+        (_, _) =>
+          {
+            val savedPrices = iterateThroughDays(from, to).map { localDate =>
+              val day = DayMonth(localDate)
 
-            priceAggregateActor ? SavePriceForSingleDay(userId, unitId, day, price)
-          }
+              priceAggregateActor ? SavePriceForSingleDay(userId, unitId, day, price)
+            }
 
-          Future.sequence(savedPrices).onComplete {
-            case Success(result) =>
-              msgSender ! Good
-            case Failure(t) =>
-              log.error(t.getMessage)
-              msgSender ! Bad(persistingDailyPricesErrorMessage)
+            Future.sequence(savedPrices).onComplete {
+              case Success(result) =>
+                msgSender ! Good
+              case Failure(t) =>
+                log.error(t.getMessage)
+                msgSender ! Bad(persistingDailyPricesErrorMessage)
+            }
           }
-        }
       } recover (err => msgSender ! Bad(err.mkString(", ")))
   }
 }

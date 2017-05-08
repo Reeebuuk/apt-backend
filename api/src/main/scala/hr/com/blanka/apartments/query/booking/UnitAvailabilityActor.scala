@@ -1,19 +1,19 @@
 package hr.com.blanka.apartments.query.booking
 
-import akka.actor.{ActorLogging, ActorRef, Props}
+import akka.actor.{ ActorLogging, ActorRef, Props }
 import akka.cluster.sharding.ShardRegion
 import akka.persistence.PersistentActor
-import hr.com.blanka.apartments.command.booking.{BookingAggregateActor, CheckIfPeriodIsAvailable, EnquiryBooked}
-import org.joda.time.{Days, LocalDate}
-import org.scalactic.{Bad, Good}
+import hr.com.blanka.apartments.command.booking.{ BookingAggregateActor, CheckIfPeriodIsAvailable, EnquiryBooked }
+import org.joda.time.{ Days, LocalDate }
+import org.scalactic.{ Bad, Good }
 
 object UnitAvailabilityActor {
   def apply(synchronizeBookingActor: ActorRef) = Props(classOf[UnitAvailabilityActor], synchronizeBookingActor)
 
   val extractEntityId: ShardRegion.ExtractEntityId = {
-    case e : EnquiryBooked => (e.userId.toString, e)
-    case e : GetAvailableApartments => (e.userId.toString, e)
-    case e : CheckIfPeriodIsAvailable => (e.userId.toString, e)
+    case e: EnquiryBooked => (e.userId.toString, e)
+    case e: GetAvailableApartments => (e.userId.toString, e)
+    case e: CheckIfPeriodIsAvailable => (e.userId.toString, e)
   }
 
   val extractShardId: ShardRegion.ExtractShardId = {
@@ -33,31 +33,30 @@ class UnitAvailabilityActor(synchronizeBookingActor: ActorRef) extends Persisten
     case GetAvailableApartments(_, from, to) =>
       sender() ! Good(AvailableApartments(getAvailableApartments(from, to)))
 
-    case EnquiryBookedWithSeqNmr(nmbr, EnquiryBooked(userId, bookingId, enquiry, _, _ ,_)) =>
-      iterateThroughDays(enquiry.dateFrom, enquiry.dateTo).foreach( date =>
+    case EnquiryBookedWithSeqNmr(nmbr, EnquiryBooked(userId, bookingId, enquiry, _, _, _)) =>
+      iterateThroughDays(enquiry.dateFrom, enquiry.dateTo).foreach(date =>
         persist(BookedUnit(userId, enquiry.unitId, date, nmbr)) { event =>
           update(event)
-        }
-      )
+        })
   }
 
   //currently hardcoded for 3 apartments
   def getAvailableApartments(from: LocalDate, to: LocalDate) =
     Set(1, 2, 3).diff(getBookedApartments(from, to))
 
-  def getBookedApartments(from: LocalDate, to:LocalDate): Set[Int] =
+  def getBookedApartments(from: LocalDate, to: LocalDate): Set[Int] =
     iterateThroughDays(from, to).flatMap(bookedUnitsPerDate.getOrElse(_, Set())).toSet
 
   def checkIfUnitIdIsBooked(unitId: Int, from: LocalDate, to: LocalDate) =
     getBookedApartments(from, to).toList.contains(unitId) match {
-      case true  => Bad
+      case true => Bad
       case false => Good
     }
 
   def iterateThroughDays(from: LocalDate, to: LocalDate): List[LocalDate] =
     (0 to Days.daysBetween(from, to).getDays).map(from.plusDays).toList
 
-  def update(e: BookedUnit) : Unit = {
+  def update(e: BookedUnit): Unit = {
     bookedUnitsPerDate = bookedUnitsPerDate.get(e.date) match {
       case None => bookedUnitsPerDate + (e.date -> Set(e.unitId))
       case Some(units) => bookedUnitsPerDate + (e.date -> (units + e.unitId))
