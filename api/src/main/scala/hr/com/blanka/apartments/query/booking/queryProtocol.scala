@@ -11,7 +11,7 @@ case class GetAvailableApartments(userId: String, from: LocalDate, to: LocalDate
 sealed trait BookingQueryResponse
 
 case class BookedDays(bookedDays: List[BookedDay]) extends BookingQueryResponse
-case class AvailableApartments(apartments: Set[Int]) extends BookingQueryResponse
+case class AvailableApartments(apartmentIds: Set[Int]) extends BookingQueryResponse
 
 case class BookedUnit(userId: String, unitId: Int, date: LocalDate, sequenceNmbr: Long)
 

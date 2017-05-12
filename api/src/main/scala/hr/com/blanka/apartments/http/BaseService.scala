@@ -2,13 +2,20 @@ package hr.com.blanka.apartments.http
 
 import akka.actor.ActorRef
 import akka.http.scaladsl.server.Directives._
-import hr.com.blanka.apartments.http.routes._
+import akka.http.scaladsl.server.Route
+import hr.com.blanka.apartments.http.routes.command.{ CommandBookingServiceRoute, CommandPriceServiceRoute }
+import hr.com.blanka.apartments.http.routes.query.{ QueryBookingServiceRoute, QueryPriceServiceRoute }
 
-trait BaseService extends PriceServiceRoute with BookingServiceRoute {
+trait BaseService
+    extends QueryPriceServiceRoute
+    with QueryBookingServiceRoute
+    with CommandBookingServiceRoute
+    with CommandPriceServiceRoute {
 
-  def routes(command: ActorRef, query: ActorRef) = {
+  def routes(command: ActorRef, query: ActorRef): Route = {
     pathPrefix("v1") {
-      priceRoute(command, query) ~ bookingRoute(command, query)
+      queryPriceRoute(query) ~ queryBookingRoute(query) ~
+        commandPriceRoute(command) ~ commandBookingRoute(command)
     }
   }
 }
