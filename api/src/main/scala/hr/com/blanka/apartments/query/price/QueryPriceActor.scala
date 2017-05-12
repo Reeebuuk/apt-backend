@@ -1,9 +1,9 @@
 package hr.com.blanka.apartments.query.price
 
 import akka.Done
-import akka.actor.{Actor, ActorLogging, ActorRef, Props}
-import akka.cluster.sharding.{ClusterSharding, ClusterShardingSettings}
-import akka.pattern.{ask, pipe}
+import akka.actor.{ Actor, ActorLogging, ActorRef, Props }
+import akka.cluster.sharding.{ ClusterSharding, ClusterShardingSettings }
+import akka.pattern.{ ask, pipe }
 import akka.persistence.cassandra.query.scaladsl.CassandraReadJournal
 import akka.persistence.query.PersistenceQuery
 import akka.stream.ActorMaterializer
@@ -23,15 +23,6 @@ class QueryPriceActor(implicit materializer: ActorMaterializer) extends Actor wi
 
   implicit val timeout = Timeout(3 seconds)
 
-  def startSync(actor: ActorRef): Future[Done] = {
-    val queries = PersistenceQuery(context.system).readJournalFor[CassandraReadJournal](CassandraReadJournal.Identifier)
-
-    val src =
-      queries.eventsByPersistenceId(PriceAggregateActor.persistenceId, 0L, Long.MaxValue)
-
-    src.runForeach(actor ! _.event)
-  }
-
   val dailyPriceAggregateActor: ActorRef = ClusterSharding(context.system).start(
     typeName = "DailyPriceAggregateActor",
     entityProps = DailyPriceAggregateActor(),
@@ -40,12 +31,16 @@ class QueryPriceActor(implicit materializer: ActorMaterializer) extends Actor wi
     extractShardId = DailyPriceAggregateActor.extractShardId
   )
 
-  val queryPriceRangeActor = context.actorOf(QueryPriceRangeActor(dailyPriceAggregateActor), "QueryPriceRangeActor")
+  val queryPriceRangeActor: ActorRef =
+    context.actorOf(QueryPriceRangeActor(dailyPriceAggregateActor), "QueryPriceRangeActor")
 
-  override def preStart() = startSync(dailyPriceAggregateActor)
+  //  override def preStart(): Unit = startSync(dailyPriceAggregateActor)
 
   override def receive: Receive = {
     case e: LookupPriceForRange =>
+      val msgSender = sender()
+      queryPriceRangeActor ? e pipeTo msgSender
+    case e: LookupAllPrices =>
       val msgSender = sender()
       queryPriceRangeActor ? e pipeTo msgSender
   }

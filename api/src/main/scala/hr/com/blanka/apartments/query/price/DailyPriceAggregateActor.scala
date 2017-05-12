@@ -2,7 +2,8 @@ package hr.com.blanka.apartments.query.price
 
 import akka.actor.{ Actor, Props }
 import akka.cluster.sharding.ShardRegion
-import hr.com.blanka.apartments.command.price.{ DailyPriceSaved, DayMonth }
+import hr.com.blanka.apartments.command.price.DailyPriceSaved
+import hr.com.blanka.apartments.common.DayMonth
 
 object DailyPriceAggregateActor {
   def apply() = Props(classOf[DailyPriceAggregateActor])
@@ -10,11 +11,10 @@ object DailyPriceAggregateActor {
   val extractEntityId: ShardRegion.ExtractEntityId = {
     case e @ DailyPriceSaved(userId, unitId, _, _, _) => (s"$userId$unitId", e)
     case e @ LookupPriceForDay(userId, unitId, _) => (s"$userId$unitId", e)
+    case e @ LookupAllPrices(userId, unitId) => (s"$userId$unitId", e)
   }
 
-  val extractShardId: ShardRegion.ExtractShardId = {
-    case _ => "one"
-  }
+  val extractShardId: ShardRegion.ExtractShardId = _ => "one"
 }
 
 class DailyPriceAggregateActor extends Actor {
@@ -29,11 +29,12 @@ class DailyPriceAggregateActor extends Actor {
     context become active(currentDailyPrices + (newDailyPrice.dayMonth -> newPrices))
   }
 
-  override def receive = active(Map[DayMonth, List[BigDecimal]]())
+  override def receive: Receive = active(Map[DayMonth, List[BigDecimal]]())
 
   def active(currentDailyPrices: Map[DayMonth, List[BigDecimal]]): Receive = {
     case e: DailyPriceSaved =>
       updateState(e, currentDailyPrices)
+      context become active(currentDailyPrices)
 
     case LookupPriceForDay(userId, unitId, day) =>
       val lastPrice: BigDecimal = currentDailyPrices.get(day) match {
@@ -42,6 +43,11 @@ class DailyPriceAggregateActor extends Actor {
       }
 
       sender() ! PriceDayFetched(lastPrice)
+
+    case LookupAllPrices(userId, unitId) =>
+      val prices = currentDailyPrices.map(dayPrice => DailyPrice(dayPrice._1, dayPrice._2.head)).toList
+
+      sender() ! AllPricesFetched(prices)
   }
 
 }
