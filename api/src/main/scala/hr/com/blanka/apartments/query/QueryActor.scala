@@ -1,6 +1,6 @@
 package hr.com.blanka.apartments.query
 
-import akka.actor.{ Actor, ActorLogging, Props }
+import akka.actor.{ Actor, ActorLogging, ActorRef, Props }
 import akka.pattern.{ ask, pipe }
 import akka.stream.ActorMaterializer
 import akka.util.Timeout
@@ -19,8 +19,13 @@ class QueryActor(materializer: ActorMaterializer) extends Actor with ActorLoggin
 
   implicit val timeout = Timeout(3 seconds)
 
-  val priceActor = context.actorOf(QueryPriceActor(materializer), "QueryPriceActor")
-  val bookingActor = context.actorOf(QueryBookingActor(materializer), "QueryBookingActor")
+  val priceActor: ActorRef = context.actorOf(QueryPriceActor(materializer), "QueryPriceActor")
+  val bookingActor: ActorRef = context.actorOf(QueryBookingActor(materializer), "QueryBookingActor")
+
+  val queryProjectionSupervisor: ActorRef = context.actorOf(
+    QueryProjectionSupervisor(materializer),
+    "QueryProjectionSupervisor"
+  )
 
   override def receive: Receive = {
     case e: PriceQuery =>

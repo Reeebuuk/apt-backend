@@ -1,6 +1,6 @@
 package hr.com.blanka.apartments.utils
 
-import org.joda.time.{Days, LocalDate}
+import org.joda.time.{ Days, LocalDate }
 
 trait HelperMethods {
 

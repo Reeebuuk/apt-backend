@@ -29,7 +29,7 @@ class CommandBookingActor extends PersistentActor with ActorLogging {
   var bookingCounter: Long = 0l
 
   override def receiveCommand: Receive = {
-    case EnquiryReceived(userId, enquiry) =>
+    case SaveEnquiryInitiated(userId, enquiry) =>
       persist(NewBookingIdAssigned(bookingCounter + 1)) { event =>
         bookingCounter = event.bookingId
         bookingAggregateActor ? SaveEnquiry(userId, bookingCounter, enquiry) pipeTo sender()
