@@ -1,31 +1,34 @@
 package hr.com.blanka.apartments
 
-import akka.actor.{ActorRef, ActorSystem}
-import akka.event.{LoggingAdapter, NoLogging}
+import akka.actor.{ ActorRef, ActorSystem }
+import akka.event.{ LoggingAdapter, NoLogging }
 import akka.http.scaladsl.model.StatusCodes._
 import akka.http.scaladsl.model._
-import akka.http.scaladsl.testkit.{RouteTestTimeout, ScalatestRouteTest}
+import akka.http.scaladsl.testkit.{ RouteTestTimeout, ScalatestRouteTest }
 import com.typesafe.config.Config
 import hr.com.blanka.apartments.Main._
 import hr.com.blanka.apartments.command.CommandActor
-import hr.com.blanka.apartments.command.price.SavePriceRange
-import hr.com.blanka.apartments.http.model.PriceForRangeResponse
+import hr.com.blanka.apartments.http.model.{ LookupPriceForRangeRequest, PriceForRangeResponse, SavePriceRangeRequest }
 import hr.com.blanka.apartments.query.QueryActor
-import hr.com.blanka.apartments.query.price.LookupPriceForRange
-import hr.com.blanka.apartments.utils.{ReadMarshallingSupport, WriteMarshallingSupport}
+import hr.com.blanka.apartments.utils.{ ReadMarshallingSupport, WriteMarshallingSupport }
 import org.joda.time.LocalDate
-import org.json4s.{DefaultFormats, Formats}
-import org.scalatest.concurrent.Eventually
-import org.scalatest.time.{Second, Seconds, Span}
+import org.json4s.{ DefaultFormats, Formats }
 import org.scalatest.Matchers
+import org.scalatest.concurrent.Eventually
+import org.scalatest.time.{ Second, Seconds, Span }
 import spray.json._
 
 import scala.concurrent.ExecutionContextExecutor
 import scala.concurrent.duration._
 import scala.language.implicitConversions
 
-class PriceTest extends IntegrationTestCassandraSupport with Matchers with ScalatestRouteTest with Eventually with
-  ReadMarshallingSupport with WriteMarshallingSupport{
+class PriceTest
+    extends IntegrationTestCassandraSupport
+    with Matchers
+    with ScalatestRouteTest
+    with Eventually
+    with ReadMarshallingSupport
+    with WriteMarshallingSupport {
 
   import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport._
   protected val log: LoggingAdapter = NoLogging
@@ -51,7 +54,7 @@ class PriceTest extends IntegrationTestCassandraSupport with Matchers with Scala
 
     val firstFrom = midYearDate
     val firstTo = firstFrom.plusDays(5)
-    val firstPrice = SavePriceRange(userId, unitId, firstFrom, firstTo, 35)
+    val firstPrice = SavePriceRangeRequest(userId, unitId, firstFrom, firstTo, 35)
     val firstRequestEntity = HttpEntity(MediaTypes.`application/json`, firstPrice.toJson.toString())
 
     Post("/price", firstRequestEntity) ~> commandPriceRoute(command) ~> check {
@@ -60,7 +63,7 @@ class PriceTest extends IntegrationTestCassandraSupport with Matchers with Scala
 
     val secondFrom = firstTo
     val secondTo = secondFrom.plusDays(5)
-    val secondPrice = SavePriceRange(userId, unitId, secondFrom, secondTo, 40)
+    val secondPrice = SavePriceRangeRequest(userId, unitId, secondFrom, secondTo, 40)
     val secondRequestEntity = HttpEntity(MediaTypes.`application/json`, secondPrice.toJson.toString())
 
     Post("/price", secondRequestEntity) ~> commandPriceRoute(command) ~> check {
@@ -70,7 +73,7 @@ class PriceTest extends IntegrationTestCassandraSupport with Matchers with Scala
     val from = midYearDate.plusDays(3)
     val to = from.plusDays(4)
     val lookupRequest =
-      HttpEntity(MediaTypes.`application/json`, LookupPriceForRange(userId, unitId, from, to).toJson.toString())
+      HttpEntity(MediaTypes.`application/json`, LookupPriceForRangeRequest(userId, unitId, from, to).toJson.toString())
 
     eventually {
       Post("/price/calculate", lookupRequest) ~> queryPriceRoute(query) ~> check {
