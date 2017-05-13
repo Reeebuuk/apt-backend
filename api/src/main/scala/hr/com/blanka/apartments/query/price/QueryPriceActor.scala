@@ -1,17 +1,12 @@
 package hr.com.blanka.apartments.query.price
 
-import akka.Done
 import akka.actor.{ Actor, ActorLogging, ActorRef, Props }
 import akka.cluster.sharding.{ ClusterSharding, ClusterShardingSettings }
 import akka.pattern.{ ask, pipe }
-import akka.persistence.cassandra.query.scaladsl.CassandraReadJournal
-import akka.persistence.query.PersistenceQuery
 import akka.stream.ActorMaterializer
 import akka.util.Timeout
-import hr.com.blanka.apartments.command.price.PriceAggregateActor
 
 import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future
 import scala.concurrent.duration._
 import scala.language.postfixOps
 
@@ -33,8 +28,6 @@ class QueryPriceActor(implicit materializer: ActorMaterializer) extends Actor wi
 
   val queryPriceRangeActor: ActorRef =
     context.actorOf(QueryPriceRangeActor(dailyPriceAggregateActor), "QueryPriceRangeActor")
-
-  //  override def preStart(): Unit = startSync(dailyPriceAggregateActor)
 
   override def receive: Receive = {
     case e: LookupPriceForRange =>
