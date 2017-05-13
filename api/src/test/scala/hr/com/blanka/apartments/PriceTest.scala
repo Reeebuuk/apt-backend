@@ -13,7 +13,7 @@ import hr.com.blanka.apartments.query.QueryActor
 import hr.com.blanka.apartments.utils.{ ReadMarshallingSupport, WriteMarshallingSupport }
 import org.joda.time.LocalDate
 import org.json4s.{ DefaultFormats, Formats }
-import org.scalatest.Matchers
+import org.scalatest.{ FlatSpec, Matchers }
 import org.scalatest.concurrent.Eventually
 import org.scalatest.time.{ Second, Seconds, Span }
 import spray.json._
@@ -23,7 +23,7 @@ import scala.concurrent.duration._
 import scala.language.implicitConversions
 
 class PriceTest
-    extends IntegrationTestCassandraSupport
+    extends FlatSpec
     with Matchers
     with ScalatestRouteTest
     with Eventually

@@ -17,6 +17,8 @@ libraryDependencies ++= {
   val jodaTimeV = "2.9.9"
   val cassandraUnitV = "3.1.3.2"
   val guavaV = "21.0"
+  val leveldbV = "0.9"
+  val leveldbJniV = "1.8"
 
   Seq(
     "joda-time" % "joda-time" % jodaTimeV,
@@ -34,6 +36,8 @@ libraryDependencies ++= {
     "org.scalactic" %% "scalactic" % scalacticV,
     "org.cassandraunit" % "cassandra-unit" % cassandraUnitV % "test",
     "org.scalatest" %% "scalatest" % scalaTestV % "test",
-    "com.typesafe.akka" %% "akka-http-testkit" % akkaHttpTestV % "test"
+    "com.typesafe.akka" %% "akka-http-testkit" % akkaHttpTestV % "test",
+    "org.iq80.leveldb" % "leveldb" % leveldbV % "test",
+    "org.fusesource.leveldbjni" % "leveldbjni-all" % leveldbJniV % "test"
   )
 }

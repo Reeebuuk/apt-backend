@@ -2,24 +2,20 @@ package hr.com.blanka.apartments
 
 import java.io.IOException
 import java.net.ServerSocket
+import java.util.concurrent.ThreadLocalRandom
 
-import akka.actor.ActorRef
-import com.typesafe.config.ConfigFactory
-import org.scalatest._
-
-import scala.concurrent.forkjoin.ThreadLocalRandom
+import com.typesafe.config.{ Config, ConfigFactory }
 
 object IntegrationConf {
 
-  def config(port: Int, className: String) = ConfigFactory.parseString(
-    s"""
+  def config(port: Int, className: String): Config = ConfigFactory.parseString(s"""
        |akka{
        |  actor {
        |    provider = "akka.cluster.ClusterActorRefProvider"
        |  }
        |  persistence {
-       |    persistence.journal.plugin = "cassandra-journal"
-       |    persistence.snapshot-store.plugin = "cassandra-snapshot-store"
+       |    journal.plugin = "akka.persistence.journal.leveldb"
+       |    snapshot-store.plugin = "akka.persistence.journal.leveldb"
        |  }
        |  remote {
        |    log-remote-lifecycle-events = off
@@ -37,41 +33,24 @@ object IntegrationConf {
        |
        |  sharding {
        |    remember-entities = false
-       |    journal-plugin-id = "cassandra-journal"
-       |    snapshot-plugin-id = "cassandra-snapshot-store"
+       |    journal-plugin-id = "inmemory-journal"
+       |    snapshot-plugin-id = "inmemory-snapshot-store"
        |  }
        |
        |  extensions=["akka.cluster.metrics.ClusterMetricsExtension"]
        |}
+       |inmemory-snapshot-store {
+       |  class = "akka.persistence.inmemory.snapshot.InMemorySnapshotStore"
+       |  ask-timeout = "10s"
+       |}
+       |
+       |inmemory-read-journal {
+       |  refresh-interval = "100ms"
+       |  max-buffer-size = "100"
+       |}
     """.stripMargin)
 
-  lazy val freePort = FreePort.nextFreePort(49152, 65535)
-}
-
-trait IntegrationTestCassandraSupport extends FlatSpec with BeforeAndAfterAll {
-
-  import IntegrationConf._
-
-  val freePort: Int = FreePort.nextFreePort(49152, 65535)
-
-  lazy val host = "localhost"
-
-  import org.cassandraunit.utils.EmbeddedCassandraServerHelper
-
-  EmbeddedCassandraServerHelper.startEmbeddedCassandra()
-
-  var employeeProcessor: ActorRef = _
-  var benefitsView: ActorRef = _
-
-  override protected def beforeAll() = {
-    super.beforeAll()
-  }
-
-  override protected def afterAll() = {
-    super.afterAll()
-  }
-
-
+  lazy val freePort: Int = FreePort.nextFreePort(49152, 65535)
 }
 
 object FreePort {
