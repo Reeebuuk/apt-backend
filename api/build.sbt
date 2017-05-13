@@ -1,6 +1,7 @@
 name := "Api"
 
 resolvers += "Sonatype releases" at "http://repo.typesafe.com/typesafe/releases/"
+resolvers += "Artima Maven Repository" at "http://repo.artima.com/releases"
 resolvers += "Sonatype OSS Snapshots" at "https://oss.sonatype.org/content/repositories/snapshots"
 
 scalaVersion := "2.12.1"

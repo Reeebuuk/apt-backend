@@ -3,6 +3,11 @@ enablePlugins(JavaServerAppPackaging)
 
 name          := "Apartments Blanka backend"
 
+lazy val api =  project in file("api")
+
+lazy val root =  (project in file(".")) aggregate(api) dependsOn(api)
+
+
 organization  := "com.apt"
 
 version       := "1.0.0"
