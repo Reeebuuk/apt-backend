@@ -1,6 +1,6 @@
 package hr.com.blanka.apartments.http.model
 
-import hr.com.blanka.apartments.command.booking.{DepositPaid, Enquiry, SaveEnquiryInitiated}
+import hr.com.blanka.apartments.command.booking.{ DepositPaid, Enquiry, SaveEnquiryInitiated }
 import hr.com.blanka.apartments.command.price.SavePriceRange
 import org.joda.time.LocalDate
 
@@ -41,14 +41,14 @@ case class EnquiryReceivedRequest(userId: String, enquiry: EnquiryRequest) {
       )
     )
 }
-case class DepositPaidRequest(userId: String, bookingId: Long, depositAmount: BigDecimal, currency: String){
+case class DepositPaidRequest(userId: String, bookingId: Long, depositAmount: BigDecimal, currency: String) {
   def toCommand: DepositPaid =
     DepositPaid(userId, bookingId, depositAmount, currency)
 }
 
-case class SavePriceRangeRequest(userId: String, unitId: Int, from: LocalDate, to: LocalDate, price: BigDecimal){
+case class SavePriceRangeRequest(userId: String, unitId: Int, from: LocalDate, to: LocalDate, price: BigDecimal) {
   def toCommand: SavePriceRange =
-    SavePriceRange(userId, unitId,from, to, price)
+    SavePriceRange(userId, unitId, from, to, price)
 }
 
 case class LookupPriceForRangeRequest(userId: String, unitId: Int, from: LocalDate, to: LocalDate)
