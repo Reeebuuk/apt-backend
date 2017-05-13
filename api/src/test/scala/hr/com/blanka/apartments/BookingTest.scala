@@ -8,10 +8,8 @@ import akka.http.scaladsl.testkit.{ RouteTestTimeout, ScalatestRouteTest }
 import com.typesafe.config.Config
 import hr.com.blanka.apartments.Main._
 import hr.com.blanka.apartments.command.CommandActor
-import hr.com.blanka.apartments.command.booking.{ DepositPaid, Enquiry, SaveEnquiryInitiated }
-import hr.com.blanka.apartments.http.model.{ AvailableApartmentsResponse, BookedDayResponse, BookedDaysResponse }
+import hr.com.blanka.apartments.http.model._
 import hr.com.blanka.apartments.query.QueryActor
-import hr.com.blanka.apartments.query.booking.{ AvailableApartments, BookedDay, BookedDays }
 import hr.com.blanka.apartments.utils.{ ReadMarshallingSupport, WriteMarshallingSupport }
 import org.joda.time.LocalDate
 import org.json4s.{ DefaultFormats, Formats }
@@ -58,15 +56,15 @@ class BookingTest
 
     val firstFrom = midYearDate
     val firstTo = firstFrom.plusDays(5)
-    val enquiry = Enquiry(unitId, firstFrom, firstTo, "", "", "", "", "", "", "", "", "", "")
-    val firstPrice = SaveEnquiryInitiated(userId, enquiry)
+    val enquiry = EnquiryRequest(unitId, firstFrom, firstTo, "", "", "", "", "", "", "", "", "", "")
+    val firstPrice = EnquiryReceivedRequest(userId, enquiry)
     val firstRequestEntity = HttpEntity(MediaTypes.`application/json`, firstPrice.toJson.toString())
 
     Post("/booking", firstRequestEntity) ~> commandBookingRoute(command) ~> check {
       status should be(OK)
     }
 
-    val depositPaid = DepositPaid(userId, 1, BigDecimal(15), "EUR")
+    val depositPaid = DepositPaidRequest(userId, 1, BigDecimal(15), "EUR")
     val depositPaidEntity = HttpEntity(MediaTypes.`application/json`, depositPaid.toJson.toString())
 
     Post("/booking/depositPaid", depositPaidEntity) ~> commandBookingRoute(command) ~> check {
