@@ -2,7 +2,7 @@ package hr.com.blanka.apartments.http.model
 
 import hr.com.blanka.apartments.command.booking.{ DepositPaid, Enquiry, SaveEnquiryInitiated }
 import hr.com.blanka.apartments.command.price.SavePriceRange
-import org.joda.time.LocalDate
+import java.time.LocalDate
 
 case class EnquiryRequest(
   unitId: Int,
@@ -17,8 +17,7 @@ case class EnquiryRequest(
   country: String,
   animals: String,
   noOfPeople: String,
-  note: String
-)
+  note: String)
 
 case class EnquiryReceivedRequest(userId: String, enquiry: EnquiryRequest) {
   def toCommand: SaveEnquiryInitiated =
@@ -37,9 +36,7 @@ case class EnquiryReceivedRequest(userId: String, enquiry: EnquiryRequest) {
         enquiry.country,
         enquiry.animals,
         enquiry.noOfPeople,
-        enquiry.note
-      )
-    )
+        enquiry.note))
 }
 case class DepositPaidRequest(userId: String, bookingId: Long, depositAmount: BigDecimal, currency: String) {
   def toCommand: DepositPaid =

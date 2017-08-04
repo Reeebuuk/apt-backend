@@ -1,5 +1,4 @@
-enablePlugins(SbtNativePackager)
-enablePlugins(JavaServerAppPackaging)
+enablePlugins(JavaAppPackaging)
 
 name          := "Apartments Blanka backend"
 
@@ -12,12 +11,9 @@ organization  := "com.apt"
 
 version       := "1.0.0"
 
-scalaVersion  := "2.12.1"
+scalaVersion  := "2.12.3"
 
 scalacOptions := Seq("-unchecked", "-feature", "-deprecation", "-encoding", "utf8")
-
-resolvers += "Sonatype releases" at "http://repo.typesafe.com/typesafe/releases/"
-resolvers += "Sonatype OSS Snapshots" at "https://oss.sonatype.org/content/repositories/snapshots"
 
 parallelExecution in Test := false
 

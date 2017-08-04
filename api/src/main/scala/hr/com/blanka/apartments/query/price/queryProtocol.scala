@@ -1,7 +1,7 @@
 package hr.com.blanka.apartments.query.price
 
 import hr.com.blanka.apartments.common.DayMonth
-import org.joda.time.LocalDate
+import java.time.LocalDate
 
 sealed trait PriceQuery
 

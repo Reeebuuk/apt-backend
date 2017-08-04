@@ -1,10 +1,10 @@
 package hr.com.blanka.apartments.utils
 
-import org.joda.time.{ Days, LocalDate }
+import java.time.{ Duration, LocalDate }
 
 trait HelperMethods {
 
   def iterateThroughDays(from: LocalDate, to: LocalDate): List[LocalDate] =
-    (0 to Days.daysBetween(from, to).getDays).map(from.plusDays).toList
+    (0l to Duration.between(from, to).toDays).map(from.plusDays).toList
 
 }

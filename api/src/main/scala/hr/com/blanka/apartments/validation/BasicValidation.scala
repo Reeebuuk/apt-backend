@@ -1,6 +1,7 @@
 package hr.com.blanka.apartments.validation
 
-import org.joda.time.{ Days, LocalDate }
+import java.time.{ Duration, LocalDate }
+
 import org.scalactic.Accumulation._
 import org.scalactic._
 
@@ -9,17 +10,19 @@ object BasicValidation {
   import ErrorMessages._
 
   private def notPastDate(date: LocalDate, rangeSide: String): LocalDate Or One[ErrorMessage] = {
-    if (date.getDayOfYear >= new LocalDate().getDayOfYear)
+    if (date.getDayOfYear >= LocalDate.now().getDayOfYear)
       Good(date)
     else
       Bad(One(dateIsInPastErrorMessage(rangeSide, date)))
   }
 
   def validateDuration(from: LocalDate, to: LocalDate): Int Or Every[ErrorMessage] = {
-    val dates = withGood(notPastDate(from, "From"), notPastDate(to, "To")) { (from, to) => (from, to) }
+    val dates = withGood(notPastDate(from, "From"), notPastDate(to, "To")) { (from, to) =>
+      (from, to)
+    }
 
     dates.flatMap(x => {
-      val duration = Days.daysBetween(x._1, x._2).getDays
+      val duration = Duration.between(x._1, x._2).toDays.toInt
       if (duration >= 0)
         Good(duration)
       else

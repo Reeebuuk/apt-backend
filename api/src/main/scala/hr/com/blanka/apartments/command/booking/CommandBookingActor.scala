@@ -23,8 +23,7 @@ class CommandBookingActor extends PersistentActor with ActorLogging {
     entityProps = BookingAggregateActor(),
     settings = ClusterShardingSettings(context.system),
     extractEntityId = BookingAggregateActor.extractEntityId,
-    extractShardId = BookingAggregateActor.extractShardId
-  )
+    extractShardId = BookingAggregateActor.extractShardId)
 
   var bookingCounter: Long = 0l
 

@@ -1,7 +1,7 @@
 package hr.com.blanka.apartments.query.booking
 
 import akka.actor.ActorRef
-import org.joda.time.LocalDate
+import java.time.LocalDate
 
 sealed trait BookingQuery
 

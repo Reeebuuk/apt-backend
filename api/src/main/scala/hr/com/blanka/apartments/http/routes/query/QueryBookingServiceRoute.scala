@@ -9,7 +9,7 @@ import hr.com.blanka.apartments.http.model.{ AvailableApartmentsResponse, Booked
 import hr.com.blanka.apartments.http.routes.BaseServiceRoute
 import hr.com.blanka.apartments.query.booking.{ AvailableApartments, BookedDays, GetAvailableApartments, GetBookedDates }
 import hr.com.blanka.apartments.utils.WriteMarshallingSupport
-import org.joda.time.LocalDate
+import java.time.LocalDate
 import org.scalactic._
 
 trait QueryBookingServiceRoute extends BaseServiceRoute with WriteMarshallingSupport {
@@ -33,7 +33,7 @@ trait QueryBookingServiceRoute extends BaseServiceRoute with WriteMarshallingSup
     } ~
       path("available") {
         parameters('from.as[Long], 'to.as[Long]) { (from, to) =>
-          onSuccess(query ? GetAvailableApartments("user", new LocalDate(from), new LocalDate(to))) {
+          onSuccess(query ? GetAvailableApartments("user", LocalDate.ofEpochDay(from), LocalDate.ofEpochDay(to))) {
             case Good(aa: AvailableApartments) => complete(StatusCodes.OK, AvailableApartmentsResponse.remap(aa))
             case Bad(response) =>
               response match {

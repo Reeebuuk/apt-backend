@@ -24,8 +24,7 @@ class QueryActor(materializer: ActorMaterializer) extends Actor with ActorLoggin
 
   val queryProjectionSupervisor: ActorRef = context.actorOf(
     QueryProjectionSupervisor(materializer),
-    "QueryProjectionSupervisor"
-  )
+    "QueryProjectionSupervisor")
 
   override def receive: Receive = {
     case e: PriceQuery =>

@@ -7,10 +7,10 @@ import hr.com.blanka.apartments.http.routes.command.{ CommandBookingServiceRoute
 import hr.com.blanka.apartments.http.routes.query.{ QueryBookingServiceRoute, QueryPriceServiceRoute }
 
 trait BaseService
-    extends QueryPriceServiceRoute
-    with QueryBookingServiceRoute
-    with CommandBookingServiceRoute
-    with CommandPriceServiceRoute {
+  extends QueryPriceServiceRoute
+  with QueryBookingServiceRoute
+  with CommandBookingServiceRoute
+  with CommandPriceServiceRoute {
 
   def routes(command: ActorRef, query: ActorRef): Route = {
     pathPrefix("v1") {

@@ -11,7 +11,7 @@ import hr.com.blanka.apartments.command.CommandActor
 import hr.com.blanka.apartments.http.model.{ LookupPriceForRangeRequest, PriceForRangeResponse, SavePriceRangeRequest }
 import hr.com.blanka.apartments.query.QueryActor
 import hr.com.blanka.apartments.utils.{ ReadMarshallingSupport, WriteMarshallingSupport }
-import org.joda.time.LocalDate
+import java.time.LocalDate
 import org.json4s.{ DefaultFormats, Formats }
 import org.scalatest.{ FlatSpec, Matchers }
 import org.scalatest.concurrent.Eventually
@@ -23,12 +23,12 @@ import scala.concurrent.duration._
 import scala.language.implicitConversions
 
 class PriceTest
-    extends FlatSpec
-    with Matchers
-    with ScalatestRouteTest
-    with Eventually
-    with ReadMarshallingSupport
-    with WriteMarshallingSupport {
+  extends FlatSpec
+  with Matchers
+  with ScalatestRouteTest
+  with Eventually
+  with ReadMarshallingSupport
+  with WriteMarshallingSupport {
 
   import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport._
   protected val log: LoggingAdapter = NoLogging
@@ -44,7 +44,7 @@ class PriceTest
 
   implicit val format: Formats = DefaultFormats.withBigDecimal
 
-  val midYearDate: LocalDate = new LocalDate().withMonthOfYear(11).withDayOfMonth(5)
+  val midYearDate: LocalDate = LocalDate.now().withMonth(11).withDayOfMonth(5)
 
   implicit val config = PatienceConfig(Span(5, Seconds), Span(1, Second))
 

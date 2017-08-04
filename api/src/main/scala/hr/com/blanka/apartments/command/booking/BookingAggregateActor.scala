@@ -1,9 +1,10 @@
 package hr.com.blanka.apartments.command.booking
 
+import java.time.LocalDateTime
+
 import akka.actor.{ ActorLogging, Props }
 import akka.cluster.sharding.ShardRegion
 import akka.persistence.PersistentActor
-import org.joda.time.DateTime
 import org.scalactic.Good
 
 object BookingAggregateActor {
@@ -32,7 +33,7 @@ class BookingAggregateActor extends PersistentActor with ActorLogging {
 
   def init: Receive = {
     case SaveEnquiry(userId, id, booking) =>
-      persist(EnquirySaved(userId, id, booking, new DateTime())) { e =>
+      persist(EnquirySaved(userId, id, booking, LocalDateTime.now())) { e =>
         enquiryValue = e.enquiry
         context become enquiry
         sender() ! Good
@@ -42,7 +43,7 @@ class BookingAggregateActor extends PersistentActor with ActorLogging {
 
   def enquiry: Receive = {
     case MarkEnquiryAsBooked(userId, bookingId, depositAmount, currency) =>
-      persist(EnquiryBooked(userId, bookingId, enquiryValue, new DateTime(), depositAmount, currency)) { e =>
+      persist(EnquiryBooked(userId, bookingId, enquiryValue, LocalDateTime.now(), depositAmount, currency)) { e =>
         sender() ! Good
       }
     case e: SaveEnquiry => log.error(s"Received SaveEnquiry with same Id $e")

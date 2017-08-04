@@ -1,11 +1,12 @@
 package hr.com.blanka.apartments.query.booking
 
+import java.time.LocalDate
+
 import akka.actor.{ ActorLogging, ActorRef, Props }
 import akka.cluster.sharding.ShardRegion
 import akka.persistence.PersistentActor
 import hr.com.blanka.apartments.command.booking.{ BookingAggregateActor, EnquiryBooked }
 import hr.com.blanka.apartments.utils.HelperMethods
-import org.joda.time.{ Days, LocalDate }
 import org.scalactic.Good
 
 object BookedDatesActor {
@@ -30,15 +31,14 @@ class BookedDatesActor(synchronizeBookingActor: ActorRef) extends PersistentActo
 
   override def receiveCommand: Receive = {
     case EnquiryBookedWithSeqNmr(nmbr, EnquiryBooked(userId, _, enquiry, _, _, _)) =>
-      val fromDate = new LocalDate(enquiry.dateFrom)
-      val toDate = new LocalDate(enquiry.dateTo)
-
       val currentlyBookedDates: List[BookedDay] = bookedDatesPerUnit.getOrElse(enquiry.unitId, List.empty)
       val currentlyBookedDatesOnly: List[LocalDate] = currentlyBookedDates.map(_.day)
 
-      val bookedPeriod: List[BookedDay] = iterateThroughDays(fromDate, toDate).map {
-        case day if day == fromDate && !currentlyBookedDatesOnly.contains(day) => BookedDay(day, firstDay = true, lastDay = false)
-        case day if day == toDate && !currentlyBookedDatesOnly.contains(day) => BookedDay(day, firstDay = false, lastDay = true)
+      val bookedPeriod: List[BookedDay] = iterateThroughDays(enquiry.dateFrom, enquiry.dateTo).map {
+        case day if day == enquiry.dateFrom && !currentlyBookedDatesOnly.contains(day) =>
+          BookedDay(day, firstDay = true, lastDay = false)
+        case day if day == enquiry.dateTo && !currentlyBookedDatesOnly.contains(day) =>
+          BookedDay(day, firstDay = false, lastDay = true)
         case day => BookedDay(day, firstDay = false, lastDay = false)
       }
 

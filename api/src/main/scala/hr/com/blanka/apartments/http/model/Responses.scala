@@ -1,7 +1,7 @@
 package hr.com.blanka.apartments.http.model
 
 import hr.com.blanka.apartments.query.booking.{ AvailableApartments, BookedDay, BookedDays }
-import org.joda.time.LocalDate
+import java.time.LocalDate
 
 case class PriceForRangeResponse(price: BigDecimal)
 

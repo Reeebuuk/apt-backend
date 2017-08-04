@@ -1,6 +1,6 @@
 package hr.com.blanka.apartments.command.booking
 
-import org.joda.time.{ DateTime, LocalDate }
+import java.time.{ LocalDate, LocalDateTime }
 
 /*
  * Commands
@@ -37,15 +37,14 @@ case class CheckIfPeriodIsAvailable(userId: String, unitId: Int, dateFrom: Local
  */
 
 case class NewBookingIdAssigned(bookingId: Long)
-case class EnquirySaved(userId: String, bookingId: Long, enquiry: Enquiry, timeSaved: DateTime)
+case class EnquirySaved(userId: String, bookingId: Long, enquiry: Enquiry, timeSaved: LocalDateTime)
 case class EnquiryBooked(
   userId: String,
   bookingId: Long,
   enquiry: Enquiry,
-  timeSaved: DateTime,
+  timeSaved: LocalDateTime,
   depositAmount: BigDecimal,
-  currency: String
-)
+  currency: String)
 
 case class Enquiry(
   unitId: Int,
@@ -60,5 +59,4 @@ case class Enquiry(
   country: String,
   animals: String,
   noOfPeople: String,
-  note: String
-)
+  note: String)
