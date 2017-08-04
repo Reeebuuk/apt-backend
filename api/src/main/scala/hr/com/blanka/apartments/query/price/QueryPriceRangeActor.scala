@@ -4,30 +4,28 @@ import akka.actor.SupervisorStrategy.Restart
 import akka.actor._
 import akka.pattern.ask
 import akka.util.Timeout
-import hr.com.blanka.apartments.command.price.DayMonth
-import org.joda.time.{Days, LocalDate}
-import org.scalactic.{Bad, Good}
+import hr.com.blanka.apartments.common.DayMonth
+import org.joda.time.{ Days, LocalDate }
+import org.scalactic.{ Bad, Good }
 
-import scala.collection.immutable.Map
+import scala.collection.immutable
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.concurrent.duration.DurationInt
 import scala.language.postfixOps
-import scala.util.{Failure, Success}
+import scala.util.{ Failure, Success }
 
 object QueryPriceRangeActor {
   def apply(dailyPriceActor: ActorRef) = Props(classOf[QueryPriceRangeActor], dailyPriceActor)
 }
 
-case class CalculationData(singleDayCalculations: Map[Long, Option[BigDecimal]])
-
 class QueryPriceRangeActor(dailyPriceActor: ActorRef) extends Actor {
 
   implicit val timeout = Timeout(10 seconds)
 
-  override def receive = active(Map[Long, CalculationData]())
-
-  def sendMessagesForSingleDayCalculations(calculatePriceForRange: LookupPriceForRange) = {
+  def sendMessagesForSingleDayCalculations(
+    calculatePriceForRange: LookupPriceForRange
+  ): immutable.IndexedSeq[Future[Any]] = {
     import calculatePriceForRange._
 
     val fromDate = new LocalDate(from)
@@ -40,19 +38,41 @@ class QueryPriceRangeActor(dailyPriceActor: ActorRef) extends Actor {
 
   }
 
-  def active(priceRangeCalculations: Map[Long, CalculationData]): Receive = {
+  override def receive: Receive = {
     case cpfr: LookupPriceForRange =>
       val msgSender = sender()
       val newlySentDailyCalculationMessages = sendMessagesForSingleDayCalculations(cpfr)
 
       Future.sequence(newlySentDailyCalculationMessages).onComplete {
-        case Success(result) => msgSender ! Good(result.foldLeft(BigDecimal(0))((sum, next) => next.asInstanceOf[PriceDayFetched].price + sum))
+        case Success(result) =>
+          msgSender ! Good(
+            result.foldLeft(BigDecimal(0))((sum, next) => next.asInstanceOf[PriceDayFetched].price + sum)
+          )
         case Failure(t) => msgSender ! Bad("An error has occurred: " + t.getMessage)
       }
+    case lap: LookupAllPrices =>
+      val msgSender = sender()
+      val newlySentDailyCalculationMessages = sendMessagesForSingleDayCalculations(
+        LookupPriceForRange(
+          userId = lap.userId,
+          unitId = lap.unitId,
+          from = new LocalDate().withDayOfMonth(1).withMonthOfYear(1),
+          to = new LocalDate().withDayOfMonth(31).withMonthOfYear(12)
+        )
+      )
+
+      Future.sequence(newlySentDailyCalculationMessages).onComplete {
+        case Success(result) =>
+          msgSender ! Good(
+            result.foldLeft(BigDecimal(0))((sum, next) => next.asInstanceOf[PriceDayFetched].price + sum)
+          )
+        case Failure(t) => msgSender ! Bad("An error has occurred: " + t.getMessage)
+      }
+
   }
 
-  override val supervisorStrategy =
+  override val supervisorStrategy: OneForOneStrategy =
     OneForOneStrategy(maxNrOfRetries = 2, withinTimeRange = 2 seconds) {
-      case x => Restart
+      case _ => Restart
     }
 }

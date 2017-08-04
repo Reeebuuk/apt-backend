@@ -1,9 +1,9 @@
 package hr.com.blanka.apartments.query.booking
 
-import akka.actor.{Actor, ActorLogging, ActorRef, Props}
-import akka.cluster.sharding.{ClusterSharding, ClusterShardingSettings}
+import akka.actor.{ Actor, ActorLogging, ActorRef, Props }
+import akka.cluster.sharding.{ ClusterSharding, ClusterShardingSettings }
 import akka.stream.ActorMaterializer
-import akka.pattern.{ask, pipe}
+import akka.pattern.{ ask, pipe }
 
 import akka.util.Timeout
 
@@ -26,14 +26,16 @@ class QueryBookingActor(materializer: ActorMaterializer) extends Actor with Acto
     entityProps = BookedDatesActor(synchronizeBookingActor),
     settings = ClusterShardingSettings(context.system),
     extractEntityId = BookedDatesActor.extractEntityId,
-    extractShardId = BookedDatesActor.extractShardId)
+    extractShardId = BookedDatesActor.extractShardId
+  )
 
   val unitAvailabilityActor: ActorRef = ClusterSharding(context.system).start(
     typeName = "unitAvailabilityActor",
     entityProps = UnitAvailabilityActor(synchronizeBookingActor),
     settings = ClusterShardingSettings(context.system),
     extractEntityId = UnitAvailabilityActor.extractEntityId,
-    extractShardId = UnitAvailabilityActor.extractShardId)
+    extractShardId = UnitAvailabilityActor.extractShardId
+  )
 
   override def receive: Receive = {
     case e: GetAvailableApartments =>

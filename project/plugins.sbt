@@ -8,6 +8,8 @@ addSbtPlugin("com.eed3si9n" % "sbt-assembly" % "0.14.1")
 
 addSbtPlugin("com.typesafe.sbt" % "sbt-native-packager" % "1.0.1")
 
-addSbtPlugin("io.kamon" % "aspectj-runner" % "0.1.3")
-
 addSbtPlugin("io.spray" % "sbt-revolver" % "0.8.0")
+
+addSbtPlugin("com.artima.supersafe" % "sbtplugin" % "1.1.2")
+
+addSbtPlugin("net.virtual-void" % "sbt-dependency-graph" % "0.8.2")

@@ -1,15 +1,10 @@
 package hr.com.blanka.apartments.query.price
 
-import akka.NotUsed
-import akka.actor.{Actor, ActorLogging, ActorRef, Props}
-import akka.cluster.sharding.{ClusterSharding, ClusterShardingSettings}
-import akka.contrib.persistence.mongodb.{MongoReadJournal, ScalaDslMongoReadJournal}
-import akka.pattern.{ask, pipe}
-import akka.persistence.query.{EventEnvelope, PersistenceQuery}
+import akka.actor.{ Actor, ActorLogging, ActorRef, Props }
+import akka.cluster.sharding.{ ClusterSharding, ClusterShardingSettings }
+import akka.pattern.{ ask, pipe }
 import akka.stream.ActorMaterializer
-import akka.stream.scaladsl.Source
 import akka.util.Timeout
-import hr.com.blanka.apartments.command.price.PriceAggregateActor
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration._
@@ -23,28 +18,22 @@ class QueryPriceActor(implicit materializer: ActorMaterializer) extends Actor wi
 
   implicit val timeout = Timeout(3 seconds)
 
-  def startSync(actor: ActorRef) = {
-    val queries = PersistenceQuery(context.system).readJournalFor[ScalaDslMongoReadJournal](MongoReadJournal.Identifier)
-
-    val src: Source[EventEnvelope, NotUsed] =
-      queries.eventsByPersistenceId(PriceAggregateActor.persistenceId, 0L, Long.MaxValue)
-
-    src.runForeach(actor ! _.event)
-  }
-
   val dailyPriceAggregateActor: ActorRef = ClusterSharding(context.system).start(
     typeName = "DailyPriceAggregateActor",
     entityProps = DailyPriceAggregateActor(),
     settings = ClusterShardingSettings(context.system),
     extractEntityId = DailyPriceAggregateActor.extractEntityId,
-    extractShardId = DailyPriceAggregateActor.extractShardId)
+    extractShardId = DailyPriceAggregateActor.extractShardId
+  )
 
-  val queryPriceRangeActor = context.actorOf(QueryPriceRangeActor(dailyPriceAggregateActor), "QueryPriceRangeActor")
-
-  override def preStart() = startSync(dailyPriceAggregateActor)
+  val queryPriceRangeActor: ActorRef =
+    context.actorOf(QueryPriceRangeActor(dailyPriceAggregateActor), "QueryPriceRangeActor")
 
   override def receive: Receive = {
     case e: LookupPriceForRange =>
+      val msgSender = sender()
+      queryPriceRangeActor ? e pipeTo msgSender
+    case e: LookupAllPrices =>
       val msgSender = sender()
       queryPriceRangeActor ? e pipeTo msgSender
   }

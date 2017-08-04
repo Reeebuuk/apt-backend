@@ -1,11 +1,12 @@
 package hr.com.blanka.apartments.query.booking
 
-import akka.NotUsed
-import akka.actor.{Actor, ActorRef, Props}
-import akka.contrib.persistence.mongodb.{MongoReadJournal, ScalaDslMongoReadJournal}
-import akka.persistence.query.{EventEnvelope, PersistenceQuery}
+import akka.Done
+import akka.actor.{ Actor, ActorRef, Props }
+import akka.persistence.cassandra.query.scaladsl.CassandraReadJournal
+import akka.persistence.query.PersistenceQuery
 import akka.stream.ActorMaterializer
-import akka.stream.scaladsl.Source
+
+import scala.concurrent.Future
 
 object SynchronizeBookingActor {
   def apply(materializer: ActorMaterializer) = Props(classOf[SynchronizeBookingActor], materializer)
@@ -13,10 +14,10 @@ object SynchronizeBookingActor {
 
 class SynchronizeBookingActor(implicit materializer: ActorMaterializer) extends Actor {
 
-  def startSync(actor: ActorRef, persistenceId: String, initialIndex: Long) = {
-    val queries = PersistenceQuery(context.system).readJournalFor[ScalaDslMongoReadJournal](MongoReadJournal.Identifier)
+  def startSync(actor: ActorRef, persistenceId: String, initialIndex: Long): Future[Done] = {
+    val queries = PersistenceQuery(context.system).readJournalFor[CassandraReadJournal](CassandraReadJournal.Identifier)
 
-    val src: Source[EventEnvelope, NotUsed] =
+    val src =
       queries.eventsByPersistenceId(persistenceId, initialIndex, Long.MaxValue)
 
     src.runForeach(e => actor ! EnquiryBookedWithSeqNmr(e.sequenceNr, e.event))
