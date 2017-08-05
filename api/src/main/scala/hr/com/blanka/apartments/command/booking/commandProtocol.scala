@@ -14,12 +14,16 @@ sealed trait KnownBookingCommand extends BookingCommand {
 
 case class SaveEnquiryInitiated(userId: String, enquiry: Enquiry) extends BookingCommand
 
-case class SaveEnquiry(userId: String, bookingId: Long, enquiry: Enquiry) extends KnownBookingCommand
+case class SaveEnquiry(userId: String, bookingId: Long, enquiry: Enquiry)
+    extends KnownBookingCommand
 case class DepositPaid(userId: String, bookingId: Long, depositAmount: BigDecimal, currency: String)
-  extends KnownBookingCommand
+    extends KnownBookingCommand
 
-case class MarkEnquiryAsBooked(userId: String, bookingId: Long, depositAmount: BigDecimal, currency: String)
-  extends KnownBookingCommand
+case class MarkEnquiryAsBooked(userId: String,
+                               bookingId: Long,
+                               depositAmount: BigDecimal,
+                               currency: String)
+    extends KnownBookingCommand
 
 /*
  * Validation
@@ -29,8 +33,11 @@ sealed trait ValidationQuery {
   def userId: String
 }
 
-case class CheckIfPeriodIsAvailable(userId: String, unitId: Int, dateFrom: LocalDate, dateTo: LocalDate)
-  extends ValidationQuery
+case class CheckIfPeriodIsAvailable(userId: String,
+                                    unitId: Int,
+                                    dateFrom: LocalDate,
+                                    dateTo: LocalDate)
+    extends ValidationQuery
 
 /*
  * Events
@@ -38,25 +45,23 @@ case class CheckIfPeriodIsAvailable(userId: String, unitId: Int, dateFrom: Local
 
 case class NewBookingIdAssigned(bookingId: Long)
 case class EnquirySaved(userId: String, bookingId: Long, enquiry: Enquiry, timeSaved: LocalDateTime)
-case class EnquiryBooked(
-  userId: String,
-  bookingId: Long,
-  enquiry: Enquiry,
-  timeSaved: LocalDateTime,
-  depositAmount: BigDecimal,
-  currency: String)
+case class EnquiryBooked(userId: String,
+                         bookingId: Long,
+                         enquiry: Enquiry,
+                         timeSaved: LocalDateTime,
+                         depositAmount: BigDecimal,
+                         currency: String)
 
-case class Enquiry(
-  unitId: Int,
-  dateFrom: LocalDate,
-  dateTo: LocalDate,
-  name: String,
-  surname: String,
-  phoneNumber: String,
-  email: String,
-  address: String,
-  city: String,
-  country: String,
-  animals: String,
-  noOfPeople: String,
-  note: String)
+case class Enquiry(unitId: Int,
+                   dateFrom: LocalDate,
+                   dateTo: LocalDate,
+                   name: String,
+                   surname: String,
+                   phoneNumber: String,
+                   email: String,
+                   address: String,
+                   city: String,
+                   country: String,
+                   animals: String,
+                   noOfPeople: String,
+                   note: String)

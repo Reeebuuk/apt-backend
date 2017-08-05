@@ -25,7 +25,8 @@ class QueryPriceRangeActor(dailyPriceActor: ActorRef) extends Actor {
   implicit val timeout = Timeout(10 seconds)
 
   def sendMessagesForSingleDayCalculations(
-    calculatePriceForRange: LookupPriceForRange): immutable.IndexedSeq[Future[Any]] = {
+      calculatePriceForRange: LookupPriceForRange
+  ): immutable.IndexedSeq[Future[Any]] = {
     import calculatePriceForRange._
 
     (0l until Duration.between(from, to).toDays).map(daysFromStart => {
@@ -37,29 +38,35 @@ class QueryPriceRangeActor(dailyPriceActor: ActorRef) extends Actor {
 
   override def receive: Receive = {
     case cpfr: LookupPriceForRange =>
-      val msgSender = sender()
+      val msgSender                         = sender()
       val newlySentDailyCalculationMessages = sendMessagesForSingleDayCalculations(cpfr)
 
       Future.sequence(newlySentDailyCalculationMessages).onComplete {
         case Success(result) =>
           msgSender ! Good(
-            result.foldLeft(BigDecimal(0))((sum, next) => next.asInstanceOf[PriceDayFetched].price + sum))
+            result.foldLeft(BigDecimal(0))(
+              (sum, next) => next.asInstanceOf[PriceDayFetched].price + sum
+            )
+          )
         case Failure(t) => msgSender ! Bad("An error has occurred: " + t.getMessage)
       }
     case lap: LookupAllPrices =>
-      val msgSender = sender()
+      val msgSender   = sender()
       val currentYear = LocalDate.now().getYear
       val newlySentDailyCalculationMessages = sendMessagesForSingleDayCalculations(
-        LookupPriceForRange(
-          userId = lap.userId,
-          unitId = lap.unitId,
-          from = LocalDate.ofYearDay(currentYear, 1),
-          to = LocalDate.of(currentYear, 12, 31)))
+        LookupPriceForRange(userId = lap.userId,
+                            unitId = lap.unitId,
+                            from = LocalDate.ofYearDay(currentYear, 1),
+                            to = LocalDate.of(currentYear, 12, 31))
+      )
 
       Future.sequence(newlySentDailyCalculationMessages).onComplete {
         case Success(result) =>
           msgSender ! Good(
-            result.foldLeft(BigDecimal(0))((sum, next) => next.asInstanceOf[PriceDayFetched].price + sum))
+            result.foldLeft(BigDecimal(0))(
+              (sum, next) => next.asInstanceOf[PriceDayFetched].price + sum
+            )
+          )
         case Failure(t) => msgSender ! Bad("An error has occurred: " + t.getMessage)
       }
 

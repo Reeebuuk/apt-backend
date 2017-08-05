@@ -16,14 +16,15 @@ object CommandBookingActor {
 
 class CommandBookingActor extends PersistentActor with ActorLogging {
 
-  implicit val timeout = Timeout(3 seconds)
+  implicit val timeout = Timeout(10 seconds)
 
   val bookingAggregateActor: ActorRef = ClusterSharding(context.system).start(
     typeName = "commandBookingAggregateActor",
     entityProps = BookingAggregateActor(),
     settings = ClusterShardingSettings(context.system),
     extractEntityId = BookingAggregateActor.extractEntityId,
-    extractShardId = BookingAggregateActor.extractShardId)
+    extractShardId = BookingAggregateActor.extractShardId
+  )
 
   var bookingCounter: Long = 0l
 

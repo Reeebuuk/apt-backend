@@ -10,11 +10,11 @@ import org.scalactic.Good
 object BookingAggregateActor {
   def apply() = Props(classOf[BookingAggregateActor])
 
-  val extractEntityId: ShardRegion.ExtractEntityId = {
+  def extractEntityId: ShardRegion.ExtractEntityId = {
     case e: KnownBookingCommand => (e.bookingId.toString, e)
   }
 
-  val extractShardId: ShardRegion.ExtractShardId = _ => "one"
+  def extractShardId: ShardRegion.ExtractShardId = _ => "one"
 
   val persistenceId = "BookingAggregateActor"
 }
@@ -38,12 +38,15 @@ class BookingAggregateActor extends PersistentActor with ActorLogging {
         context become enquiry
         sender() ! Good
       }
-    case e: MarkEnquiryAsBooked => log.error(s"Received MarkEnquiryAsBooked for enquiry which doesn't exit $e")
+    case e: MarkEnquiryAsBooked =>
+      log.error(s"Received MarkEnquiryAsBooked for enquiry which doesn't exit $e")
   }
 
   def enquiry: Receive = {
     case MarkEnquiryAsBooked(userId, bookingId, depositAmount, currency) =>
-      persist(EnquiryBooked(userId, bookingId, enquiryValue, LocalDateTime.now(), depositAmount, currency)) { e =>
+      persist(
+        EnquiryBooked(userId, bookingId, enquiryValue, LocalDateTime.now(), depositAmount, currency)
+      ) { e =>
         sender() ! Good
       }
     case e: SaveEnquiry => log.error(s"Received SaveEnquiry with same Id $e")

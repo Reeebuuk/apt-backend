@@ -17,23 +17,26 @@ object QueryBookingActor {
 
 class QueryBookingActor(materializer: ActorMaterializer) extends Actor with ActorLogging {
 
-  implicit val timeout = Timeout(3 seconds)
+  implicit val timeout = Timeout(10 seconds)
 
-  val synchronizeBookingActor = context.actorOf(SynchronizeBookingActor(materializer), "synchronizeBookingActor")
+  val synchronizeBookingActor =
+    context.actorOf(SynchronizeBookingActor(materializer), "synchronizeBookingActor")
 
   val bookedDatesActor: ActorRef = ClusterSharding(context.system).start(
     typeName = "bookedDatesActor",
     entityProps = BookedDatesActor(synchronizeBookingActor),
     settings = ClusterShardingSettings(context.system),
     extractEntityId = BookedDatesActor.extractEntityId,
-    extractShardId = BookedDatesActor.extractShardId)
+    extractShardId = BookedDatesActor.extractShardId
+  )
 
   val unitAvailabilityActor: ActorRef = ClusterSharding(context.system).start(
     typeName = "unitAvailabilityActor",
     entityProps = UnitAvailabilityActor(synchronizeBookingActor),
     settings = ClusterShardingSettings(context.system),
     extractEntityId = UnitAvailabilityActor.extractEntityId,
-    extractShardId = UnitAvailabilityActor.extractShardId)
+    extractShardId = UnitAvailabilityActor.extractShardId
+  )
 
   override def receive: Receive = {
     case e: GetAvailableApartments =>

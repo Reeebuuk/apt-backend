@@ -17,14 +17,13 @@ object QueryActor {
 
 class QueryActor(materializer: ActorMaterializer) extends Actor with ActorLogging {
 
-  implicit val timeout = Timeout(3 seconds)
+  implicit val timeout = Timeout(10 seconds)
 
-  val priceActor: ActorRef = context.actorOf(QueryPriceActor(materializer), "QueryPriceActor")
+  val priceActor: ActorRef   = context.actorOf(QueryPriceActor(materializer), "QueryPriceActor")
   val bookingActor: ActorRef = context.actorOf(QueryBookingActor(materializer), "QueryBookingActor")
 
-  val queryProjectionSupervisor: ActorRef = context.actorOf(
-    QueryProjectionSupervisor(materializer),
-    "QueryProjectionSupervisor")
+  val queryProjectionSupervisor: ActorRef =
+    context.actorOf(QueryProjectionSupervisor(materializer), "QueryProjectionSupervisor")
 
   override def receive: Receive = {
     case e: PriceQuery =>

@@ -10,6 +10,8 @@ object IntegrationConf {
 
   def config(port: Int, className: String): Config = ConfigFactory.parseString(s"""
        |akka{
+       |  loglevel = DEBUG
+       |
        |  actor {
        |    provider = "akka.cluster.ClusterActorRefProvider"
        |  }
@@ -36,8 +38,6 @@ object IntegrationConf {
        |    journal-plugin-id = "inmemory-journal"
        |    snapshot-plugin-id = "inmemory-snapshot-store"
        |  }
-       |
-       |  extensions=["akka.cluster.metrics.ClusterMetricsExtension"]
        |}
        |inmemory-snapshot-store {
        |  class = "akka.persistence.inmemory.snapshot.InMemorySnapshotStore"
@@ -67,12 +67,11 @@ object FreePort {
     port
   }
 
-  private def isLocalPortFree(port: Int): Boolean = {
+  private def isLocalPortFree(port: Int): Boolean =
     try {
       new ServerSocket(port).close()
       true
     } catch {
       case _: IOException => false
     }
-  }
 }

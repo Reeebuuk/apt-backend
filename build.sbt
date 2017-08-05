@@ -1,19 +1,83 @@
-enablePlugins(JavaAppPackaging)
+scalaVersion := "2.12.3"
 
-name          := "Apartments Blanka backend"
+resolvers += Resolver.bintrayRepo("hseeberger", "maven")
 
-lazy val api =  project in file("api")
+lazy val api =
+  project
+    .settings(settings)
+    .settings(
+      libraryDependencies ++= {
+        val akkaV                     = "2.5.3"
+        val akkaHttpTestV             = "10.0.9"
+        val scalaTestV                = "3.0.3"
+        val scalacticV                = "3.0.3"
+        val akkaPersistanceCassandraV = "0.54"
+        val leveldbV                  = "0.9"
+        val leveldbJniV               = "1.8"
+        val akkaHttpPlayJsonSupportV  = "1.17.0"
+        val playJsonV                 = "2.6.2"
 
-lazy val root =  (project in file(".")) aggregate(api) dependsOn(api)
+        Seq(
+          "com.typesafe.akka"         %% "akka-contrib"                        % akkaV,
+          "com.typesafe.akka"         %% "akka-stream"                         % akkaV,
+          "com.typesafe.akka"         %% "akka-cluster"                        % akkaV,
+          "com.typesafe.akka"         %% "akka-cluster-sharding"               % akkaV,
+          "com.typesafe.akka"         %% "akka-persistence-query"              % akkaV,
+          "com.typesafe.akka"         %% "akka-http-core"                      % akkaHttpTestV,
+          "com.typesafe.akka"         %% "akka-http-spray-json"                % akkaHttpTestV,
+          "com.typesafe.akka"         %% "akka-persistence-cassandra"          % akkaPersistanceCassandraV,
+          "de.heikoseeberger"         %% "akka-http-play-json"                 % akkaHttpPlayJsonSupportV,
+          "com.typesafe.play"         %% "play-json"                           % playJsonV,
+          "org.scalactic"             %% "scalactic"                           % scalacticV,
+          "org.slf4j"                 % "slf4j-simple"                        % "1.7.25",
+          "com.typesafe.akka"         %% "akka-persistence-cassandra-launcher" % akkaPersistanceCassandraV % Test,
+          "org.scalatest"             %% "scalatest"                           % scalaTestV % Test,
+          "com.typesafe.akka"         %% "akka-http-testkit"                   % akkaHttpTestV % Test,
+          "org.iq80.leveldb"          % "leveldb"                              % leveldbV % Test,
+          "org.fusesource.leveldbjni" % "leveldbjni-all"                       % leveldbJniV % Test
+        )
+      }
+    )
 
+lazy val root = (project in file(".")) aggregate api dependsOn api
 
-organization  := "com.apt"
+lazy val settings =
+commonSettings ++
+gitSettings ++
+scalafmtSettings
 
-version       := "1.0.0"
+lazy val commonSettings =
+  Seq(
+    scalaVersion := "2.12.3",
+    organization := "hr.com.apartments-blanka",
+    organizationName := "Krunoslav Uzelac",
+    scalacOptions ++= Seq(
+      "-unchecked",
+      "-deprecation",
+      "-language:_",
+      "-target:jvm-1.8",
+      "-encoding",
+      "UTF-8"
+    ),
+    unmanagedSourceDirectories.in(Compile) := Seq(scalaSource.in(Compile).value),
+    unmanagedSourceDirectories.in(Test) := Seq(scalaSource.in(Test).value),
+    shellPrompt in ThisBuild := { state =>
+      val project = Project.extract(state).currentRef.project
+      s"[$project]> "
+    }
+  )
 
-scalaVersion  := "2.12.3"
+lazy val gitSettings =
+  Seq(
+    git.useGitDescribe := true
+  )
 
-scalacOptions := Seq("-unchecked", "-feature", "-deprecation", "-encoding", "utf8")
+lazy val scalafmtSettings =
+  Seq(
+    scalafmtOnCompile := true,
+    scalafmtOnCompile.in(Sbt) := false,
+    scalafmtVersion := "1.1.0"
+  )
 
 parallelExecution in Test := false
 

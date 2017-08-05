@@ -9,12 +9,11 @@ object BasicValidation {
 
   import ErrorMessages._
 
-  private def notPastDate(date: LocalDate, rangeSide: String): LocalDate Or One[ErrorMessage] = {
+  private def notPastDate(date: LocalDate, rangeSide: String): LocalDate Or One[ErrorMessage] =
     if (date.getDayOfYear >= LocalDate.now().getDayOfYear)
       Good(date)
     else
       Bad(One(dateIsInPastErrorMessage(rangeSide, date)))
-  }
 
   def validateDuration(from: LocalDate, to: LocalDate): Int Or Every[ErrorMessage] = {
     val dates = withGood(notPastDate(from, "From"), notPastDate(to, "To")) { (from, to) =>
@@ -31,10 +30,9 @@ object BasicValidation {
   }
 
   // Temp until unit addition side is added
-  def validUnitId(unitId: Int): Int Or One[ErrorMessage] = {
+  def validUnitId(unitId: Int): Int Or One[ErrorMessage] =
     if (unitId > 0 && unitId < 4)
       Good(unitId)
     else
       Bad(One("Unit id doesn't exist"))
-  }
 }

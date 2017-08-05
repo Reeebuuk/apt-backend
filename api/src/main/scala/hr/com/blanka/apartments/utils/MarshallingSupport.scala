@@ -1,47 +1,37 @@
 package hr.com.blanka.apartments.utils
 
-import java.time.LocalDate
-import java.time.format.DateTimeFormatter
-
 import hr.com.blanka.apartments.http.model.ErrorResponse
-import spray.json.{ DefaultJsonProtocol, JsString, JsValue, JsonFormat, RootJsonFormat }
+import play.api.libs.json.{ Json, OWrites, Reads }
 
-trait WriteMarshallingSupport extends DefaultJsonProtocol with DateFormatter {
-
-  import hr.com.blanka.apartments.http.model._
-
-  implicit val PriceForRangeDtoFormat: RootJsonFormat[PriceForRangeResponse] = jsonFormat1(PriceForRangeResponse.apply)
-  implicit val AvailableApartmentsFormat: RootJsonFormat[AvailableApartmentsResponse] = jsonFormat1(
-    AvailableApartmentsResponse.apply)
-  implicit val BookedDayFormat: RootJsonFormat[BookedDayResponse] = jsonFormat3(BookedDayResponse.apply)
-  implicit val BookedDaysFormat: RootJsonFormat[BookedDaysResponse] = jsonFormat1(BookedDaysResponse.apply)
-}
-
-trait ReadMarshallingSupport extends DefaultJsonProtocol with DateFormatter {
+trait WriteMarshallingSupport extends ErrorMarshallingSupport {
 
   import hr.com.blanka.apartments.http.model._
 
-  implicit val LookupPriceForRangeFormat: RootJsonFormat[LookupPriceForRangeRequest] = jsonFormat4(
-    LookupPriceForRangeRequest.apply)
-  implicit val SavePriceRangeDtoFormat: RootJsonFormat[SavePriceRangeRequest] = jsonFormat5(SavePriceRangeRequest.apply)
-  implicit val EnquiryFormat: RootJsonFormat[EnquiryRequest] = jsonFormat13(EnquiryRequest.apply)
-  implicit val SaveBookingFormat: RootJsonFormat[EnquiryReceivedRequest] = jsonFormat2(EnquiryReceivedRequest.apply)
-  implicit val DepositPaidFormat: RootJsonFormat[DepositPaidRequest] = jsonFormat4(DepositPaidRequest.apply)
+  implicit val PriceForRangeDtoFormat: OWrites[PriceForRangeResponse] =
+    Json.writes[PriceForRangeResponse]
+  implicit val AvailableApartmentsFormat: OWrites[AvailableApartmentsResponse] =
+    Json.writes[AvailableApartmentsResponse]
+  implicit val BookedDayFormat: OWrites[BookedDayResponse]   = Json.writes[BookedDayResponse]
+  implicit val BookedDaysFormat: OWrites[BookedDaysResponse] = Json.writes[BookedDaysResponse]
+
 }
 
-trait DateFormatter { self: DefaultJsonProtocol =>
+trait ReadMarshallingSupport extends ErrorMarshallingSupport {
 
-  implicit val LocalDateFormat = new JsonFormat[LocalDate] {
+  import hr.com.blanka.apartments.http.model._
 
-    def write(x: LocalDate) = JsString(x.toString)
+  implicit val lookupPriceForRangeFormat: Reads[LookupPriceForRangeRequest] =
+    Json.reads[LookupPriceForRangeRequest]
+  implicit val savePriceRangeDtoFormat: Reads[SavePriceRangeRequest] =
+    Json.reads[SavePriceRangeRequest]
+  implicit val enquiryFormat: Reads[EnquiryRequest] = Json.reads[EnquiryRequest]
+  implicit val enquiryReceivedRequestFormat: Reads[EnquiryReceivedRequest] =
+    Json.reads[EnquiryReceivedRequest]
+  implicit val depositPaidFormat: Reads[DepositPaidRequest] = Json.reads[DepositPaidRequest]
 
-    def read(value: JsValue): LocalDate = value match {
-      case JsString(x) => LocalDate.parse(x, DateTimeFormatter.ISO_INSTANT)
-      case x =>
-        throw new RuntimeException(s"Unexpected type %s on parsing of LocalLocalDateTime type".format(x.getClass.getName))
-    }
-  }
+}
 
-  implicit val ErrorDtoFormat: RootJsonFormat[ErrorResponse] = jsonFormat1(ErrorResponse.apply)
+trait ErrorMarshallingSupport {
+  implicit val errorDtoFormat: OWrites[ErrorResponse] = Json.writes[ErrorResponse]
 
 }

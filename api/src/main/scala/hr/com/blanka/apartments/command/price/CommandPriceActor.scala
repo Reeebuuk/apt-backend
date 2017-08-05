@@ -21,11 +21,15 @@ object CommandPriceActor {
   def apply() = Props(classOf[CommandPriceActor], PriceAggregateActor())
 }
 
-class CommandPriceActor(priceAggregateActorProps: Props) extends Actor with HelperMethods with ActorLogging {
+class CommandPriceActor(priceAggregateActorProps: Props)
+    extends Actor
+    with HelperMethods
+    with ActorLogging {
 
-  implicit val timeout = Timeout(3 seconds)
+  implicit val timeout = Timeout(10 seconds)
 
-  val priceAggregateActor: ActorRef = context.actorOf(priceAggregateActorProps, "priceAggregateActor")
+  val priceAggregateActor: ActorRef =
+    context.actorOf(priceAggregateActorProps, "priceAggregateActor")
 
   override def receive: Receive = {
     case SavePriceRange(userId, unitId, from, to, price) =>

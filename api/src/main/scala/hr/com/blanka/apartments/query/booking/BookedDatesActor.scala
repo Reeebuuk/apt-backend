@@ -10,10 +10,11 @@ import hr.com.blanka.apartments.utils.HelperMethods
 import org.scalactic.Good
 
 object BookedDatesActor {
-  def apply(synchronizeBookingActor: ActorRef) = Props(classOf[BookedDatesActor], synchronizeBookingActor)
+  def apply(synchronizeBookingActor: ActorRef) =
+    Props(classOf[BookedDatesActor], synchronizeBookingActor)
 
   val extractEntityId: ShardRegion.ExtractEntityId = {
-    case e: EnquiryBooked => (e.userId.toString, e)
+    case e: EnquiryBooked  => (e.userId.toString, e)
     case e: GetBookedDates => (e.userId.toString, e)
   }
 
@@ -24,14 +25,18 @@ object BookedDatesActor {
 
 case class PeriodBooked(unitId: Int, period: List[BookedDay], sequenceNmbr: Long)
 
-class BookedDatesActor(synchronizeBookingActor: ActorRef) extends PersistentActor with HelperMethods with ActorLogging {
+class BookedDatesActor(synchronizeBookingActor: ActorRef)
+    extends PersistentActor
+    with HelperMethods
+    with ActorLogging {
 
-  var bookedDatesPerUnit = Map[Int, List[BookedDay]]()
+  var bookedDatesPerUnit                   = Map[Int, List[BookedDay]]()
   var recoverySequenceNumberForQuery: Long = 0
 
   override def receiveCommand: Receive = {
     case EnquiryBookedWithSeqNmr(nmbr, EnquiryBooked(userId, _, enquiry, _, _, _)) =>
-      val currentlyBookedDates: List[BookedDay] = bookedDatesPerUnit.getOrElse(enquiry.unitId, List.empty)
+      val currentlyBookedDates: List[BookedDay] =
+        bookedDatesPerUnit.getOrElse(enquiry.unitId, List.empty)
       val currentlyBookedDatesOnly: List[LocalDate] = currentlyBookedDates.map(_.day)
 
       val bookedPeriod: List[BookedDay] = iterateThroughDays(enquiry.dateFrom, enquiry.dateTo).map {
@@ -46,7 +51,8 @@ class BookedDatesActor(synchronizeBookingActor: ActorRef) extends PersistentActo
         bookedDatesPerUnit = bookedDatesPerUnit + (event.unitId -> (currentlyBookedDates ++ event.period).distinct)
         recoverySequenceNumberForQuery = nmbr
       }
-    case GetBookedDates(_, unitId) => sender() ! Good(BookedDays(bookedDatesPerUnit.getOrElse(unitId, List.empty)))
+    case GetBookedDates(_, unitId) =>
+      sender() ! Good(BookedDays(bookedDatesPerUnit.getOrElse(unitId, List.empty)))
   }
 
   override def receiveRecover: Receive = {
@@ -57,7 +63,9 @@ class BookedDatesActor(synchronizeBookingActor: ActorRef) extends PersistentActo
   }
 
   override def preStart() =
-    synchronizeBookingActor ! StartSync(self, BookingAggregateActor.persistenceId, recoverySequenceNumberForQuery)
+    synchronizeBookingActor ! StartSync(self,
+                                        BookingAggregateActor.persistenceId,
+                                        recoverySequenceNumberForQuery)
 
   override def persistenceId: String = "BookedDatesActor"
 }

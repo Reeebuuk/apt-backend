@@ -10,7 +10,7 @@ object DailyPriceAggregateActor {
 
   val extractEntityId: ShardRegion.ExtractEntityId = {
     case e @ DailyPriceSaved(userId, unitId, _, _, _) => (s"$userId$unitId", e)
-    case e @ LookupPriceForDay(userId, unitId, _) => (s"$userId$unitId", e)
+    case e @ LookupPriceForDay(userId, unitId, _)     => (s"$userId$unitId", e)
   }
 
   val extractShardId: ShardRegion.ExtractShardId = _ => "one"
@@ -18,11 +18,12 @@ object DailyPriceAggregateActor {
 
 class DailyPriceAggregateActor extends Actor {
 
-  def updateState(newDailyPrice: DailyPriceSaved, currentDailyPrices: Map[DayMonth, List[BigDecimal]]): Unit = {
+  def updateState(newDailyPrice: DailyPriceSaved,
+                  currentDailyPrices: Map[DayMonth, List[BigDecimal]]): Unit = {
 
     val newPrices: List[BigDecimal] = currentDailyPrices.get(newDailyPrice.dayMonth) match {
       case Some(priceForDay) => newDailyPrice.price :: priceForDay
-      case None => List(newDailyPrice.price)
+      case None              => List(newDailyPrice.price)
     }
 
     context become active(currentDailyPrices + (newDailyPrice.dayMonth -> newPrices))
@@ -36,7 +37,7 @@ class DailyPriceAggregateActor extends Actor {
 
     case LookupPriceForDay(userId, unitId, day) =>
       val lastPrice: BigDecimal = currentDailyPrices.get(day) match {
-        case None => 0
+        case None        => 0
         case Some(price) => price.head
       }
 

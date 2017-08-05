@@ -16,9 +16,9 @@ object CommandActor {
 
 class CommandActor extends Actor with ActorLogging {
 
-  implicit val timeout = Timeout(3 seconds)
+  implicit val timeout = Timeout(10 seconds)
 
-  val priceActor: ActorRef = context.actorOf(CommandPriceActor(), "CommandPriceActor")
+  val priceActor: ActorRef   = context.actorOf(CommandPriceActor(), "CommandPriceActor")
   val bookingActor: ActorRef = context.actorOf(CommandBookingActor(), "CommandBookingActor")
 
   override def receive: Receive = {

@@ -4,20 +4,19 @@ import hr.com.blanka.apartments.command.booking.{ DepositPaid, Enquiry, SaveEnqu
 import hr.com.blanka.apartments.command.price.SavePriceRange
 import java.time.LocalDate
 
-case class EnquiryRequest(
-  unitId: Int,
-  dateFrom: LocalDate,
-  dateTo: LocalDate,
-  name: String,
-  surname: String,
-  phoneNumber: String,
-  email: String,
-  address: String,
-  city: String,
-  country: String,
-  animals: String,
-  noOfPeople: String,
-  note: String)
+case class EnquiryRequest(unitId: Int,
+                          dateFrom: LocalDate,
+                          dateTo: LocalDate,
+                          name: String,
+                          surname: String,
+                          phoneNumber: String,
+                          email: String,
+                          address: String,
+                          city: String,
+                          country: String,
+                          animals: String,
+                          noOfPeople: String,
+                          note: String)
 
 case class EnquiryReceivedRequest(userId: String, enquiry: EnquiryRequest) {
   def toCommand: SaveEnquiryInitiated =
@@ -36,14 +35,23 @@ case class EnquiryReceivedRequest(userId: String, enquiry: EnquiryRequest) {
         enquiry.country,
         enquiry.animals,
         enquiry.noOfPeople,
-        enquiry.note))
+        enquiry.note
+      )
+    )
 }
-case class DepositPaidRequest(userId: String, bookingId: Long, depositAmount: BigDecimal, currency: String) {
+case class DepositPaidRequest(userId: String,
+                              bookingId: Long,
+                              depositAmount: BigDecimal,
+                              currency: String) {
   def toCommand: DepositPaid =
     DepositPaid(userId, bookingId, depositAmount, currency)
 }
 
-case class SavePriceRangeRequest(userId: String, unitId: Int, from: LocalDate, to: LocalDate, price: BigDecimal) {
+case class SavePriceRangeRequest(userId: String,
+                                 unitId: Int,
+                                 from: LocalDate,
+                                 to: LocalDate,
+                                 price: BigDecimal) {
   def toCommand: SavePriceRange =
     SavePriceRange(userId, unitId, from, to, price)
 }

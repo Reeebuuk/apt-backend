@@ -16,14 +16,15 @@ object QueryPriceActor {
 
 class QueryPriceActor(implicit materializer: ActorMaterializer) extends Actor with ActorLogging {
 
-  implicit val timeout = Timeout(3 seconds)
+  implicit val timeout = Timeout(10 seconds)
 
   val dailyPriceAggregateActor: ActorRef = ClusterSharding(context.system).start(
     typeName = "DailyPriceAggregateActor",
     entityProps = DailyPriceAggregateActor(),
     settings = ClusterShardingSettings(context.system),
     extractEntityId = DailyPriceAggregateActor.extractEntityId,
-    extractShardId = DailyPriceAggregateActor.extractShardId)
+    extractShardId = DailyPriceAggregateActor.extractShardId
+  )
 
   val queryPriceRangeActor: ActorRef =
     context.actorOf(QueryPriceRangeActor(dailyPriceAggregateActor), "QueryPriceRangeActor")

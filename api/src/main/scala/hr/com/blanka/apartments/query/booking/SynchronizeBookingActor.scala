@@ -15,7 +15,8 @@ object SynchronizeBookingActor {
 class SynchronizeBookingActor(implicit materializer: ActorMaterializer) extends Actor {
 
   def startSync(actor: ActorRef, persistenceId: String, initialIndex: Long): Future[Done] = {
-    val queries = PersistenceQuery(context.system).readJournalFor[CassandraReadJournal](CassandraReadJournal.Identifier)
+    val queries = PersistenceQuery(context.system)
+      .readJournalFor[CassandraReadJournal](CassandraReadJournal.Identifier)
 
     val src =
       queries.eventsByPersistenceId(persistenceId, initialIndex, Long.MaxValue)

@@ -10,14 +10,16 @@ import hr.com.blanka.apartments.command.price.PriceAggregateActor
 import scala.concurrent.Future
 
 object QueryProjectionSupervisor {
-  def apply(materializer: ActorMaterializer) = Props(classOf[QueryProjectionSupervisor], materializer)
+  def apply(materializer: ActorMaterializer) =
+    Props(classOf[QueryProjectionSupervisor], materializer)
 }
 
 class QueryProjectionSupervisor(implicit materializer: ActorMaterializer) extends Actor {
 
   def startSync(actor: ActorRef): Future[Done] = {
     val queries =
-      PersistenceQuery(context.system).readJournalFor[CassandraReadJournal](CassandraReadJournal.Identifier)
+      PersistenceQuery(context.system)
+        .readJournalFor[CassandraReadJournal](CassandraReadJournal.Identifier)
 
     val src =
       queries.eventsByPersistenceId(PriceAggregateActor.persistenceId, 0L, Long.MaxValue)

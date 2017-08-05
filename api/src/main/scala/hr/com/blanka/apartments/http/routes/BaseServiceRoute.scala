@@ -13,6 +13,6 @@ trait BaseServiceRoute {
   protected implicit def materializer: ActorMaterializer
   protected def log: LoggingAdapter
 
-  implicit val timeout = Timeout(3 seconds)
+  implicit val timeout = Timeout(10 seconds)
 
 }
