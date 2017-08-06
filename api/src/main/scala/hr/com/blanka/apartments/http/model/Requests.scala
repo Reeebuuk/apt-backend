@@ -4,6 +4,8 @@ import hr.com.blanka.apartments.command.booking.{ DepositPaid, Enquiry, SaveEnqu
 import hr.com.blanka.apartments.command.price.SavePriceRange
 import java.time.LocalDate
 
+import hr.com.blanka.apartments.query.price.LookupPriceForRange
+
 case class EnquiryRequest(unitId: Int,
                           dateFrom: LocalDate,
                           dateTo: LocalDate,
@@ -56,4 +58,7 @@ case class SavePriceRangeRequest(userId: String,
     SavePriceRange(userId, unitId, from, to, price)
 }
 
-case class LookupPriceForRangeRequest(userId: String, unitId: Int, from: LocalDate, to: LocalDate)
+case class LookupPriceForRangeRequest(userId: String, unitId: Int, from: LocalDate, to: LocalDate) {
+  def toQuery: LookupPriceForRange =
+    LookupPriceForRange(userId, unitId, from, to)
+}

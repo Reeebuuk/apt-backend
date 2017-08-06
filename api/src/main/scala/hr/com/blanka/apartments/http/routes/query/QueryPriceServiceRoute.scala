@@ -2,7 +2,6 @@ package hr.com.blanka.apartments.http.routes.query
 
 import akka.actor.ActorRef
 import akka.http.scaladsl.model.StatusCodes
-import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server.{ Directives, Route }
 import akka.pattern.ask
 import de.heikoseeberger.akkahttpplayjson.PlayJsonSupport
@@ -44,7 +43,7 @@ trait QueryPriceServiceRoute
       post {
         decodeRequest {
           entity(as[LookupPriceForRangeRequest]) { lookupPriceForRange =>
-            onSuccess(query ? lookupPriceForRange) {
+            onSuccess(query ? lookupPriceForRange.toQuery) {
               case Good(result) =>
                 complete(StatusCodes.OK, PriceForRangeResponse(result.asInstanceOf[BigDecimal]))
               case Bad(response) =>

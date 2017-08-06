@@ -21,7 +21,7 @@ object BasicValidation {
     }
 
     dates.flatMap(x => {
-      val duration = Duration.between(x._1, x._2).toDays.toInt
+      val duration = Duration.between(x._1.atStartOfDay(), x._2.atStartOfDay()).toDays.toInt
       if (duration >= 0)
         Good(duration)
       else

@@ -29,10 +29,11 @@ class QueryPriceRangeActor(dailyPriceActor: ActorRef) extends Actor {
   ): immutable.IndexedSeq[Future[Any]] = {
     import calculatePriceForRange._
 
-    (0l until Duration.between(from, to).toDays).map(daysFromStart => {
-      val day = DayMonth(LocalDate.from(from).plusDays(daysFromStart))
-      dailyPriceActor ? LookupPriceForDay(userId, unitId, day)
-    })
+    (0l until Duration.between(from.atStartOfDay(), to.atStartOfDay()).toDays)
+      .map(daysFromStart => {
+        val day = DayMonth(LocalDate.from(from).plusDays(daysFromStart))
+        dailyPriceActor ? LookupPriceForDay(userId, unitId, day)
+      })
 
   }
 

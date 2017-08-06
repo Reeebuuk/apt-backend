@@ -14,11 +14,14 @@ import scala.concurrent.duration._
 import scala.language.postfixOps
 
 class CommandPriceActorTest
-  extends TestKit(
-    ActorSystem("test-benefits", ConfigFactory.parseString("""akka.loggers = ["akka.testkit.TestEventListener"] """)))
-  with FreeSpecLike
-  with Matchers
-  with BeforeAndAfterAll {
+    extends TestKit(
+      ActorSystem("test-benefits",
+                  ConfigFactory
+                    .parseString("""akka.loggers = ["akka.testkit.TestEventListener"] """))
+    )
+    with FreeSpecLike
+    with Matchers
+    with BeforeAndAfterAll {
 
   val probe = TestProbe()
 
@@ -45,8 +48,8 @@ class CommandPriceActorTest
     val userId = "user"
     val unitId = 1
     "return Good result if save range is valid" in {
-      val from = LocalDate.now()
-      val to = from.plusDays(5)
+      val from           = LocalDate.now()
+      val to             = from.plusDays(5)
       val savePriceRange = SavePriceRange(userId, unitId, from, to, 35)
 
       probe.send(commandPriceActor, savePriceRange)
@@ -54,8 +57,8 @@ class CommandPriceActorTest
     }
 
     "return Bad result if range is not valid" in {
-      val from = LocalDate.now()
-      val to = from.plusDays(5)
+      val from           = LocalDate.now()
+      val to             = from.plusDays(5)
       val savePriceRange = SavePriceRange(userId, unitId, to, from, 35)
 
       probe.send(commandPriceActor, savePriceRange)
@@ -63,19 +66,23 @@ class CommandPriceActorTest
     }
 
     "return Bad result if range dates are in the past" in {
-      val from = LocalDate.now().minusDays(10)
-      val to = from.plusDays(5)
+      val from           = LocalDate.now().minusDays(10)
+      val to             = from.plusDays(5)
       val savePriceRange = SavePriceRange(userId, unitId, from, to, 35)
 
       probe.send(commandPriceActor, savePriceRange)
       probe.expectMsg(
-        Bad(List(dateIsInPastErrorMessage("From", from), dateIsInPastErrorMessage("To", to)).mkString(", ")))
+        Bad(
+          List(dateIsInPastErrorMessage("From", from), dateIsInPastErrorMessage("To", to))
+            .mkString(", ")
+        )
+      )
     }
 
     "return Bad result if whole range is not successfully saved" in {
-      val userId = "notSaving"
-      val from = LocalDate.now()
-      val to = from.plusDays(5)
+      val userId         = "notSaving"
+      val from           = LocalDate.now()
+      val to             = from.plusDays(5)
       val savePriceRange = SavePriceRange(userId, unitId, from, to, 35)
 
       probe.send(commandPriceActor, savePriceRange)

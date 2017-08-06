@@ -8,46 +8,107 @@ import com.typesafe.config.{ Config, ConfigFactory }
 
 object IntegrationConf {
 
-  def config(port: Int, className: String): Config = ConfigFactory.parseString(s"""
-       |akka{
-       |  loglevel = DEBUG
+  def config(className: String): Config = ConfigFactory.parseString(s"""
+       |akka {
+       |  loglevel = INFO
+       |}
        |
+ |http {
+       |  interface = "0.0.0.0"
+       |  port = 9000
+       |}
+       |
+ |cors.allowed-origin = "*"
+       |
+ |akka {
        |  actor {
        |    provider = "akka.cluster.ClusterActorRefProvider"
        |  }
-       |  persistence {
-       |    journal.plugin = "akka.persistence.journal.leveldb"
-       |    snapshot-store.plugin = "akka.persistence.journal.leveldb"
+       |
+ |  persistence {
+       |    journal.plugin = "cassandra-journal"
+       |    snapshot-store.plugin = "cassandra-snapshot-store"
        |  }
-       |  remote {
+       |
+ |  remote {
        |    log-remote-lifecycle-events = off
        |    netty.tcp {
        |      hostname = "127.0.0.1"
-       |      port = 9005
+       |      port = 8999
        |    }
        |  }
        |
-       |  cluster {
+ |  cluster {
        |    seed-nodes = [
-       |      "akka.tcp://hr-com-blanka-apartments-$className@127.0.0.1:9005"
+       |      "akka.tcp://hr-com-blanka-apartments-$className@127.0.0.1:8999"
        |    ]
+       |
+ |    sharding {
+       |      remember-entities = false
+       |      journal-plugin-id = "cassandra-journal"
+       |      snapshot-plugin-id = "cassandra-snapshot-store"
+       |    }
        |  }
        |
-       |  sharding {
-       |    remember-entities = false
-       |    journal-plugin-id = "inmemory-journal"
-       |    snapshot-plugin-id = "inmemory-snapshot-store"
-       |  }
-       |}
-       |inmemory-snapshot-store {
-       |  class = "akka.persistence.inmemory.snapshot.InMemorySnapshotStore"
-       |  ask-timeout = "10s"
+ |}
+       |
+ |cassandra-journal {
+       |  contact-points = ["localhost"]
+       |
+ |  port = 9041
+       |
+ |  keyspace = "booking_engine_journal"
+       |
+ |  class = "akka.persistence.cassandra.journal.CassandraJournal"
+       |
+ |  cassandra-2x-compat = off
+       |
+ |  enable-events-by-tag-query = on
        |}
        |
-       |inmemory-read-journal {
-       |  refresh-interval = "100ms"
-       |  max-buffer-size = "100"
+ |cassandra-query-journal {
+       |  class = "akka.persistence.cassandra.query.CassandraReadJournalProvider"
+       |
+       |  write-plugin = "cassandra-journal"
+       |
+       |  refresh-interval = 50ms
+       |
+       |  max-buffer-size = 500
+       |
+       |  max-result-size-query = 250
+       |
+       |  read-consistency = "QUORUM"
+       |
+       |  # When offset 0L is used it will look for events from this day and forward.
+       |  first-time-bucket = "20151120"
+
+       |  eventual-consistency-delay = 0s
+       |
+       |  delayed-event-timeout = 0s
+       |
+       |  plugin-dispatcher = "cassandra-plugin-default-dispatcher"
+       |
        |}
+       |
+       |cassandra-plugin-default-dispatcher {
+       |  type = Dispatcher
+       |  executor = "fork-join-executor"
+       |  fork-join-executor {
+       |    parallelism-min = 8
+       |    parallelism-factor = 1.0
+       |    parallelism-max = 16
+       |  }
+       |}
+       |
+       |cassandra-plugin-blocking-dispatcher {
+       |  type = Dispatcher
+       |  executor = "thread-pool-executor"
+       |  thread-pool-executor {
+       |    fixed-pool-size = 16
+       |  }
+       |  throughput = 1
+       |}
+       |
     """.stripMargin)
 
   lazy val freePort: Int = FreePort.nextFreePort(49152, 65535)

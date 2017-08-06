@@ -16,25 +16,28 @@ lazy val api =
         val leveldbJniV               = "1.8"
         val akkaHttpPlayJsonSupportV  = "1.17.0"
         val playJsonV                 = "2.6.2"
+        val logbackClassicV           = "1.2.3"
+        val scalaLoggingV             = "3.7.2"
 
         Seq(
-          "com.typesafe.akka"         %% "akka-contrib"                        % akkaV,
-          "com.typesafe.akka"         %% "akka-stream"                         % akkaV,
-          "com.typesafe.akka"         %% "akka-cluster"                        % akkaV,
-          "com.typesafe.akka"         %% "akka-cluster-sharding"               % akkaV,
-          "com.typesafe.akka"         %% "akka-persistence-query"              % akkaV,
-          "com.typesafe.akka"         %% "akka-http-core"                      % akkaHttpTestV,
-          "com.typesafe.akka"         %% "akka-http-spray-json"                % akkaHttpTestV,
-          "com.typesafe.akka"         %% "akka-persistence-cassandra"          % akkaPersistanceCassandraV,
-          "de.heikoseeberger"         %% "akka-http-play-json"                 % akkaHttpPlayJsonSupportV,
-          "com.typesafe.play"         %% "play-json"                           % playJsonV,
-          "org.scalactic"             %% "scalactic"                           % scalacticV,
-          "org.slf4j"                 % "slf4j-simple"                        % "1.7.25",
-          "com.typesafe.akka"         %% "akka-persistence-cassandra-launcher" % akkaPersistanceCassandraV % Test,
-          "org.scalatest"             %% "scalatest"                           % scalaTestV % Test,
-          "com.typesafe.akka"         %% "akka-http-testkit"                   % akkaHttpTestV % Test,
-          "org.iq80.leveldb"          % "leveldb"                              % leveldbV % Test,
-          "org.fusesource.leveldbjni" % "leveldbjni-all"                       % leveldbJniV % Test
+          "com.typesafe.akka"          %% "akka-contrib"                        % akkaV,
+          "com.typesafe.akka"          %% "akka-stream"                         % akkaV,
+          "com.typesafe.akka"          %% "akka-cluster"                        % akkaV,
+          "com.typesafe.akka"          %% "akka-cluster-sharding"               % akkaV,
+          "com.typesafe.akka"          %% "akka-persistence-query"              % akkaV,
+          "com.typesafe.akka"          %% "akka-http-core"                      % akkaHttpTestV,
+          "com.typesafe.akka"          %% "akka-http-spray-json"                % akkaHttpTestV,
+          "com.typesafe.akka"          %% "akka-persistence-cassandra"          % akkaPersistanceCassandraV,
+          "de.heikoseeberger"          %% "akka-http-play-json"                 % akkaHttpPlayJsonSupportV,
+          "com.typesafe.play"          %% "play-json"                           % playJsonV,
+          "org.scalactic"              %% "scalactic"                           % scalacticV,
+          "ch.qos.logback"             % "logback-classic"                      % logbackClassicV,
+          "com.typesafe.scala-logging" %% "scala-logging"                       % scalaLoggingV,
+          "com.typesafe.akka"          %% "akka-persistence-cassandra-launcher" % akkaPersistanceCassandraV % Test,
+          "org.scalatest"              %% "scalatest"                           % scalaTestV % Test,
+          "com.typesafe.akka"          %% "akka-http-testkit"                   % akkaHttpTestV % Test,
+          "org.iq80.leveldb"           % "leveldb"                              % leveldbV % Test,
+          "org.fusesource.leveldbjni"  % "leveldbjni-all"                       % leveldbJniV % Test
         )
       }
     )
