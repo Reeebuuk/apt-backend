@@ -7,7 +7,7 @@ import akka.http.scaladsl.testkit.{ RouteTestTimeout, ScalatestRouteTest }
 import akka.persistence.cassandra.testkit.CassandraLauncher
 import hr.com.blanka.apartments.command.CommandActor
 import hr.com.blanka.apartments.query.QueryActor
-import org.scalatest.concurrent.Eventually
+import org.scalatest.concurrent.{ Eventually, ScalaFutures }
 import org.scalatest.time.{ Seconds, Span }
 import org.scalatest.{ AsyncWordSpec, Matchers }
 
@@ -18,14 +18,15 @@ trait BaseIntegrationTest
     with Matchers
     with ScalatestRouteTest
     with Eventually
-    with MarshallingSupport {
+    with MarshallingSupport
+    with ScalaFutures {
 
-  CassandraLauncher.start(
-    new File("cassandra"),
-    CassandraLauncher.DefaultTestConfigResource,
-    clean = true,
-    port = 9041
-  )
+//  CassandraLauncher.start(
+//    new File("cassandra"),
+//    CassandraLauncher.DefaultTestConfigResource,
+//    clean = true,
+//    port = 9042
+//  )
 
   implicit def default(implicit system: ActorSystem) = RouteTestTimeout(new DurationInt(10).second)
 

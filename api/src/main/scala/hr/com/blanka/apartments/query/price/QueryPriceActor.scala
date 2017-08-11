@@ -5,6 +5,7 @@ import akka.cluster.sharding.{ ClusterSharding, ClusterShardingSettings }
 import akka.pattern.{ ask, pipe }
 import akka.stream.ActorMaterializer
 import akka.util.Timeout
+import hr.com.blanka.apartments.command.price.DailyPriceSaved
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration._
@@ -30,6 +31,9 @@ class QueryPriceActor(implicit materializer: ActorMaterializer) extends Actor wi
     context.actorOf(QueryPriceRangeActor(dailyPriceAggregateActor), "QueryPriceRangeActor")
 
   override def receive: Receive = {
+    case e: DailyPriceSaved =>
+      val msgSender = sender()
+      dailyPriceAggregateActor ? e pipeTo msgSender
     case e: LookupPriceForRange =>
       val msgSender = sender()
       queryPriceRangeActor ? e pipeTo msgSender

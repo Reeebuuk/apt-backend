@@ -4,6 +4,7 @@ import akka.actor.{ Actor, ActorLogging, ActorRef, Props }
 import akka.pattern.{ ask, pipe }
 import akka.stream.ActorMaterializer
 import akka.util.Timeout
+import hr.com.blanka.apartments.command.price.DailyPriceSaved
 import hr.com.blanka.apartments.query.booking.{ BookingQuery, QueryBookingActor }
 import hr.com.blanka.apartments.query.price.{ PriceQuery, QueryPriceActor }
 
@@ -26,6 +27,9 @@ class QueryActor(materializer: ActorMaterializer) extends Actor with ActorLoggin
     context.actorOf(QueryProjectionSupervisor(materializer), "QueryProjectionSupervisor")
 
   override def receive: Receive = {
+    case e: DailyPriceSaved =>
+      val msgSender = sender()
+      priceActor ? e pipeTo msgSender
     case e: PriceQuery =>
       val msgSender = sender()
       priceActor ? e pipeTo msgSender

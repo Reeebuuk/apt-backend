@@ -8,7 +8,7 @@ import de.heikoseeberger.akkahttpplayjson.PlayJsonSupport
 import hr.com.blanka.apartments.Generators._
 import hr.com.blanka.apartments.Main._
 import hr.com.blanka.apartments.http.model.PriceForRangeResponse
-import play.api.libs.json.{ Format, Json }
+import play.api.libs.json.Json
 
 import scala.language.implicitConversions
 
@@ -21,7 +21,7 @@ class PriceTest extends BaseIntegrationTest {
 
   "Price service should save multiple prices and fetch results" in {
 
-    val firstPrice = generateSavePriceRangeRequest()
+    val firstPrice = generateSavePriceRangeRequest(price = BigDecimal(1)) //5.11-12.11
     val firstRequestEntity =
       HttpEntity(MediaTypes.`application/json`, Json.toJson(firstPrice).toString())
 
@@ -30,9 +30,9 @@ class PriceTest extends BaseIntegrationTest {
     }
 
     val secondPrice = generateSavePriceRangeRequest(
-      from = firstPrice.to,
+      from = firstPrice.to.minusDays(1), //11.11-17.11
       to = firstPrice.to.plusDays(5),
-      price = BigDecimal(60)
+      price = BigDecimal(10)
     )
     val secondRequestEntity =
       HttpEntity(MediaTypes.`application/json`, Json.toJson(secondPrice).toString())
@@ -41,8 +41,9 @@ class PriceTest extends BaseIntegrationTest {
       status should be(OK)
     }
 
-    val lookupRequest = generateLookupPriceForRangeRequest(from = firstPrice.from.plusDays(3),
-                                                           to = firstPrice.from.plusDays(7))
+    val lookupRequest =
+      generateLookupPriceForRangeRequest(from = firstPrice.from.plusDays(3), //8.11
+                                         to = firstPrice.from.plusDays(8)) //12.11
     val lookupRequestEntity =
       HttpEntity(MediaTypes.`application/json`, Json.toJson(lookupRequest).toString())
 
@@ -50,12 +51,10 @@ class PriceTest extends BaseIntegrationTest {
       Post("/price/calculate", lookupRequestEntity) ~> queryPriceRoute(query) ~> check {
         Unmarshal(response.entity.httpEntity)
           .to[PriceForRangeResponse]
-          .map(
-            _ should be(
-              PriceForRangeResponse(BigDecimal(270))
-            )
-          )
-        status should be(OK)
+          .value
+          .get
+          .get
+          .price should be(BigDecimal(23))
       }
     }
   }
