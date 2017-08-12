@@ -32,11 +32,11 @@ class BookingAggregateActor extends PersistentActor with ActorLogging {
   var enquiryValue: Enquiry = _
 
   def init: Receive = {
-    case SaveEnquiry(userId, id, booking) =>
-      persist(EnquirySaved(userId, id, booking, LocalDateTime.now())) { e =>
+    case SaveEnquiry(userId, bookingId, booking) =>
+      persist(EnquirySaved(userId, bookingId, booking, LocalDateTime.now())) { e =>
         enquiryValue = e.enquiry
         context become enquiry
-        sender() ! Good
+        sender() ! Good(bookingId)
       }
     case e: MarkEnquiryAsBooked =>
       log.error(s"Received MarkEnquiryAsBooked for enquiry which doesn't exit $e")

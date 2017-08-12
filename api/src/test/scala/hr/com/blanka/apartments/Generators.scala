@@ -45,8 +45,8 @@ object Generators {
     )
 
   def generateDepositPaidRequest(
+      bookingId: Long,
       userId: String = USER_ID,
-      bookingId: Long = 333,
       depositAmount: BigDecimal = BigDecimal(100),
       currency: String = "EUR"
   ): DepositPaidRequest =

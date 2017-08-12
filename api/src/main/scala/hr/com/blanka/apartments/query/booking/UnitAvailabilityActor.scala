@@ -65,7 +65,9 @@ class UnitAvailabilityActor(synchronizeBookingActor: ActorRef)
     }
 
   def iterateThroughDays(from: LocalDate, to: LocalDate): List[LocalDate] =
-    (0l to Duration.between(from, to).toDays).map(from.plusDays).toList
+    (0l to Duration.between(from.atStartOfDay(), to.atStartOfDay()).toDays)
+      .map(from.plusDays)
+      .toList
 
   def update(e: BookedUnit): Unit = {
     bookedUnitsPerDate = bookedUnitsPerDate.get(e.date) match {

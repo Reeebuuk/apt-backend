@@ -17,7 +17,7 @@ class PriceTest extends BaseIntegrationTest {
   import PlayJsonSupport._
 
   override def testConfig: Config =
-    IntegrationConf.config(classOf[PriceTest].getSimpleName)
+    IntegrationConf.config(classOf[PriceTest].getSimpleName, cassandraPort)
 
   "Price service should save multiple prices and fetch results" in {
 

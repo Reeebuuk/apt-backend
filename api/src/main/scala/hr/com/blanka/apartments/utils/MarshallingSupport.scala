@@ -1,6 +1,7 @@
 package hr.com.blanka.apartments.utils
 
 import hr.com.blanka.apartments.http.model.ErrorResponse
+import hr.com.blanka.apartments.http.routes.command.BookingId
 import play.api.libs.json.{ Json, OWrites, Reads }
 
 trait WriteMarshallingSupport extends ErrorMarshallingSupport {
@@ -33,5 +34,6 @@ trait ReadMarshallingSupport extends ErrorMarshallingSupport {
 
 trait ErrorMarshallingSupport {
   implicit val errorDtoFormat: OWrites[ErrorResponse] = Json.writes[ErrorResponse]
+  implicit val bookingIdFormat: OWrites[BookingId]    = Json.writes[BookingId]
 
 }

@@ -1,6 +1,7 @@
 package hr.com.blanka.apartments
 
 import hr.com.blanka.apartments.http.model._
+import hr.com.blanka.apartments.http.routes.command.BookingId
 import play.api.libs.json.{ Format, Json, OWrites, Reads }
 
 trait MarshallingSupport {
@@ -23,6 +24,8 @@ trait MarshallingSupport {
     Json.reads[BookedDaysResponse]
   implicit val priceForRangeResponse1: Format[PriceForRangeResponse] =
     Json.format[PriceForRangeResponse]
+  implicit val BookingIdFormat: Format[BookingId] =
+    Json.format[BookingId]
 }
 
 object MarshallingSupport extends MarshallingSupport

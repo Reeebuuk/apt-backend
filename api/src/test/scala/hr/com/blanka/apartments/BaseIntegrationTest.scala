@@ -21,12 +21,14 @@ trait BaseIntegrationTest
     with MarshallingSupport
     with ScalaFutures {
 
-//  CassandraLauncher.start(
-//    new File("cassandra"),
-//    CassandraLauncher.DefaultTestConfigResource,
-//    clean = true,
-//    port = 9042
-//  )
+  val cassandraPort: Int = 9043
+
+  CassandraLauncher.start(
+    new File("cassandra"),
+    CassandraLauncher.DefaultTestConfigResource,
+    clean = true,
+    port = cassandraPort
+  )
 
   implicit def default(implicit system: ActorSystem) = RouteTestTimeout(new DurationInt(10).second)
 

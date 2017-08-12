@@ -8,329 +8,103 @@ import com.typesafe.config.{ Config, ConfigFactory }
 
 object IntegrationConf {
 
-  def config(className: String): Config = ConfigFactory.parseString(s"""
-       akka {
-                                                                       |  loglevel = DEBUG
-                                                                       |}
-                                                                       |
+  def config(className: String, cassandraPort: Int): Config =
+    ConfigFactory.parseString(s"""
  |http {
-                                                                       |  interface = "0.0.0.0"
-                                                                       |  port = 9000
-                                                                       |}
-                                                                       |
- |cors.allowed-origin = "*"
-                                                                       |
+ |  interface = "0.0.0.0"
+ |  port = 9000
+ |}
+ |
  |akka {
-                                                                       |  actor {
-                                                                       |    provider = "akka.cluster.ClusterActorRefProvider"
-                                                                       |  }
-                                                                       |
+ |  actor {
+ |    provider = "akka.cluster.ClusterActorRefProvider"
+ |  }
+ |
  |  persistence {
-                                                                       |    journal.plugin = "cassandra-journal"
-                                                                       |    snapshot-store.plugin = "cassandra-snapshot-store"
-                                                                       |  }
-                                                                       |
+ |    journal.plugin = "cassandra-journal"
+ |    snapshot-store.plugin = "cassandra-snapshot-store"
+ |  }
+ |
  |  remote {
-                                                                       |    log-remote-lifecycle-events = off
-                                                                       |    netty.tcp {
-                                                                       |      hostname = "127.0.0.1"
-                                                                       |      port = 8999
-                                                                       |    }
-                                                                       |  }
-                                                                       |
+ |    log-remote-lifecycle-events = off
+ |    netty.tcp {
+ |      hostname = "127.0.0.1"
+ |      port = 8999
+ |    }
+ |  }
+ |
  |  cluster {
-                                                                       |    seed-nodes = [
-                                                                       |      "akka.tcp://hr-com-blanka-apartments-$className@127.0.0.1:8999"
-                                                                       |    ]
-                                                                       |
+ |    seed-nodes = [
+ |      "akka.tcp://hr-com-blanka-apartments-$className@127.0.0.1:8999"
+ |    ]
+ |
  |    sharding {
-                                                                       |      remember-entities = false
-                                                                       |      journal-plugin-id = "cassandra-journal"
-                                                                       |      snapshot-plugin-id = "cassandra-snapshot-store"
-                                                                       |    }
-                                                                       |  }
-                                                                       |
+ |      remember-entities = false
+ |      journal-plugin-id = "cassandra-journal"
+ |      snapshot-plugin-id = "cassandra-snapshot-store"
+ |    }
+ |  }
+ |
  |}
-                                                                       |
+ |
  |cassandra-journal {
-                                                                       |  contact-points = ["localhost"]
-                                                                       |
- |  port = 9042
-                                                                       |
+ |  contact-points = ["localhost"]
+ |  port = $cassandraPort
  |  keyspace = "booking_engine_journal"
-                                                                       |
  |  class = "akka.persistence.cassandra.journal.CassandraJournal"
-                                                                       |
  |  cassandra-2x-compat = off
-                                                                       |
  |  enable-events-by-tag-query = on
-                                                                       |}
-                                                                       |
- |cassandra-snapshot-store {
-                                                                       |
- |  # FQCN of the cassandra snapshot store plugin
-                                                                       |  class = "akka.persistence.cassandra.snapshot.CassandraSnapshotStore"
-                                                                       |
- |  # Comma-separated list of contact points in the Cassandra cluster.
-                                                                       |  # Host:Port pairs are also supported. In that case the port parameter will be ignored.
-                                                                       |  contact-points = ["localhost"]
-                                                                       |
- |  # Port of contact points in the Cassandra cluster.
-                                                                       |  # Will be ignored if the contact point list is defined by host:port pairs.
-                                                                       |  port = 9042
-                                                                       |
- |  # The implementation of akka.persistence.cassandra.SessionProvider
-                                                                       |  # is used for creating the Cassandra Session. By default the
-                                                                       |  # the ConfigSessionProvider is building the Cluster from configuration properties
-                                                                       |  # but it is possible to replace the implementation of the SessionProvider
-                                                                       |  # to reuse another session or override the Cluster builder with other
-                                                                       |  # settings.
-                                                                       |  # For example, it is possible to lookup the contact points of the Cassandra cluster
-                                                                       |  # asynchronously instead of giving them in the configuration in a subclass of
-                                                                       |  # ConfigSessionProvider and overriding the lookupContactPoints method.
-                                                                       |  # It may optionally have a constructor with an ActorSystem and Config parameter.
-                                                                       |  # The config parameter is this config section of the plugin.
-                                                                       |  session-provider = akka.persistence.cassandra.ConfigSessionProvider
-                                                                       |
- |  # The identifier that will be passed as parameter to the
-                                                                       |  # ConfigSessionProvider.lookupContactPoints method.
-                                                                       |  cluster-id = ""
-                                                                       |
- |  # Name of the keyspace to be created/used by the snapshot store
-                                                                       |  keyspace = "booking_engine_journal"
-                                                                       |
- |  # Parameter indicating whether the snapshot keyspace should be auto created
-                                                                       |  keyspace-autocreate = true
-                                                                       |
- |  # Parameter indicating whether the snapshot tables should be auto created
-                                                                       |  tables-autocreate = true
-                                                                       |
- |  # Number of retries before giving up connecting for the initial connection to the Cassandra cluster
-                                                                       |  connect-retries = 3
-                                                                       |
- |  # Delay between connection retries, for the initial connection to the Cassandra cluster
-                                                                       |  connect-retry-delay = 1s
-                                                                       |
- |  # Max delay of the ExponentialReconnectionPolicy that is used when reconnecting
-                                                                       |  # to the Cassandra cluster
-                                                                       |  reconnect-max-delay = 30s
-                                                                       |
- |  # Cassandra driver connection pool settings
-                                                                       |  # Documented at https://datastax.github.io/java-driver/manual/pooling/
-                                                                       |  # and http://docs.datastax.com/en/drivers/java/3.0/com/datastax/driver/core/PoolingOptions.html
-                                                                       |  connection-pool {
-                                                                       |
- |    # Create new connection threshold local
-                                                                       |    new-connection-threshold-local = 50
-                                                                       |
- |    # Create new connection threshold remote
-                                                                       |    new-connection-threshold-remote = 50
-                                                                       |
- |    # Connections per host core local
-                                                                       |    connections-per-host-core-local = 1
-                                                                       |
- |    # Connections per host max local
-                                                                       |    connections-per-host-max-local = 4
-                                                                       |
- |    # Connections per host core remote
-                                                                       |    connections-per-host-core-remote = 1
-                                                                       |
- |    # Connections per host max remote
-                                                                       |    connections-per-host-max-remote = 4
-                                                                       |
- |    # Max requests per connection local
-                                                                       |    max-requests-per-connection-local = 32768
-                                                                       |
- |    # Max requests per connection remote
-                                                                       |    max-requests-per-connection-remote = 2000
-                                                                       |
- |    # Sets the timeout when trying to acquire a connection from a host's pool
-                                                                       |    pool-timeout-millis = 0
-                                                                       |  }
-                                                                       |
- |  # Name of the table to be created/used by the snapshot store.
-                                                                       |  # If the table doesn't exist it is automatically created.
-                                                                       |  table = "snapshots"
-                                                                       |
- |  # Compaction strategy for the snapshot table
-                                                                       |  # Please refer to the tests for example configurations.
-                                                                       |  # Refer to http://docs.datastax.com/en/cql/3.1/cql/cql_reference/compactSubprop.html
-                                                                       |  # for more information regarding the properties.
-                                                                       |  table-compaction-strategy {
-                                                                       |    class = "SizeTieredCompactionStrategy"
-                                                                       |  }
-                                                                       |
- |  # Name of the table to be created/used for journal config.
-                                                                       |  # If the table doesn't exist it is automatically created.
-                                                                       |  config-table = "config"
-                                                                       |
- |  # Name of the table to be created/used for storing metadata.
-                                                                       |  # If the table doesn't exist it is automatically created.
-                                                                       |  metadata-table = "metadata"
-                                                                       |
- |  # replication strategy to use. SimpleStrategy or NetworkTopologyStrategy
-                                                                       |  replication-strategy = "SimpleStrategy"
-                                                                       |
- |  # Replication factor to use when creating a keyspace. Is only used when replication-strategy is SimpleStrategy.
-                                                                       |  replication-factor = 1
-                                                                       |
- |  # Replication factor list for data centers, e.g. ["dc1:3", "dc2:2"]. Is only used when replication-strategy is NetworkTopologyStrategy.
-                                                                       |  data-center-replication-factors = []
-                                                                       |
- |  # To limit the Cassandra hosts this plugin connects with to a specific datacenter.
-                                                                       |  # (DCAwareRoundRobinPolicy withLocalDc)
-                                                                       |  # The id for the local datacenter of the Cassandra hosts it should connect to.
-                                                                       |  # By default, this property is not set resulting in Datastax's standard round robin policy being used.
-                                                                       |  local-datacenter = ""
-                                                                       |
- |  # Number of hosts from non-local datacenter to use as a fall-back policy.
-                                                                       |  # Works only when local-datacenter is set
-                                                                       |  used-hosts-per-remote-dc = 0
-                                                                       |
- |  # To connect to the Cassandra hosts with credentials.
-                                                                       |  # Authentication is disabled if username is not configured.
-                                                                       |  authentication.username = ""
-                                                                       |  authentication.password = ""
-                                                                       |
- |  # SSL can be configured with the following properties.
-                                                                       |  # SSL is disabled if the truststore is not configured.
-                                                                       |  # For detailed instructions, please refer to the DataStax Cassandra chapter about
-                                                                       |  # SSL Encryption: http://docs.datastax.com/en/cassandra/2.0/cassandra/security/secureSslEncryptionTOC.html
-                                                                       |  # Path to the JKS Truststore file
-                                                                       |  ssl.truststore.path = ""
-                                                                       |  # Password to unlock the JKS Truststore
-                                                                       |  ssl.truststore.password = ""
-                                                                       |  # Path to the JKS Keystore file (optional config, only needed for client authentication)
-                                                                       |  ssl.keystore.path = ""
-                                                                       |  # Password to unlock JKS Truststore and access the private key (both must use the same password)
-                                                                       |  ssl.keystore.password = ""
-                                                                       |
- |  # Write consistency level
-                                                                       |  write-consistency = "ONE"
-                                                                       |
- |  # Read consistency level
-                                                                       |  read-consistency = "ONE"
-                                                                       |
- |  # Maximum number of snapshot metadata to load per recursion (when trying to
-                                                                       |  # find a snapshot that matches specified selection criteria). Only increase
-                                                                       |  # this value when selection criteria frequently select snapshots that are
-                                                                       |  # much older than the most recent snapshot i.e. if there are much more than
-                                                                       |  # 10 snapshots between the most recent one and selected one. This setting is
-                                                                       |  # only for increasing load efficiency of snapshots.
-                                                                       |  max-metadata-result-size = 10
-                                                                       |
- |  # Maximum size of result set
-                                                                       |  max-result-size = 50001
-                                                                       |
- |  # Dispatcher for the plugin actor and task.
-                                                                       |  plugin-dispatcher = "cassandra-plugin-default-dispatcher"
-                                                                       |
- |  # Dispatcher for potentially blocking tasks.
-                                                                       |  blocking-dispatcher = "cassandra-plugin-blocking-dispatcher"
-                                                                       |
- |  # Set the protocol version explicitly, should only be used for compatibility testing.
-                                                                       |  # Supported values: 3, 4
-                                                                       |  protocol-version = ""
-                                                                       |
- |  # Options to configure low-level socket options for the connections to Cassandra hosts
-                                                                       |  # See: https://datastax.github.io/java-driver/manual/socket_options
-                                                                       |  socket {
-                                                                       |
- |    # how long the driver waits to establish a new connection to a Cassandra node before giving up
-                                                                       |    connection-timeout-millis = 5000
-                                                                       |
- |    # the per-host read timeout in milliseconds. Should be higher than the timeout settings used on the Cassandra side
-                                                                       |    read-timeout-millis = 12000
-                                                                       |
- |    # a hint to the size of the underlying buffers for outgoing network I/O. Set to zero to
-                                                                       |    # use the default from the underlying Netty transport (Java NIO or native epoll)
-                                                                       |    send-buffer-size = 0
-                                                                       |
- |    # a hint to the size of the underlying buffers for incoming network I/O. Set to zero to
-                                                                       |    # use the default from the underlying Netty transport (Java NIO or native epoll)
-                                                                       |    receive-buffer-size = 0
-                                                                       |  }
-                                                                       |}
-                                                                       |
- |cassandra-query-journal {
-                                                                       |  # Implementation class of the Cassandra ReadJournalProvider
-                                                                       |  class = "akka.persistence.cassandra.query.CassandraReadJournalProvider"
-                                                                       |
- |  # Absolute path to the write journal plugin configuration section
-                                                                       |  write-plugin = "cassandra-journal"
-                                                                       |
- |  # New events are retrieved (polled) with this interval.
-                                                                       |  refresh-interval = 50ms
-                                                                       |
- |  # How many events to fetch in one query (replay) and keep buffered until they
-                                                                       |  # are delivered downstreams.
-                                                                       |  max-buffer-size = 500
-                                                                       |
- |  # The fetch size of the Cassandra select statement
-                                                                       |  # Value less or equal to 0 means max-result-size will be used
-                                                                       |  # http://docs.datastax.com/en/drivers/java/3.0/com/datastax/driver/core/Statement.html
-                                                                       |  max-result-size-query = 250
-                                                                       |
- |  # Read consistency level
-                                                                       |  read-consistency = "QUORUM"
-                                                                       |
- |  # Configure this to the day (yyyyMMdd) when the system was first started.
-                                                                       |  # When offset 0L is used it will look for events from this day and forward.
-                                                                       |  first-time-bucket = "20151120"
-                                                                       |
- |  # The returned event stream is ordered by the offset (timestamp), which corresponds
-                                                                       |  # to the same order as the write journal stored the events, with inaccuracy due to clock skew
-                                                                       |  # between different nodes. The same stream elements (in same order) are returned for multiple
-                                                                       |  # executions of the query on a best effort basis. The query is using a Cassandra Materialized
-                                                                       |  # View for the query and that is eventually consistent, so different queries may see different
-                                                                       |  # events for the latest events, but eventually the result will be ordered by timestamp
-                                                                       |  # (Cassandra timeuuid column). To compensate for the the eventual consistency the query is
-                                                                       |  # delayed to not read the latest events, the duration of this delay is defined by this
-                                                                       |  # configuration property.
-                                                                       |  # However, this is only best effort and in case of network partitions
-                                                                       |  # or other things that may delay the updates of the Materialized View the events may be
-                                                                       |  # delivered in different order (not strictly by their timestamp).
-                                                                       |  eventual-consistency-delay = 0s
-                                                                       |
- |  # If you use the same tag for all events for a `persistenceId` it is possible to get
-                                                                       |  # a more strict delivery order than otherwise. This can be useful when all events of
-                                                                       |  # a PersistentActor class (all events of all instances of that PersistentActor class)
-                                                                       |  # are tagged with the same tag. Then the events for each `persistenceId` can be delivered
-                                                                       |  # strictly by sequence number. If a sequence number is missing the query is delayed up
-                                                                       |  # to the configured `delayed-event-timeout` and if the expected event is still not
-                                                                       |  # found the stream is completed with failure. This means that there must not be any
-                                                                       |  # holes in the sequence numbers for a given tag, i.e. all events must be tagged
-                                                                       |  # with the same tag. Set this property to for example 30s to enable this feature.
-                                                                       |  # It is disabled by default.
-                                                                       |  delayed-event-timeout = 0s
-                                                                       |
- |  # Dispatcher for the plugin actors.
-                                                                       |  plugin-dispatcher = "cassandra-plugin-default-dispatcher"
-                                                                       |
  |}
-                                                                       |
- |# Default dispatcher for plugin actor and tasks.
-                                                                       |cassandra-plugin-default-dispatcher {
-                                                                       |  type = Dispatcher
-                                                                       |  executor = "fork-join-executor"
-                                                                       |  fork-join-executor {
-                                                                       |    parallelism-min = 8
-                                                                       |    parallelism-factor = 1.0
-                                                                       |    parallelism-max = 16
-                                                                       |  }
-                                                                       |}
-                                                                       |
- |# Dispatcher for potentially blocking tasks.
-                                                                       |cassandra-plugin-blocking-dispatcher {
-                                                                       |  type = Dispatcher
-                                                                       |  executor = "thread-pool-executor"
-                                                                       |  thread-pool-executor {
-                                                                       |    fixed-pool-size = 16
-                                                                       |  }
-                                                                       |  throughput = 1
-                                                                       |}
-                                                                       |
-    """.stripMargin)
+ |
+ |cassandra-snapshot-store {
+ |  class = "akka.persistence.cassandra.snapshot.CassandraSnapshotStore"
+ |  contact-points = ["localhost"]
+ |  port = $cassandraPort
+ |  session-provider = akka.persistence.cassandra.ConfigSessionProvider
+ |  keyspace = "booking_engine_journal"
+ |  keyspace-autocreate = true
+ |  tables-autocreate = true
+ |  connect-retries = 3
+ |  connect-retry-delay = 1s
+ |  reconnect-max-delay = 30s
+ |  table = "snapshots"
+ |  table-compaction-strategy {
+ |    class = "SizeTieredCompactionStrategy"
+ |  }
+ |  config-table = "config"
+ |  metadata-table = "metadata"
+ |  replication-strategy = "SimpleStrategy"
+ |  replication-factor = 1
+ |}
+ |
+ |cassandra-query-journal {
+ |  class = "akka.persistence.cassandra.query.CassandraReadJournalProvider"
+ |  write-plugin = "cassandra-journal"
+ |  refresh-interval = 50ms
+ |  max-buffer-size = 500
+ |  max-result-size-query = 250
+ |  read-consistency = "QUORUM"
+ |  plugin-dispatcher = "cassandra-plugin-default-dispatcher"
+ |}
+ |
+ |cassandra-plugin-default-dispatcher {
+ |  type = Dispatcher
+ |  executor = "fork-join-executor"
+ |  fork-join-executor {
+ |    parallelism-min = 8
+ |    parallelism-factor = 1.0
+ |    parallelism-max = 16
+ |  }
+ |}
+ |
+ |cassandra-plugin-blocking-dispatcher {
+ |  type = Dispatcher
+ |  executor = "thread-pool-executor"
+ |  thread-pool-executor {
+ |    fixed-pool-size = 16
+ |  }
+ |  throughput = 1
+ |}""".stripMargin)
 
   lazy val freePort: Int = FreePort.nextFreePort(49152, 65535)
 }
