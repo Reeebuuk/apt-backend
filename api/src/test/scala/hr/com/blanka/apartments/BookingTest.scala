@@ -20,7 +20,7 @@ class BookingTest extends BaseIntegrationTest {
   import PlayJsonSupport._
 
   override def testConfig: Config =
-    IntegrationConf.config(classOf[BookingTest].getSimpleName, cassandraPort)
+    IntegrationConf.config(classOf[BookingTest].getSimpleName)
 
   "Booking service should save booking and update availability" in {
 

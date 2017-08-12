@@ -8,7 +8,7 @@ import com.typesafe.config.{ Config, ConfigFactory }
 
 object IntegrationConf {
 
-  def config(className: String, cassandraPort: Int): Config =
+  def config(className: String): Config =
     ConfigFactory.parseString(s"""
  |http {
  |  interface = "0.0.0.0"
@@ -49,7 +49,7 @@ object IntegrationConf {
  |
  |cassandra-journal {
  |  contact-points = ["localhost"]
- |  port = $cassandraPort
+ |  port = 9043
  |  keyspace = "booking_engine_journal"
  |  class = "akka.persistence.cassandra.journal.CassandraJournal"
  |  cassandra-2x-compat = off
@@ -59,7 +59,7 @@ object IntegrationConf {
  |cassandra-snapshot-store {
  |  class = "akka.persistence.cassandra.snapshot.CassandraSnapshotStore"
  |  contact-points = ["localhost"]
- |  port = $cassandraPort
+ |  port = 9043
  |  session-provider = akka.persistence.cassandra.ConfigSessionProvider
  |  keyspace = "booking_engine_journal"
  |  keyspace-autocreate = true
