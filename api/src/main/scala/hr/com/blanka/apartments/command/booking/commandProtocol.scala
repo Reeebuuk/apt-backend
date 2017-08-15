@@ -2,6 +2,8 @@ package hr.com.blanka.apartments.command.booking
 
 import java.time.{ LocalDate, LocalDateTime }
 
+import hr.com.blanka.apartments.ValueClasses.{ BookingId, UnitId, UserId }
+
 /*
  * Commands
  */
@@ -9,18 +11,21 @@ import java.time.{ LocalDate, LocalDateTime }
 sealed trait BookingCommand
 
 sealed trait KnownBookingCommand extends BookingCommand {
-  def bookingId: Long
+  def bookingId: BookingId
 }
 
-case class SaveEnquiryInitiated(userId: String, enquiry: Enquiry) extends BookingCommand
+case class SaveEnquiryInitiated(userId: UserId, enquiry: Enquiry) extends BookingCommand
 
-case class SaveEnquiry(userId: String, bookingId: Long, enquiry: Enquiry)
+case class SaveEnquiry(userId: UserId, bookingId: BookingId, enquiry: Enquiry)
     extends KnownBookingCommand
-case class DepositPaid(userId: String, bookingId: Long, depositAmount: BigDecimal, currency: String)
+case class DepositPaid(userId: UserId,
+                       bookingId: BookingId,
+                       depositAmount: BigDecimal,
+                       currency: String)
     extends KnownBookingCommand
 
-case class MarkEnquiryAsBooked(userId: String,
-                               bookingId: Long,
+case class MarkEnquiryAsBooked(userId: UserId,
+                               bookingId: BookingId,
                                depositAmount: BigDecimal,
                                currency: String)
     extends KnownBookingCommand
@@ -30,11 +35,11 @@ case class MarkEnquiryAsBooked(userId: String,
  */
 
 sealed trait ValidationQuery {
-  def userId: String
+  def userId: UserId
 }
 
-case class CheckIfPeriodIsAvailable(userId: String,
-                                    unitId: Int,
+case class CheckIfPeriodIsAvailable(userId: UserId,
+                                    unitId: UnitId,
                                     dateFrom: LocalDate,
                                     dateTo: LocalDate)
     extends ValidationQuery
@@ -43,16 +48,19 @@ case class CheckIfPeriodIsAvailable(userId: String,
  * Events
  */
 
-case class NewBookingIdAssigned(bookingId: Long)
-case class EnquirySaved(userId: String, bookingId: Long, enquiry: Enquiry, timeSaved: LocalDateTime)
-case class EnquiryBooked(userId: String,
-                         bookingId: Long,
+case class NewBookingIdAssigned(bookingId: BookingId)
+case class EnquirySaved(userId: UserId,
+                        bookingId: BookingId,
+                        enquiry: Enquiry,
+                        timeSaved: LocalDateTime)
+case class EnquiryBooked(userId: UserId,
+                         bookingId: BookingId,
                          enquiry: Enquiry,
                          timeSaved: LocalDateTime,
                          depositAmount: BigDecimal,
                          currency: String)
 
-case class Enquiry(unitId: Int,
+case class Enquiry(unitId: UnitId,
                    dateFrom: LocalDate,
                    dateTo: LocalDate,
                    name: String,

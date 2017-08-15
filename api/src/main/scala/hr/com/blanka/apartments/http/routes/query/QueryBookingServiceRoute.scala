@@ -2,25 +2,25 @@ package hr.com.blanka.apartments.http.routes.query
 
 import akka.actor.ActorRef
 import akka.http.scaladsl.model.StatusCodes
-import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server.{ Directives, Route }
 import akka.pattern.ask
 import hr.com.blanka.apartments.http.model.{
-  AvailableApartmentsResponse,
+  AvailableUnitsResponse,
   BookedDaysResponse,
   ErrorResponse
 }
 import hr.com.blanka.apartments.http.routes.BaseServiceRoute
 import hr.com.blanka.apartments.query.booking.{
-  AvailableApartments,
+  AvailableUnits,
   BookedDays,
-  GetAvailableApartments,
+  GetAvailableUnits,
   GetBookedDates
 }
 import hr.com.blanka.apartments.utils.WriteMarshallingSupport
-import java.time.LocalDate
+import java.time.{ Instant, ZoneId }
 
 import de.heikoseeberger.akkahttpplayjson.PlayJsonSupport
+import hr.com.blanka.apartments.ValueClasses._
 import org.scalactic._
 
 trait QueryBookingServiceRoute extends BaseServiceRoute with WriteMarshallingSupport {
@@ -31,7 +31,7 @@ trait QueryBookingServiceRoute extends BaseServiceRoute with WriteMarshallingSup
   def queryBookingRoute(query: ActorRef): Route = pathPrefix("booking") {
     path("bookedDates") {
       parameter("unitId".as[Int]) { unitId =>
-        onSuccess(query ? GetBookedDates("user", unitId)) {
+        onSuccess(query ? GetBookedDates(UserId("user"), UnitId(unitId))) {
           case Good(bd: BookedDays) => complete(StatusCodes.OK, BookedDaysResponse.remap(bd))
           case Bad(response) =>
             response match {
@@ -46,12 +46,14 @@ trait QueryBookingServiceRoute extends BaseServiceRoute with WriteMarshallingSup
     path("available") {
       parameters('from.as[Long], 'to.as[Long]) { (from, to) =>
         onSuccess(
-          query ? GetAvailableApartments("user",
-                                         LocalDate.ofEpochDay(from),
-                                         LocalDate.ofEpochDay(to))
+          query ? GetAvailableUnits(
+            userId = UserId("user"),
+            from = Instant.ofEpochMilli(from).atZone(ZoneId.of("UTC")).toLocalDate,
+            to = Instant.ofEpochMilli(to).atZone(ZoneId.of("UTC")).toLocalDate
+          )
         ) {
-          case Good(aa: AvailableApartments) =>
-            complete(StatusCodes.OK, AvailableApartmentsResponse.remap(aa))
+          case Good(aa: AvailableUnits) =>
+            complete(StatusCodes.OK, AvailableUnitsResponse.remap(aa))
           case Bad(response) =>
             response match {
               case One(error) => complete(StatusCodes.BadRequest, ErrorResponse(error.toString))

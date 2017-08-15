@@ -5,6 +5,7 @@ import akka.cluster.sharding.{ ClusterSharding, ClusterShardingSettings }
 import akka.pattern.{ ask, pipe }
 import akka.persistence.PersistentActor
 import akka.util.Timeout
+import hr.com.blanka.apartments.ValueClasses.BookingId
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration._
@@ -30,16 +31,16 @@ class CommandBookingActor extends PersistentActor with ActorLogging {
 
   override def receiveCommand: Receive = {
     case SaveEnquiryInitiated(userId, enquiry) =>
-      persist(NewBookingIdAssigned(bookingCounter + 1)) { event =>
-        bookingCounter = event.bookingId
-        bookingAggregateActor ? SaveEnquiry(userId, bookingCounter, enquiry) pipeTo sender()
+      persist(NewBookingIdAssigned(BookingId(bookingCounter + 1))) { event =>
+        bookingCounter = event.bookingId.id
+        bookingAggregateActor ? SaveEnquiry(userId, event.bookingId, enquiry) pipeTo sender()
       }
     case DepositPaid(userId, bookingId, depositAmount, currency) =>
       bookingAggregateActor ? MarkEnquiryAsBooked(userId, bookingId, depositAmount, currency) pipeTo sender()
   }
 
   override def receiveRecover: Receive = {
-    case NewBookingIdAssigned(counter) => bookingCounter = counter
+    case NewBookingIdAssigned(counter) => bookingCounter = counter.id
   }
 
   override def persistenceId: String = "BookingCounter"

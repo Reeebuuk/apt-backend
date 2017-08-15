@@ -1,19 +1,18 @@
 package hr.com.blanka.apartments.utils
 
-import hr.com.blanka.apartments.http.model.ErrorResponse
-import hr.com.blanka.apartments.http.routes.command.BookingId
+import hr.com.blanka.apartments.http.model.{ ErrorResponse, NewEnquiryResponse }
 import play.api.libs.json.{ Json, OWrites, Reads }
 
 trait WriteMarshallingSupport extends ErrorMarshallingSupport {
 
   import hr.com.blanka.apartments.http.model._
 
-  implicit val PriceForRangeDtoFormat: OWrites[PriceForRangeResponse] =
+  implicit val priceForRangeDtoFormat: OWrites[PriceForRangeResponse] =
     Json.writes[PriceForRangeResponse]
-  implicit val AvailableApartmentsFormat: OWrites[AvailableApartmentsResponse] =
-    Json.writes[AvailableApartmentsResponse]
-  implicit val BookedDayFormat: OWrites[BookedDayResponse]   = Json.writes[BookedDayResponse]
-  implicit val BookedDaysFormat: OWrites[BookedDaysResponse] = Json.writes[BookedDaysResponse]
+  implicit val availableUnitsFormat: OWrites[AvailableUnitsResponse] =
+    Json.writes[AvailableUnitsResponse]
+  implicit val bookedDayFormat: OWrites[BookedDayResponse]   = Json.writes[BookedDayResponse]
+  implicit val bookedDaysFormat: OWrites[BookedDaysResponse] = Json.writes[BookedDaysResponse]
 
 }
 
@@ -34,6 +33,7 @@ trait ReadMarshallingSupport extends ErrorMarshallingSupport {
 
 trait ErrorMarshallingSupport {
   implicit val errorDtoFormat: OWrites[ErrorResponse] = Json.writes[ErrorResponse]
-  implicit val bookingIdFormat: OWrites[BookingId]    = Json.writes[BookingId]
+  implicit val newEnquiryResponseFormat: OWrites[NewEnquiryResponse] =
+    Json.writes[NewEnquiryResponse]
 
 }

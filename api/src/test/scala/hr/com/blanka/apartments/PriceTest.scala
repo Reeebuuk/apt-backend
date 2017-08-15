@@ -5,7 +5,6 @@ import akka.http.scaladsl.model._
 import akka.http.scaladsl.unmarshalling.Unmarshal
 import com.typesafe.config.Config
 import de.heikoseeberger.akkahttpplayjson.PlayJsonSupport
-import hr.com.blanka.apartments.Generators._
 import hr.com.blanka.apartments.Main._
 import hr.com.blanka.apartments.http.model.PriceForRangeResponse
 import play.api.libs.json.Json
@@ -15,6 +14,7 @@ import scala.language.implicitConversions
 class PriceTest extends BaseIntegrationTest {
 
   import PlayJsonSupport._
+  import hr.com.blanka.apartments.RequestResponseGenerators._
 
   override def testConfig: Config =
     IntegrationConf.config(classOf[PriceTest].getSimpleName)

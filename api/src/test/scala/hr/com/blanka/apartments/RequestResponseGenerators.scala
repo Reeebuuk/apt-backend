@@ -4,7 +4,7 @@ import java.time.LocalDate
 
 import hr.com.blanka.apartments.http.model._
 
-object Generators {
+object RequestResponseGenerators {
 
   val USER_ID = "userId"
   val UNIT_ID = 1
@@ -92,8 +92,8 @@ object Generators {
         acc match {
           case Nil => List(BookedDayResponse(date, firstDay = true, lastDay = false))
           case x if x.size < days.size - 1 =>
-            List(BookedDayResponse(date, firstDay = false, lastDay = false))
-          case x => x :+ BookedDayResponse(date, firstDay = false, lastDay = true)
+            acc :+ BookedDayResponse(date, firstDay = false, lastDay = false)
+          case _ => acc :+ BookedDayResponse(date, firstDay = false, lastDay = true)
       }
     )
 

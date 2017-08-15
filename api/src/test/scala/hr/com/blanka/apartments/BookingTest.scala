@@ -7,10 +7,8 @@ import akka.http.scaladsl.model._
 import akka.http.scaladsl.unmarshalling.Unmarshal
 import com.typesafe.config.Config
 import de.heikoseeberger.akkahttpplayjson.PlayJsonSupport
-import hr.com.blanka.apartments.Generators._
 import hr.com.blanka.apartments.Main._
 import hr.com.blanka.apartments.http.model._
-import hr.com.blanka.apartments.http.routes.command.BookingId
 import play.api.libs.json.Json
 
 import scala.language.implicitConversions
@@ -18,6 +16,7 @@ import scala.language.implicitConversions
 class BookingTest extends BaseIntegrationTest {
 
   import PlayJsonSupport._
+  import hr.com.blanka.apartments.RequestResponseGenerators._
 
   override def testConfig: Config =
     IntegrationConf.config(classOf[BookingTest].getSimpleName)
@@ -31,7 +30,7 @@ class BookingTest extends BaseIntegrationTest {
     Post("/booking", enquiryRequestEntity) ~> commandBookingRoute(command) ~> check {
       status should be(OK)
       val bookingId = Unmarshal(response.entity.httpEntity)
-        .to[BookingId]
+        .to[NewEnquiryResponse]
         .value
         .get
         .get
@@ -48,16 +47,16 @@ class BookingTest extends BaseIntegrationTest {
       eventually {
         Get(
           s"/booking/available?" +
-          s"from=${enquiryRequest.enquiry.dateFrom.atStartOfDay().toEpochSecond(ZoneOffset.UTC)}&" +
-          s"to=${enquiryRequest.enquiry.dateTo.atStartOfDay().toEpochSecond(ZoneOffset.UTC)}"
+          s"from=${enquiryRequest.enquiry.dateFrom.atStartOfDay().toInstant(ZoneOffset.UTC).toEpochMilli}&" +
+          s"to=${enquiryRequest.enquiry.dateTo.atStartOfDay().toInstant(ZoneOffset.UTC).toEpochMilli}"
         ) ~> queryBookingRoute(query) ~> check {
           status should be(OK)
 
           Unmarshal(response.entity.httpEntity)
-            .to[AvailableApartmentsResponse]
+            .to[AvailableUnitsResponse]
             .value
             .get
-            .get shouldBe AvailableApartmentsResponse(Set(2, 3))
+            .get shouldBe AvailableUnitsResponse(Set(2, 3))
         }
       }
 

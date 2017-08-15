@@ -1,6 +1,6 @@
 package hr.com.blanka.apartments.http.model
 
-import hr.com.blanka.apartments.query.booking.{ AvailableApartments, BookedDay, BookedDays }
+import hr.com.blanka.apartments.query.booking.{ AvailableUnits, BookedDay, BookedDays }
 import java.time.LocalDate
 
 case class PriceForRangeResponse(price: BigDecimal)
@@ -13,10 +13,10 @@ object BookedDaysResponse {
     BookedDaysResponse(bd.bookedDays.map(BookedDayResponse.remap))
 }
 
-case class AvailableApartmentsResponse(apartments: Set[Int])
-object AvailableApartmentsResponse {
-  def remap(aa: AvailableApartments): AvailableApartmentsResponse =
-    AvailableApartmentsResponse(aa.apartmentIds)
+case class AvailableUnitsResponse(apartments: Set[Int])
+object AvailableUnitsResponse {
+  def remap(aa: AvailableUnits): AvailableUnitsResponse =
+    new AvailableUnitsResponse(aa.unitIds.map(_.id))
 }
 
 case class BookedDayResponse(day: LocalDate, firstDay: Boolean, lastDay: Boolean)
@@ -24,3 +24,5 @@ object BookedDayResponse {
   def remap(bd: BookedDay): BookedDayResponse =
     BookedDayResponse(bd.day, bd.firstDay, bd.lastDay)
 }
+
+case class NewEnquiryResponse(bookingId: Long)

@@ -5,16 +5,16 @@ import akka.http.scaladsl.model.StatusCodes
 import akka.http.scaladsl.server.{ Directives, Route }
 import akka.pattern.ask
 import de.heikoseeberger.akkahttpplayjson.PlayJsonSupport
+import hr.com.blanka.apartments.ValueClasses.BookingId
 import hr.com.blanka.apartments.http.model.{
   DepositPaidRequest,
   EnquiryReceivedRequest,
-  ErrorResponse
+  ErrorResponse,
+  NewEnquiryResponse
 }
 import hr.com.blanka.apartments.http.routes.BaseServiceRoute
 import hr.com.blanka.apartments.utils.ReadMarshallingSupport
 import org.scalactic._
-
-case class BookingId(bookingId: Long)
 
 trait CommandBookingServiceRoute extends BaseServiceRoute with ReadMarshallingSupport {
 
@@ -28,7 +28,10 @@ trait CommandBookingServiceRoute extends BaseServiceRoute with ReadMarshallingSu
           entity(as[EnquiryReceivedRequest]) { booking =>
             onSuccess(command ? booking.toCommand) {
               case Good(bookingId) =>
-                complete(StatusCodes.OK, BookingId(bookingId.asInstanceOf[Long]))
+                complete(StatusCodes.OK, NewEnquiryResponse(bookingId match {
+                  case x: BookingId => x.id
+                  case _            => 0l
+                }))
               case Bad(response) =>
                 response match {
                   case One(error) => complete(StatusCodes.BadRequest, ErrorResponse(error.toString))

@@ -3,20 +3,21 @@ package hr.com.blanka.apartments.query.booking
 import akka.actor.ActorRef
 import java.time.LocalDate
 
+import hr.com.blanka.apartments.ValueClasses.{ UnitId, UserId }
+
 sealed trait BookingQuery
 
-case class GetBookedDates(userId: String, unitId: Int) extends BookingQuery
-case class GetAvailableApartments(userId: String, from: LocalDate, to: LocalDate)
-    extends BookingQuery
+case class GetBookedDates(userId: UserId, unitId: UnitId)                    extends BookingQuery
+case class GetAvailableUnits(userId: UserId, from: LocalDate, to: LocalDate) extends BookingQuery
 
 sealed trait BookingQueryResponse
 
-case class BookedDays(bookedDays: List[BookedDay])     extends BookingQueryResponse
-case class AvailableApartments(apartmentIds: Set[Int]) extends BookingQueryResponse
+case class BookedDays(bookedDays: List[BookedDay]) extends BookingQueryResponse
+case class AvailableUnits(unitIds: Set[UnitId])    extends BookingQueryResponse
 
-case class BookedUnit(userId: String, unitId: Int, date: LocalDate, sequenceNmbr: Long)
+case class BookedUnit(userId: UserId, unitId: UnitId, date: LocalDate, sequenceNmbr: Long)
 
-case class EnquiryBookedWithSeqNmr(seqNmr: Long, event: Any)
+case class EnquiryBookedWithSequenceNumber(persistenceSequenceNumber: Long, event: Any)
 
 case class BookedDay(day: LocalDate, firstDay: Boolean, lastDay: Boolean)
 case class StartSync(actor: ActorRef, persistenceId: String, initialIndex: Long)

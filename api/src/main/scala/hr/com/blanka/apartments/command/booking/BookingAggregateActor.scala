@@ -11,7 +11,7 @@ object BookingAggregateActor {
   def apply() = Props(classOf[BookingAggregateActor])
 
   def extractEntityId: ShardRegion.ExtractEntityId = {
-    case e: KnownBookingCommand => (e.bookingId.toString, e)
+    case e: KnownBookingCommand => (e.bookingId.id.toString, e)
   }
 
   def extractShardId: ShardRegion.ExtractShardId = _ => "one"
@@ -20,8 +20,6 @@ object BookingAggregateActor {
 }
 
 class BookingAggregateActor extends PersistentActor with ActorLogging {
-
-  var entityId: Long = 0
 
   override def receiveRecover: Receive = {
     case _ =>

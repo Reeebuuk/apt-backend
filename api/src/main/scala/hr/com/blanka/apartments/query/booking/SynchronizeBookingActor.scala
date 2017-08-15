@@ -21,7 +21,7 @@ class SynchronizeBookingActor(implicit materializer: ActorMaterializer) extends 
     val src =
       queries.eventsByPersistenceId(persistenceId, initialIndex, Long.MaxValue)
 
-    src.runForeach(e => actor ! EnquiryBookedWithSeqNmr(e.sequenceNr, e.event))
+    src.runForeach(e => actor ! EnquiryBookedWithSequenceNumber(e.sequenceNr, e.event))
   }
 
   override def receive: Receive = {
