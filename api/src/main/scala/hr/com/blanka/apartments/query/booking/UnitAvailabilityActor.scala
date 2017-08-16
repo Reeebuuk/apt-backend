@@ -2,9 +2,8 @@ package hr.com.blanka.apartments.query.booking
 
 import java.time.{ Duration, LocalDate }
 
-import akka.actor.{ ActorLogging, ActorRef, Props }
+import akka.actor.{ Actor, ActorLogging, ActorRef, Props }
 import akka.cluster.sharding.ShardRegion
-import akka.persistence.PersistentActor
 import hr.com.blanka.apartments.ValueClasses.UnitId
 import hr.com.blanka.apartments.command.booking.{
   BookingAggregateActor,
@@ -18,34 +17,29 @@ object UnitAvailabilityActor {
     Props(classOf[UnitAvailabilityActor], synchronizeBookingActor)
 
   val extractEntityId: ShardRegion.ExtractEntityId = {
-    case e: EnquiryBooked            => (e.userId.toString, e)
-    case e: GetAvailableUnits        => (e.userId.toString, e)
-    case e: CheckIfPeriodIsAvailable => (e.userId.toString, e)
+    case e: EnquiryBooked            => (e.userId.id.toString, e)
+    case e: GetAvailableUnits        => (e.userId.id.toString, e)
+    case e: CheckIfPeriodIsAvailable => (e.userId.id.toString, e)
   }
 
   val extractShardId: ShardRegion.ExtractShardId = _ => "two"
 }
 
-class UnitAvailabilityActor(synchronizeBookingActor: ActorRef)
-    extends PersistentActor
-    with ActorLogging {
+class UnitAvailabilityActor(synchronizeBookingActor: ActorRef) extends Actor with ActorLogging {
 
   var bookedUnitsPerDate: Map[LocalDate, Set[UnitId]] = Map[LocalDate, Set[UnitId]]()
-  var sequenceNmbr: Long                              = 0
+  var persistenceSequenceNumber: Long                 = 0
 
-  override def receiveCommand: Receive = {
+  override def receive: Receive = {
     case CheckIfPeriodIsAvailable(_, unitId, from, to) =>
       sender() ! checkIfUnitIdIsBooked(unitId, from, to)
 
     case GetAvailableUnits(_, from, to) =>
       sender() ! Good(AvailableUnits(getAvailableUnits(from, to)))
 
-    case EnquiryBookedWithSequenceNumber(nmbr, event: EnquiryBooked) =>
+    case EnquiryBookedWithSequenceNumber(sequenceNumber, event: EnquiryBooked) =>
       iterateThroughDays(event.enquiry.dateFrom, event.enquiry.dateTo).foreach(
-        date =>
-          persist(BookedUnit(event.userId, event.enquiry.unitId, date, nmbr)) { event =>
-            update(event)
-        }
+        date => update(BookedUnit(event.userId, event.enquiry.unitId, date, sequenceNumber))
       )
   }
 
@@ -69,15 +63,12 @@ class UnitAvailabilityActor(synchronizeBookingActor: ActorRef)
       case None        => bookedUnitsPerDate + (e.date -> Set(e.unitId))
       case Some(units) => bookedUnitsPerDate + (e.date -> (units + e.unitId))
     }
-    sequenceNmbr = e.sequenceNmbr
+    persistenceSequenceNumber = e.sequenceNmbr
   }
 
   override def preStart(): Unit =
-    synchronizeBookingActor ! StartSync(self, BookingAggregateActor.persistenceId, sequenceNmbr)
+    synchronizeBookingActor ! StartSync(self,
+                                        BookingAggregateActor.persistenceId,
+                                        persistenceSequenceNumber)
 
-  override def receiveRecover: Receive = {
-    case e: BookedUnit => update(e)
-  }
-
-  override def persistenceId: String = "UnitAvailabilityActor"
 }

@@ -1,8 +1,7 @@
 package hr.com.blanka.apartments.query.booking
 
-import akka.actor.{ ActorLogging, ActorRef, Props }
+import akka.actor.{ Actor, ActorLogging, ActorRef, Props }
 import akka.cluster.sharding.ShardRegion
-import akka.persistence.PersistentActor
 import hr.com.blanka.apartments.ValueClasses.UnitId
 import hr.com.blanka.apartments.command.booking.{ BookingAggregateActor, Enquiry, EnquiryBooked }
 import hr.com.blanka.apartments.utils.HelperMethods
@@ -13,11 +12,11 @@ object BookedDatesActor {
     Props(classOf[BookedDatesActor], synchronizeBookingActor)
 
   val extractEntityId: ShardRegion.ExtractEntityId = {
-    case e: EnquiryBooked  => (e.userId.toString, e)
-    case e: GetBookedDates => (e.userId.toString, e)
+    case e: EnquiryBooked  => (e.userId.id.toString, e)
+    case e: GetBookedDates => (e.userId.id.toString, e)
   }
 
-  val extractShardId: ShardRegion.ExtractShardId = _ => "three"
+  val extractShardId: ShardRegion.ExtractShardId = _ => "two"
 
   def markNewDates(currentlyBookedDates: List[BookedDay], enquiry: Enquiry): List[BookedDay] = {
 
@@ -52,50 +51,30 @@ object BookedDatesActor {
     )
 }
 
-case class PeriodBooked(unitId: UnitId, period: List[BookedDay], persistenceSequenceNumber: Long)
-
-class BookedDatesActor(synchronizeBookingActor: ActorRef)
-    extends PersistentActor
-    with ActorLogging {
+class BookedDatesActor(synchronizeBookingActor: ActorRef) extends Actor with ActorLogging {
 
   var bookedDatesPerUnit: Map[UnitId, List[BookedDay]] = Map[UnitId, List[BookedDay]]()
   var recoverySequenceNumberForQuery: Long             = 0
 
   import BookedDatesActor._
 
-  override def receiveCommand: Receive = {
-    case EnquiryBookedWithSequenceNumber(persistenceSequenceNumber,
-                                         EnquiryBooked(_, _, enquiry, _, _, _)) =>
+  override def receive: Receive = {
+    case EnquiryBookedWithSequenceNumber(sequenceNumber, event: EnquiryBooked) =>
       val currentlyBookedDates: List[BookedDay] =
-        bookedDatesPerUnit.getOrElse(enquiry.unitId, List.empty)
+        bookedDatesPerUnit.getOrElse(event.enquiry.unitId, List.empty)
 
-      val bookedPeriod: List[BookedDay] = markNewDates(currentlyBookedDates, enquiry)
-
-      persist(PeriodBooked(enquiry.unitId, bookedPeriod, persistenceSequenceNumber)) { event =>
-        bookedDatesPerUnit = bookedDatesPerUnit + (event.unitId -> mergeIntoExistingSchedule(
-          currentlyBookedDates,
-          bookedPeriod
-        ))
-        recoverySequenceNumberForQuery = persistenceSequenceNumber
-      }
-    case GetBookedDates(_, unitId) =>
-      sender() ! Good(BookedDays(bookedDatesPerUnit.getOrElse(unitId, List.empty)))
-  }
-
-  override def receiveRecover: Receive = {
-    case PeriodBooked(unitId, bookedPeriod, persistenceSequenceNumber) =>
-      val currentlyBookedDates: List[BookedDay] = bookedDatesPerUnit.getOrElse(unitId, List.empty)
-      bookedDatesPerUnit = bookedDatesPerUnit + (unitId -> mergeIntoExistingSchedule(
+      val bookedPeriod: List[BookedDay] = markNewDates(currentlyBookedDates, event.enquiry)
+      bookedDatesPerUnit = bookedDatesPerUnit + (event.enquiry.unitId -> mergeIntoExistingSchedule(
         currentlyBookedDates,
         bookedPeriod
       ))
-      recoverySequenceNumberForQuery = persistenceSequenceNumber
+      recoverySequenceNumberForQuery = sequenceNumber
+    case GetBookedDates(_, unitId) =>
+      sender() ! Good(BookedDays(bookedDatesPerUnit.getOrElse(unitId, List.empty)))
   }
 
   override def preStart(): Unit =
     synchronizeBookingActor ! StartSync(self,
                                         BookingAggregateActor.persistenceId,
                                         recoverySequenceNumberForQuery)
-
-  override def persistenceId: String = "BookedDatesActor"
 }

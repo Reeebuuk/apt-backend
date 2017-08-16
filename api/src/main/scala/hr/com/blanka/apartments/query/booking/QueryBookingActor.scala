@@ -19,8 +19,13 @@ class QueryBookingActor(materializer: ActorMaterializer) extends Actor with Acto
 
   implicit val timeout = Timeout(10 seconds)
 
-  val synchronizeBookingActor: ActorRef =
-    context.actorOf(SynchronizeBookingActor(materializer), "synchronizeBookingActor")
+  val synchronizeBookingActor: ActorRef = ClusterSharding(context.system).start(
+    typeName = "synchronizeBookingActor",
+    entityProps = SynchronizeBookingActor(materializer),
+    settings = ClusterShardingSettings(context.system),
+    extractEntityId = SynchronizeBookingActor.extractEntityId,
+    extractShardId = SynchronizeBookingActor.extractShardId
+  )
 
   val bookedDatesActor: ActorRef = ClusterSharding(context.system).start(
     typeName = "bookedDatesActor",

@@ -10,6 +10,9 @@ object IntegrationConf {
 
   def config(className: String): Config =
     ConfigFactory.parseString(s"""
+ |akka {
+ |  loglevel = DEBUG
+ |}
  |http {
  |  interface = "0.0.0.0"
  |  port = 9000
@@ -17,6 +20,16 @@ object IntegrationConf {
  |
  |akka {
  |  actor {
+ |    serializers {
+ |      myown = "hr.com.blanka.apartments.MyOwnSerializer2"
+ |    }
+ |    serialization-bindings {
+ |      "java.io.Serializable" = none
+ |      "hr.com.blanka.apartments.command.booking.EnquirySaved" = myown
+ |      "hr.com.blanka.apartments.command.booking.EnquiryBooked" = myown
+ |      "hr.com.blanka.apartments.command.booking.NewBookingIdAssigned" = myown
+ |      "hr.com.blanka.apartments.command.price.DailyPriceSaved" = myown
+ |    }
  |    provider = "akka.cluster.ClusterActorRefProvider"
  |  }
  |
