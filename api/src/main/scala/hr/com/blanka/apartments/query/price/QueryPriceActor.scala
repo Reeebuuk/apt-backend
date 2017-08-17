@@ -30,6 +30,9 @@ class QueryPriceActor(implicit materializer: ActorMaterializer) extends Actor wi
   val queryPriceRangeActor: ActorRef =
     context.actorOf(QueryPriceRangeActor(dailyPriceAggregateActor), "QueryPriceRangeActor")
 
+  val pricingLegacyActor: ActorRef =
+    context.actorOf(PricingLegacyActor(), "PricingLegacyActor")
+
   override def receive: Receive = {
     case e: DailyPriceSaved =>
       val msgSender = sender()
@@ -40,5 +43,8 @@ class QueryPriceActor(implicit materializer: ActorMaterializer) extends Actor wi
     case e: LookupAllPrices =>
       val msgSender = sender()
       queryPriceRangeActor ? e pipeTo msgSender
+    case e: LegacyLookupAllPrices =>
+      val msgSender = sender()
+      pricingLegacyActor ? e pipeTo msgSender
   }
 }

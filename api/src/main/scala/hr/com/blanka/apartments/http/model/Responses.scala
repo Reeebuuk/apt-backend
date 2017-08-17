@@ -1,7 +1,9 @@
 package hr.com.blanka.apartments.http.model
 
+import java.time.{ LocalDate, ZoneOffset }
+
 import hr.com.blanka.apartments.query.booking.{ AvailableUnits, BookedDay, BookedDays }
-import java.time.LocalDate
+import hr.com.blanka.apartments.query.price.PricePerPeriod
 
 case class PriceForRangeResponse(price: BigDecimal)
 
@@ -26,3 +28,27 @@ object BookedDayResponse {
 }
 
 case class NewEnquiryResponse(bookingId: Long)
+
+case class PricePerPeriodResponse(from: Long, to: Long, appPrice: Map[Int, Int])
+case class PricePerPeriodsResponse(prices: List[PricePerPeriodResponse])
+object PricePerPeriodsResponse {
+  def remap(ppp: List[PricePerPeriod]): PricePerPeriodsResponse =
+    PricePerPeriodsResponse(
+      ppp.map(
+        period =>
+          PricePerPeriodResponse(
+            from = LocalDate
+              .of(LocalDate.now().getYear, period.from.month, period.from.day)
+              .atStartOfDay()
+              .toInstant(ZoneOffset.UTC)
+              .toEpochMilli,
+            to = LocalDate
+              .of(LocalDate.now().getYear, period.to.month, period.to.day)
+              .atStartOfDay()
+              .toInstant(ZoneOffset.UTC)
+              .toEpochMilli,
+            appPrice = period.appPrice.map(x => (x._1.id, x._2))
+        )
+      )
+    )
+}

@@ -12,12 +12,11 @@ lazy val api =
         val scalaTestV                = "3.0.3"
         val scalacticV                = "3.0.3"
         val akkaPersistanceCassandraV = "0.54"
-        val leveldbV                  = "0.9"
-        val leveldbJniV               = "1.8"
         val akkaHttpPlayJsonSupportV  = "1.17.0"
         val playJsonV                 = "2.6.2"
         val logbackClassicV           = "1.2.3"
         val scalaLoggingV             = "3.7.2"
+        val akkaHttpCorsV             = "0.2.1"
 
         Seq(
           "com.typesafe.akka"          %% "akka-contrib"                        % akkaV,
@@ -33,11 +32,10 @@ lazy val api =
           "org.scalactic"              %% "scalactic"                           % scalacticV,
           "ch.qos.logback"             % "logback-classic"                      % logbackClassicV,
           "com.typesafe.scala-logging" %% "scala-logging"                       % scalaLoggingV,
+          "ch.megard"                  %% "akka-http-cors"                      % akkaHttpCorsV,
           "com.typesafe.akka"          %% "akka-persistence-cassandra-launcher" % akkaPersistanceCassandraV % Test,
           "org.scalatest"              %% "scalatest"                           % scalaTestV % Test,
-          "com.typesafe.akka"          %% "akka-http-testkit"                   % akkaHttpTestV % Test,
-          "org.iq80.leveldb"           % "leveldb"                              % leveldbV % Test,
-          "org.fusesource.leveldbjni"  % "leveldbjni-all"                       % leveldbJniV % Test
+          "com.typesafe.akka"          %% "akka-http-testkit"                   % akkaHttpTestV % Test
         )
       }
     )

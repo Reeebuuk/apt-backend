@@ -13,7 +13,7 @@ class BasicValidationTest extends WordSpec with Matchers {
       "return bad result with error message" in {
         val to   = LocalDate.now()
         val from = to.plusDays(1)
-        BasicValidation.validateDuration(from, to) should be(
+        BasicValidation.getDuration(from, to) should be(
           Bad(One(toDateBeforeFromDateErrorMessage(from, to)))
         )
       }
@@ -22,7 +22,7 @@ class BasicValidationTest extends WordSpec with Matchers {
       "return bad result with error message" in {
         val from = LocalDate.now().minusDays(1)
         val to   = from.plusDays(3)
-        BasicValidation.validateDuration(from, to) should be(
+        BasicValidation.getDuration(from, to) should be(
           Bad(One(dateIsInPastErrorMessage("From", from)))
         )
       }
@@ -31,7 +31,7 @@ class BasicValidationTest extends WordSpec with Matchers {
       "return bad result with two error messages" in {
         val from = LocalDate.now().minusDays(2)
         val to   = LocalDate.now().minusDays(1)
-        BasicValidation.validateDuration(from, to) should be(
+        BasicValidation.getDuration(from, to) should be(
           Bad(Many(dateIsInPastErrorMessage("From", from), dateIsInPastErrorMessage("To", to)))
         )
       }
@@ -40,7 +40,7 @@ class BasicValidationTest extends WordSpec with Matchers {
       "return the duration between from and to in days" in {
         val from = LocalDate.now()
         val to   = from.plusDays(5)
-        BasicValidation.validateDuration(from, to) should be(Good(5))
+        BasicValidation.getDuration(from, to) should be(Good(5))
       }
     }
   }

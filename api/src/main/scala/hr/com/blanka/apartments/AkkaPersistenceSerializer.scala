@@ -12,9 +12,8 @@ import hr.com.blanka.apartments.command.booking.{
 }
 import hr.com.blanka.apartments.command.price.DailyPriceSaved
 import hr.com.blanka.apartments.common.DayMonth
-import play.api.libs.json.{ Json, OFormat }
 
-class MyOwnSerializer2 extends SerializerWithStringManifest {
+class AkkaPersistenceSerializer extends SerializerWithStringManifest {
 
   val EnquirySaved         = "EnquirySaved"
   val EnquiryBooked        = "EnquiryBooked"
@@ -22,9 +21,23 @@ class MyOwnSerializer2 extends SerializerWithStringManifest {
   val DailyPriceSaved      = "DailyPriceSaved"
   val UTF_8: String        = StandardCharsets.UTF_8.name()
 
-  implicit lazy val userIdFormat: OFormat[UserId]               = Json.format[UserId]
-  implicit lazy val bookingIdFormat: OFormat[BookingId]         = Json.format[BookingId]
-  implicit lazy val unitIdFormat: OFormat[UnitId]               = Json.format[UnitId]
+  import play.api.libs.json._
+
+  case class ValueClassJson[I, T](f1: I => T)(f2: T => Option[I])(implicit reads: Reads[I],
+                                                                  writes: Writes[I])
+      extends Reads[T]
+      with Writes[T] {
+    def reads(js: JsValue): JsResult[T] = js.validate[I] map f1
+    def writes(id: T): JsValue          = Json.toJson(f2(id))
+  }
+
+  implicit lazy val userIdFormat: ValueClassJson[String, UserId] =
+    ValueClassJson(UserId)(UserId.unapply)
+  implicit lazy val bookingIdFormat: ValueClassJson[Long, BookingId] =
+    ValueClassJson(BookingId)(BookingId.unapply)
+  implicit lazy val unitIdFormat: ValueClassJson[Int, UnitId] =
+    ValueClassJson(UnitId)(UnitId.unapply)
+
   implicit lazy val enquiryFormat: OFormat[Enquiry]             = Json.format[Enquiry]
   implicit lazy val enquirySavedFormat: OFormat[EnquirySaved]   = Json.format[EnquirySaved]
   implicit lazy val enquiryBookedFormat: OFormat[EnquiryBooked] = Json.format[EnquiryBooked]

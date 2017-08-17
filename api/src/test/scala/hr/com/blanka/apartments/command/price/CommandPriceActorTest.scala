@@ -6,6 +6,7 @@ import akka.actor.{ Actor, ActorSystem, Props }
 import akka.testkit.{ TestActorRef, TestKit, TestProbe }
 import akka.util.Timeout
 import com.typesafe.config.ConfigFactory
+import hr.com.blanka.apartments.ValueClasses.{ UnitId, UserId }
 import hr.com.blanka.apartments.validation.ErrorMessages._
 import org.scalactic.{ Bad, Good }
 import org.scalatest.{ BeforeAndAfterAll, FreeSpecLike, Matchers }
@@ -32,8 +33,8 @@ class CommandPriceActorTest
   }
 
   class MockPricePersistActor extends Actor {
-    def receive = {
-      case SavePriceForSingleDay("notSaving", unitId, day, price) =>
+    def receive: PartialFunction[Any, Unit] = {
+      case SavePriceForSingleDay(UserId("notSaving"), _, _, _) =>
       case SavePriceForSingleDay(userId, unitId, day, price) =>
         sender() ! DailyPriceSaved(userId, unitId, day, price, LocalDateTime.now())
     }
@@ -45,8 +46,8 @@ class CommandPriceActorTest
   })
 
   "SavePriceRange" - {
-    val userId = "user"
-    val unitId = 1
+    val userId = UserId("user")
+    val unitId = UnitId(1)
     "return Good result if save range is valid" in {
       val from           = LocalDate.now()
       val to             = from.plusDays(5)
@@ -80,7 +81,7 @@ class CommandPriceActorTest
     }
 
     "return Bad result if whole range is not successfully saved" in {
-      val userId         = "notSaving"
+      val userId         = UserId("notSaving")
       val from           = LocalDate.now()
       val to             = from.plusDays(5)
       val savePriceRange = SavePriceRange(userId, unitId, from, to, 35)

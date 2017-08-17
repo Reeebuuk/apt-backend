@@ -21,7 +21,7 @@ object IntegrationConf {
  |akka {
  |  actor {
  |    serializers {
- |      myown = "hr.com.blanka.apartments.MyOwnSerializer2"
+ |      myown = "hr.com.blanka.apartments.AkkaPersistenceSerializer"
  |    }
  |    serialization-bindings {
  |      "java.io.Serializable" = none
@@ -42,13 +42,13 @@ object IntegrationConf {
  |    log-remote-lifecycle-events = off
  |    netty.tcp {
  |      hostname = "127.0.0.1"
- |      port = 8999
+ |      port = 8998
  |    }
  |  }
  |
  |  cluster {
  |    seed-nodes = [
- |      "akka.tcp://hr-com-blanka-apartments-$className@127.0.0.1:8999"
+ |      "akka.tcp://hr-com-blanka-apartments-$className@127.0.0.1:8998"
  |    ]
  |
  |    sharding {

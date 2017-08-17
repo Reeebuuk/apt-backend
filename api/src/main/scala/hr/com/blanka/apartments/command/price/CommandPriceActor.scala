@@ -35,7 +35,7 @@ class CommandPriceActor(priceAggregateActorProps: Props)
     case SavePriceRange(userId, unitId, from, to, price) =>
       val msgSender = sender()
 
-      withGood(validateDuration(from, to), validUnitId(unitId)) { (_, _) =>
+      withGood(getDuration(from, to), validUnitId(unitId)) { (_, _) =>
         {
           val savedPrices = iterateThroughDays(from, to).map { localDate =>
             val day = DayMonth(localDate)

@@ -56,10 +56,10 @@ case class SavePriceRangeRequest(userId: String,
                                  to: LocalDate,
                                  price: BigDecimal) {
   def toCommand: SavePriceRange =
-    SavePriceRange(userId, unitId, from, to, price)
+    SavePriceRange(UserId(userId), UnitId(unitId), from, to, price)
 }
 
 case class LookupPriceForRangeRequest(userId: String, unitId: Int, from: LocalDate, to: LocalDate) {
   def toQuery: LookupPriceForRange =
-    LookupPriceForRange(userId, unitId, from, to)
+    LookupPriceForRange(UserId(userId), UnitId(unitId), from, to)
 }

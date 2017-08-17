@@ -13,7 +13,10 @@ trait WriteMarshallingSupport extends ErrorMarshallingSupport {
     Json.writes[AvailableUnitsResponse]
   implicit val bookedDayFormat: OWrites[BookedDayResponse]   = Json.writes[BookedDayResponse]
   implicit val bookedDaysFormat: OWrites[BookedDaysResponse] = Json.writes[BookedDaysResponse]
-
+  implicit val pricePerPeriodResponseFormat: OWrites[PricePerPeriodResponse] =
+    Json.writes[PricePerPeriodResponse]
+  implicit val pricePerPeriodsResponseFormat: OWrites[PricePerPeriodsResponse] =
+    Json.writes[PricePerPeriodsResponse]
 }
 
 trait ReadMarshallingSupport extends ErrorMarshallingSupport {
