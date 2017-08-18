@@ -17,7 +17,5 @@ case class AvailableUnits(unitIds: Set[UnitId])    extends BookingQueryResponse
 
 case class BookedUnit(userId: UserId, unitId: UnitId, date: LocalDate, sequenceNmbr: Long)
 
-case class EnquiryBookedWithSequenceNumber(persistenceSequenceNumber: Long, event: Any)
-
 case class BookedDay(day: LocalDate, firstDay: Boolean, lastDay: Boolean)
 case class StartSync(actor: ActorRef, persistenceId: String, initialIndex: Long)

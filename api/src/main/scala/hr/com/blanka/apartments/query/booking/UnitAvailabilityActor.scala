@@ -10,6 +10,7 @@ import hr.com.blanka.apartments.command.booking.{
   CheckIfPeriodIsAvailable,
   EnquiryBooked
 }
+import hr.com.blanka.apartments.query.PersistenceQueryEvent
 import org.scalactic.Good
 
 object UnitAvailabilityActor {
@@ -37,7 +38,7 @@ class UnitAvailabilityActor(synchronizeBookingActor: ActorRef) extends Actor wit
     case GetAvailableUnits(_, from, to) =>
       sender() ! Good(AvailableUnits(getAvailableUnits(from, to)))
 
-    case EnquiryBookedWithSequenceNumber(sequenceNumber, event: EnquiryBooked) =>
+    case PersistenceQueryEvent(sequenceNumber, event: EnquiryBooked) =>
       iterateThroughDays(event.enquiry.dateFrom, event.enquiry.dateTo).foreach(
         date => update(BookedUnit(event.userId, event.enquiry.unitId, date, sequenceNumber))
       )

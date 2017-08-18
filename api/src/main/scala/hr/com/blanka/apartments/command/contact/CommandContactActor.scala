@@ -10,6 +10,8 @@ import scala.language.postfixOps
 
 object CommandContactActor {
   def apply() = Props(classOf[CommandContactActor])
+
+  val persistenceId: String = "Contact"
 }
 
 class CommandContactActor extends PersistentActor with ActorLogging {
@@ -27,5 +29,5 @@ class CommandContactActor extends PersistentActor with ActorLogging {
     case _ =>
   }
 
-  override def persistenceId: String = "Contact"
+  override def persistenceId: String = CommandContactActor.persistenceId
 }

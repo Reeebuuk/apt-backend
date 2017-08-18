@@ -30,6 +30,8 @@ object IntegrationConf {
  |      "hr.com.blanka.apartments.command.booking.EnquiryBooked" = myown
  |      "hr.com.blanka.apartments.command.booking.NewBookingIdAssigned" = myown
  |      "hr.com.blanka.apartments.command.price.DailyPriceSaved" = myown
+ |      "hr.com.blanka.apartments.command.contact.ContactSaved" = myown
+ |      "hr.com.blanka.apartments.query.PersistenceOffsetSaved" = myown
  |    }
  |  }
  |

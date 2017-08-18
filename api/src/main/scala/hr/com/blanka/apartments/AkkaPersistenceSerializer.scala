@@ -13,15 +13,17 @@ import hr.com.blanka.apartments.command.booking.{
 import hr.com.blanka.apartments.command.contact.ContactSaved
 import hr.com.blanka.apartments.command.price.DailyPriceSaved
 import hr.com.blanka.apartments.common.DayMonth
+import hr.com.blanka.apartments.query.PersistenceOffsetSaved
 
 class AkkaPersistenceSerializer extends SerializerWithStringManifest {
 
-  val EnquirySaved         = "EnquirySaved"
-  val EnquiryBooked        = "EnquiryBooked"
-  val NewBookingIdAssigned = "NewBookingIdAssigned"
-  val DailyPriceSaved      = "DailyPriceSaved"
-  val ContactSaved         = "ContactSaved"
-  val UTF_8: String        = StandardCharsets.UTF_8.name()
+  val EnquirySaved           = "EnquirySaved"
+  val EnquiryBooked          = "EnquiryBooked"
+  val NewBookingIdAssigned   = "NewBookingIdAssigned"
+  val DailyPriceSaved        = "DailyPriceSaved"
+  val ContactSaved           = "ContactSaved"
+  val PersistenceOffsetSaved = "PersistenceOffsetSaved"
+  val UTF_8: String          = StandardCharsets.UTF_8.name()
 
   import play.api.libs.json._
 
@@ -48,25 +50,29 @@ class AkkaPersistenceSerializer extends SerializerWithStringManifest {
   implicit lazy val dayMonthFormat: OFormat[DayMonth]               = Json.format[DayMonth]
   implicit lazy val dailyPriceSavedFormat: OFormat[DailyPriceSaved] = Json.format[DailyPriceSaved]
   implicit lazy val contactSavedFormat: OFormat[ContactSaved]       = Json.format[ContactSaved]
+  implicit lazy val persistenceOffsetSavedFormat: OFormat[PersistenceOffsetSaved] =
+    Json.format[PersistenceOffsetSaved]
 
   def identifier = 3443221
 
   def manifest(obj: AnyRef): String =
     obj match {
-      case _: EnquirySaved         => EnquirySaved
-      case _: EnquiryBooked        => EnquiryBooked
-      case _: NewBookingIdAssigned => NewBookingIdAssigned
-      case _: DailyPriceSaved      => DailyPriceSaved
-      case _: ContactSaved         => ContactSaved
+      case _: EnquirySaved           => EnquirySaved
+      case _: EnquiryBooked          => EnquiryBooked
+      case _: NewBookingIdAssigned   => NewBookingIdAssigned
+      case _: DailyPriceSaved        => DailyPriceSaved
+      case _: ContactSaved           => ContactSaved
+      case _: PersistenceOffsetSaved => PersistenceOffsetSaved
     }
 
   def toBinary(obj: AnyRef): Array[Byte] =
     obj match {
-      case x: EnquirySaved         => Json.toJson(x).toString().getBytes(UTF_8)
-      case x: EnquiryBooked        => Json.toJson(x).toString().getBytes(UTF_8)
-      case x: NewBookingIdAssigned => Json.toJson(x).toString().getBytes(UTF_8)
-      case x: DailyPriceSaved      => Json.toJson(x).toString().getBytes(UTF_8)
-      case x: ContactSaved         => Json.toJson(x).toString().getBytes(UTF_8)
+      case x: EnquirySaved           => Json.toJson(x).toString().getBytes(UTF_8)
+      case x: EnquiryBooked          => Json.toJson(x).toString().getBytes(UTF_8)
+      case x: NewBookingIdAssigned   => Json.toJson(x).toString().getBytes(UTF_8)
+      case x: DailyPriceSaved        => Json.toJson(x).toString().getBytes(UTF_8)
+      case x: ContactSaved           => Json.toJson(x).toString().getBytes(UTF_8)
+      case x: PersistenceOffsetSaved => Json.toJson(x).toString().getBytes(UTF_8)
     }
 
   def fromBinary(bytes: Array[Byte], manifest: String): AnyRef =
@@ -81,5 +87,7 @@ class AkkaPersistenceSerializer extends SerializerWithStringManifest {
         Json.parse(new String(bytes, UTF_8)).as[DailyPriceSaved]
       case ContactSaved =>
         Json.parse(new String(bytes, UTF_8)).as[ContactSaved]
+      case PersistenceOffsetSaved =>
+        Json.parse(new String(bytes, UTF_8)).as[PersistenceOffsetSaved]
     }
 }

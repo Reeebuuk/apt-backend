@@ -4,6 +4,7 @@ import akka.actor.{ Actor, ActorLogging, ActorRef, Props }
 import akka.cluster.sharding.ShardRegion
 import hr.com.blanka.apartments.ValueClasses.UnitId
 import hr.com.blanka.apartments.command.booking.{ BookingAggregateActor, Enquiry, EnquiryBooked }
+import hr.com.blanka.apartments.query.PersistenceQueryEvent
 import hr.com.blanka.apartments.utils.HelperMethods
 import org.scalactic.Good
 
@@ -59,7 +60,7 @@ class BookedDatesActor(synchronizeBookingActor: ActorRef) extends Actor with Act
   import BookedDatesActor._
 
   override def receive: Receive = {
-    case EnquiryBookedWithSequenceNumber(sequenceNumber, event: EnquiryBooked) =>
+    case PersistenceQueryEvent(sequenceNumber, event: EnquiryBooked) =>
       val currentlyBookedDates: List[BookedDay] =
         bookedDatesPerUnit.getOrElse(event.enquiry.unitId, List.empty)
 
