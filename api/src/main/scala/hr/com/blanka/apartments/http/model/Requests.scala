@@ -5,6 +5,7 @@ import hr.com.blanka.apartments.command.price.SavePriceRange
 import java.time.LocalDate
 
 import hr.com.blanka.apartments.ValueClasses.{ BookingId, UnitId, UserId }
+import hr.com.blanka.apartments.command.contact.SaveContact
 import hr.com.blanka.apartments.query.price.LookupPriceForRange
 
 case class EnquiryRequest(unitId: Int,
@@ -62,4 +63,9 @@ case class SavePriceRangeRequest(userId: String,
 case class LookupPriceForRangeRequest(userId: String, unitId: Int, from: LocalDate, to: LocalDate) {
   def toQuery: LookupPriceForRange =
     LookupPriceForRange(UserId(userId), UnitId(unitId), from, to)
+}
+
+case class ContactRequest(name: String, email: String, text: String) {
+  def toCommand: SaveContact =
+    SaveContact(name, email, text)
 }

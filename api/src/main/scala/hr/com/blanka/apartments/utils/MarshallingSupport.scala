@@ -31,6 +31,7 @@ trait ReadMarshallingSupport extends ErrorMarshallingSupport {
   implicit val enquiryReceivedRequestFormat: Reads[EnquiryReceivedRequest] =
     Json.reads[EnquiryReceivedRequest]
   implicit val depositPaidFormat: Reads[DepositPaidRequest] = Json.reads[DepositPaidRequest]
+  implicit val contactRequestFormat: Reads[ContactRequest]  = Json.reads[ContactRequest]
 
 }
 

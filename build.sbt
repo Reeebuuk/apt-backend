@@ -17,6 +17,7 @@ lazy val api =
         val logbackClassicV           = "1.2.3"
         val scalaLoggingV             = "3.7.2"
         val akkaHttpCorsV             = "0.2.1"
+        val javaMailV                 = "1.6.0"
 
         Seq(
           "com.typesafe.akka"          %% "akka-contrib"                        % akkaV,
@@ -33,6 +34,7 @@ lazy val api =
           "ch.qos.logback"             % "logback-classic"                      % logbackClassicV,
           "com.typesafe.scala-logging" %% "scala-logging"                       % scalaLoggingV,
           "ch.megard"                  %% "akka-http-cors"                      % akkaHttpCorsV,
+          "com.sun.mail"               % "javax.mail"                           % javaMailV,
           "com.typesafe.akka"          %% "akka-persistence-cassandra-launcher" % akkaPersistanceCassandraV % Test,
           "org.scalatest"              %% "scalatest"                           % scalaTestV % Test,
           "com.typesafe.akka"          %% "akka-http-testkit"                   % akkaHttpTestV % Test

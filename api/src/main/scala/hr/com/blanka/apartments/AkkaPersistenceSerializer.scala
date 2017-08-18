@@ -10,6 +10,7 @@ import hr.com.blanka.apartments.command.booking.{
   EnquirySaved,
   NewBookingIdAssigned
 }
+import hr.com.blanka.apartments.command.contact.ContactSaved
 import hr.com.blanka.apartments.command.price.DailyPriceSaved
 import hr.com.blanka.apartments.common.DayMonth
 
@@ -19,6 +20,7 @@ class AkkaPersistenceSerializer extends SerializerWithStringManifest {
   val EnquiryBooked        = "EnquiryBooked"
   val NewBookingIdAssigned = "NewBookingIdAssigned"
   val DailyPriceSaved      = "DailyPriceSaved"
+  val ContactSaved         = "ContactSaved"
   val UTF_8: String        = StandardCharsets.UTF_8.name()
 
   import play.api.libs.json._
@@ -45,6 +47,7 @@ class AkkaPersistenceSerializer extends SerializerWithStringManifest {
     Json.format[NewBookingIdAssigned]
   implicit lazy val dayMonthFormat: OFormat[DayMonth]               = Json.format[DayMonth]
   implicit lazy val dailyPriceSavedFormat: OFormat[DailyPriceSaved] = Json.format[DailyPriceSaved]
+  implicit lazy val contactSavedFormat: OFormat[ContactSaved]       = Json.format[ContactSaved]
 
   def identifier = 3443221
 
@@ -54,6 +57,7 @@ class AkkaPersistenceSerializer extends SerializerWithStringManifest {
       case _: EnquiryBooked        => EnquiryBooked
       case _: NewBookingIdAssigned => NewBookingIdAssigned
       case _: DailyPriceSaved      => DailyPriceSaved
+      case _: ContactSaved         => ContactSaved
     }
 
   def toBinary(obj: AnyRef): Array[Byte] =
@@ -62,6 +66,7 @@ class AkkaPersistenceSerializer extends SerializerWithStringManifest {
       case x: EnquiryBooked        => Json.toJson(x).toString().getBytes(UTF_8)
       case x: NewBookingIdAssigned => Json.toJson(x).toString().getBytes(UTF_8)
       case x: DailyPriceSaved      => Json.toJson(x).toString().getBytes(UTF_8)
+      case x: ContactSaved         => Json.toJson(x).toString().getBytes(UTF_8)
     }
 
   def fromBinary(bytes: Array[Byte], manifest: String): AnyRef =
@@ -74,6 +79,7 @@ class AkkaPersistenceSerializer extends SerializerWithStringManifest {
         Json.parse(new String(bytes, UTF_8)).as[NewBookingIdAssigned]
       case DailyPriceSaved =>
         Json.parse(new String(bytes, UTF_8)).as[DailyPriceSaved]
-
+      case ContactSaved =>
+        Json.parse(new String(bytes, UTF_8)).as[ContactSaved]
     }
 }

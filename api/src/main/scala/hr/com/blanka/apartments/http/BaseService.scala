@@ -9,6 +9,7 @@ import ch.megard.akka.http.cors.scaladsl.CorsDirectives.{ cors, corsRejectionHan
 import ch.megard.akka.http.cors.scaladsl.settings.CorsSettings
 import hr.com.blanka.apartments.http.routes.command.{
   CommandBookingServiceRoute,
+  CommandContactServiceRoute,
   CommandPriceServiceRoute
 }
 import hr.com.blanka.apartments.http.routes.query.{
@@ -20,7 +21,8 @@ trait BaseService
     extends QueryPriceServiceRoute
     with QueryBookingServiceRoute
     with CommandBookingServiceRoute
-    with CommandPriceServiceRoute {
+    with CommandPriceServiceRoute
+    with CommandContactServiceRoute {
 
   val corsSettings: CorsSettings.Default = CorsSettings.defaultSettings.copy(
     allowedOrigins = HttpOriginRange(HttpOrigin("http://localhost:9000"))
@@ -43,7 +45,7 @@ trait BaseService
         handleErrors {
           pathPrefix("v1") {
             queryPriceRoute(query) ~ queryBookingRoute(query) ~
-            commandPriceRoute(command) ~ commandBookingRoute(command)
+            commandPriceRoute(command) ~ commandBookingRoute(command) ~ commandContactRoute(command)
           }
         }
       }
