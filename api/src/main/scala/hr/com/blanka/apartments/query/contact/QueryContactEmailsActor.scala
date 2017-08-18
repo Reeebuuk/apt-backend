@@ -21,9 +21,29 @@ class QueryContactEmailsActor(synchronizeBookingActor: ActorRef,
 
   var persistenceOffset: Long = 0
 
+  def emailTemplate(name: String, text: String): String =
+    s"""
+       |Hello $name,
+       |
+       |We have received your message:
+       |
+       |"$text"
+       |
+       |Don't worry, we usually respond straight away :)
+       |
+       |Cheers,
+       |Kruno
+       |
+       |www.apartments-blanka.com.hr
+     """.stripMargin
+
   override def receiveCommand: Receive = {
     case PersistenceQueryEvent(offset, cs: ContactSaved) =>
-      emailSenderActor ! SendEmail(fromEmail, cs.email, "Contact", cs.text, offset)
+      emailSenderActor ! SendEmail(fromEmail,
+                                   cs.email,
+                                   "Apartments Blanka contact",
+                                   emailTemplate(cs.name, cs.text),
+                                   offset)
     case offset: Long =>
       persist(PersistenceOffsetSaved(offset)) { _ =>
         persistenceOffset = offset + 1
