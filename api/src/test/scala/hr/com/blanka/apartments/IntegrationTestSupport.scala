@@ -20,6 +20,7 @@ object IntegrationConf {
  |
  |akka {
  |  actor {
+ |    provider = "akka.cluster.ClusterActorRefProvider"
  |    serializers {
  |      myown = "hr.com.blanka.apartments.AkkaPersistenceSerializer"
  |    }
@@ -30,7 +31,6 @@ object IntegrationConf {
  |      "hr.com.blanka.apartments.command.booking.NewBookingIdAssigned" = myown
  |      "hr.com.blanka.apartments.command.price.DailyPriceSaved" = myown
  |    }
- |    provider = "akka.cluster.ClusterActorRefProvider"
  |  }
  |
  |  persistence {

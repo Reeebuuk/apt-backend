@@ -23,7 +23,7 @@ class BookingTest extends BaseIntegrationTest {
 
   "Booking service should save booking and update availability" in {
 
-    val enquiryRequest = generateEnquiryReceivedRequest()
+    val enquiryRequest = generateEnquiryRequest()
     val enquiryRequestEntity =
       HttpEntity(MediaTypes.`application/json`, Json.toJson(enquiryRequest).toString())
 
@@ -47,8 +47,8 @@ class BookingTest extends BaseIntegrationTest {
       eventually {
         Get(
           s"/booking/available?" +
-          s"from=${enquiryRequest.enquiry.dateFrom.atStartOfDay().toInstant(ZoneOffset.UTC).toEpochMilli}&" +
-          s"to=${enquiryRequest.enquiry.dateTo.atStartOfDay().toInstant(ZoneOffset.UTC).toEpochMilli}"
+          s"from=${enquiryRequest.dateFrom.atStartOfDay().toInstant(ZoneOffset.UTC).toEpochMilli}&" +
+          s"to=${enquiryRequest.dateTo.atStartOfDay().toInstant(ZoneOffset.UTC).toEpochMilli}"
         ) ~> queryBookingRoute(query) ~> check {
           status should be(OK)
 
@@ -61,10 +61,10 @@ class BookingTest extends BaseIntegrationTest {
       }
 
       val bookedDays =
-        generateBookedDaysResponse(enquiryRequest.enquiry.dateFrom, enquiryRequest.enquiry.dateTo)
+        generateBookedDaysResponse(enquiryRequest.dateFrom, enquiryRequest.dateTo)
 
       eventually {
-        Get(s"/booking/bookedDates?unitId=${enquiryRequest.enquiry.unitId}") ~> queryBookingRoute(
+        Get(s"/booking/bookedDates?unitId=${enquiryRequest.unitId}") ~> queryBookingRoute(
           query
         ) ~> check {
           status should be(OK)
