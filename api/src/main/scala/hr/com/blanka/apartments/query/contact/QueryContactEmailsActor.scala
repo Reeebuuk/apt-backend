@@ -40,7 +40,7 @@ class QueryContactEmailsActor(synchronizeBookingActor: ActorRef,
   override def receiveCommand: Receive = {
     case PersistenceQueryEvent(offset, cs: ContactSaved) =>
       emailSenderActor ! SendEmail(fromEmail,
-                                   cs.email,
+                                   List(cs.email, fromEmail),
                                    "Apartments Blanka contact",
                                    emailTemplate(cs.name, cs.text),
                                    offset)

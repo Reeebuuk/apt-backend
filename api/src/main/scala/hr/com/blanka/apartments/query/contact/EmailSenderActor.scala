@@ -25,7 +25,7 @@ class EmailSenderActor(emailSettings: EmailSettings) extends Actor with ActorLog
       val message = new MimeMessage(session)
       message.setFrom(new InternetAddress(email.from))
       message.setRecipients(Message.RecipientType.TO,
-                            List(new InternetAddress(email.to)).toArray[Address])
+                            email.to.map(new InternetAddress(_)).toArray[Address])
       message.setSubject(email.subject)
       message.setText(email.text)
       Transport.send(message)
