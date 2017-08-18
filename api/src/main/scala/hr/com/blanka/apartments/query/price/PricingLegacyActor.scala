@@ -4,6 +4,7 @@ import akka.actor.{ Actor, Props }
 import com.typesafe.config.{ Config, ConfigFactory }
 import hr.com.blanka.apartments.ValueClasses.UnitId
 import hr.com.blanka.apartments.common.DayMonth
+import org.scalactic.Good
 
 import scala.collection.JavaConverters._
 
@@ -39,6 +40,6 @@ class PricingLegacyActor extends Actor {
 
   override def receive: Receive = {
     case _: LegacyLookupAllPrices =>
-      sender() ! pricingRangeList
+      sender() ! Good(pricingRangeList)
   }
 }
