@@ -11,6 +11,7 @@ import hr.com.blanka.apartments.query.booking.{ BookingQuery, QueryBookingActor 
 import hr.com.blanka.apartments.query.contact.{
   EmailSenderActor,
   EmailSettings,
+  QueryBookingsForEmailsActor,
   QueryContactEmailsActor
 }
 import hr.com.blanka.apartments.query.price.{ PriceQuery, QueryPriceActor }
@@ -47,6 +48,13 @@ class QueryActor(materializer: ActorMaterializer) extends Actor with ActorLoggin
     context.actorOf(
       QueryContactEmailsActor(commandSideReaderActor, emailSenderActor, emailSettings.fromEmail),
       "QueryContactEmailsActor"
+    )
+  val queryBookingsForEmailsActor: ActorRef =
+    context.actorOf(
+      QueryBookingsForEmailsActor(commandSideReaderActor,
+                                  emailSenderActor,
+                                  emailSettings.fromEmail),
+      "QueryBookingsForEmailsActor"
     )
 
   override def receive: Receive = {

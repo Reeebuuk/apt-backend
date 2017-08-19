@@ -10,6 +10,7 @@ import hr.com.blanka.apartments.command.booking.{
   CheckIfPeriodIsAvailable,
   EnquiryBooked
 }
+import hr.com.blanka.apartments.common.HardcodedUnits
 import hr.com.blanka.apartments.query.PersistenceQueryEvent
 import org.scalactic.Good
 
@@ -44,9 +45,8 @@ class UnitAvailabilityActor(synchronizeBookingActor: ActorRef) extends Actor wit
       )
   }
 
-  //currently hardcoded for 3 units
   def getAvailableUnits(from: LocalDate, to: LocalDate): Set[UnitId] =
-    Set(UnitId(1), UnitId(2), UnitId(3)).diff(getBookedUnits(from, to))
+    HardcodedUnits.units.keySet.diff(getBookedUnits(from, to))
 
   def getBookedUnits(from: LocalDate, to: LocalDate): Set[UnitId] =
     iterateThroughDays(from, to).flatMap(bookedUnitsPerDate.getOrElse(_, Set())).toSet

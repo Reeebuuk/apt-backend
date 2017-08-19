@@ -22,8 +22,7 @@ class QueryContactEmailsActor(synchronizeBookingActor: ActorRef,
   var persistenceOffset: Long = 0
 
   def emailTemplate(name: String, text: String): String =
-    s"""
-       |Hello $name,
+    s"""Hello $name,
        |
        |We have received your message:
        |

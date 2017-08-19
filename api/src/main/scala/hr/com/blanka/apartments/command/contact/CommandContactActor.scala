@@ -11,7 +11,7 @@ import scala.language.postfixOps
 object CommandContactActor {
   def apply() = Props(classOf[CommandContactActor])
 
-  val persistenceId: String = "Contact"
+  val persistenceId: String = "CommandContactActor"
 }
 
 class CommandContactActor extends PersistentActor with ActorLogging {
