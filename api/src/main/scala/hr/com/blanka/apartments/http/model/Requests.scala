@@ -1,11 +1,12 @@
 package hr.com.blanka.apartments.http.model
 
-import hr.com.blanka.apartments.command.booking.{ DepositPaid, Enquiry, SaveEnquiryInitiated }
+import hr.com.blanka.apartments.command.booking.{ DepositPaid, SaveEnquiryInitiated }
 import hr.com.blanka.apartments.command.price.SavePriceRange
 import java.time.LocalDate
 
 import hr.com.blanka.apartments.ValueClasses.{ BookingId, UnitId, UserId }
 import hr.com.blanka.apartments.command.contact.SaveContact
+import hr.com.blanka.apartments.common.Enquiry
 import hr.com.blanka.apartments.query.price.LookupPriceForRange
 
 case class EnquiryRequest(unitId: Int,

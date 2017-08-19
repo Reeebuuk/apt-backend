@@ -4,11 +4,10 @@ import akka.actor.{ ActorLogging, ActorRef, Props }
 import akka.persistence.{ PersistentActor, RecoveryCompleted }
 import hr.com.blanka.apartments.command.booking.{
   BookingAggregateActor,
-  Enquiry,
   EnquiryBooked,
   EnquirySaved
 }
-import hr.com.blanka.apartments.common.HardcodedUnits
+import hr.com.blanka.apartments.common.{ Enquiry, HardcodedUnits }
 import hr.com.blanka.apartments.query.booking.StartSync
 import hr.com.blanka.apartments.query.{ PersistenceOffsetSaved, PersistenceQueryEvent }
 

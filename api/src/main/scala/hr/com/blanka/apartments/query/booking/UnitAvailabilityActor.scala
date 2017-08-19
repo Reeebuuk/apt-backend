@@ -64,12 +64,14 @@ class UnitAvailabilityActor(synchronizeBookingActor: ActorRef) extends Actor wit
       case None        => bookedUnitsPerDate + (e.date -> Set(e.unitId))
       case Some(units) => bookedUnitsPerDate + (e.date -> (units + e.unitId))
     }
-    persistenceSequenceNumber = e.sequenceNmbr
+    persistenceSequenceNumber = e.sequenceNumber
   }
 
-  override def preStart(): Unit =
+  override def preStart(): Unit = {
     synchronizeBookingActor ! StartSync(self,
                                         BookingAggregateActor.persistenceId,
                                         persistenceSequenceNumber)
+    super.preStart()
+  }
 
 }

@@ -5,14 +5,13 @@ import java.nio.charset.StandardCharsets
 import akka.serialization.SerializerWithStringManifest
 import hr.com.blanka.apartments.ValueClasses.{ BookingId, UnitId, UserId }
 import hr.com.blanka.apartments.command.booking.{
-  Enquiry,
   EnquiryBooked,
   EnquirySaved,
   NewBookingIdAssigned
 }
 import hr.com.blanka.apartments.command.contact.ContactSaved
 import hr.com.blanka.apartments.command.price.DailyPriceSaved
-import hr.com.blanka.apartments.common.DayMonth
+import hr.com.blanka.apartments.common.{ DayMonth, Enquiry }
 import hr.com.blanka.apartments.query.PersistenceOffsetSaved
 
 class AkkaPersistenceSerializer extends SerializerWithStringManifest {

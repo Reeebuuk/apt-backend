@@ -3,6 +3,7 @@ package hr.com.blanka.apartments.command.booking
 import java.time.{ LocalDate, LocalDateTime }
 
 import hr.com.blanka.apartments.ValueClasses.{ BookingId, UnitId, UserId }
+import hr.com.blanka.apartments.common.Enquiry
 
 /*
  * Commands
@@ -59,17 +60,3 @@ case class EnquiryBooked(userId: UserId,
                          timeSaved: LocalDateTime,
                          depositAmount: BigDecimal,
                          currency: String)
-
-case class Enquiry(unitId: UnitId,
-                   dateFrom: LocalDate,
-                   dateTo: LocalDate,
-                   name: String,
-                   surname: String,
-                   phoneNumber: String,
-                   email: String,
-                   address: String,
-                   city: String,
-                   country: String,
-                   animals: String,
-                   noOfPeople: String,
-                   note: String)

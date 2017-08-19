@@ -3,7 +3,8 @@ package hr.com.blanka.apartments.query.booking
 import akka.actor.{ Actor, ActorLogging, ActorRef, Props }
 import akka.cluster.sharding.ShardRegion
 import hr.com.blanka.apartments.ValueClasses.UnitId
-import hr.com.blanka.apartments.command.booking.{ BookingAggregateActor, Enquiry, EnquiryBooked }
+import hr.com.blanka.apartments.command.booking.{ BookingAggregateActor, EnquiryBooked }
+import hr.com.blanka.apartments.common.Enquiry
 import hr.com.blanka.apartments.query.PersistenceQueryEvent
 import hr.com.blanka.apartments.utils.HelperMethods
 import org.scalactic.Good
@@ -74,8 +75,10 @@ class BookedDatesActor(synchronizeBookingActor: ActorRef) extends Actor with Act
       sender() ! Good(BookedDays(bookedDatesPerUnit.getOrElse(unitId, List.empty)))
   }
 
-  override def preStart(): Unit =
+  override def preStart(): Unit = {
     synchronizeBookingActor ! StartSync(self,
                                         BookingAggregateActor.persistenceId,
                                         recoverySequenceNumberForQuery)
+    super.preStart()
+  }
 }

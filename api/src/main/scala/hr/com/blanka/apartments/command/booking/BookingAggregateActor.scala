@@ -5,6 +5,7 @@ import java.time.LocalDateTime
 import akka.actor.{ ActorLogging, Props }
 import akka.cluster.sharding.ShardRegion
 import akka.persistence.PersistentActor
+import hr.com.blanka.apartments.common.Enquiry
 import org.scalactic.Good
 
 object BookingAggregateActor {
@@ -21,13 +22,9 @@ object BookingAggregateActor {
 
 class BookingAggregateActor extends PersistentActor with ActorLogging {
 
-  override def receiveRecover: Receive = {
-    case _ =>
-  }
+  var enquiryValue: Enquiry = _
 
   override def receiveCommand: Receive = init
-
-  var enquiryValue: Enquiry = _
 
   def init: Receive = {
     case SaveEnquiry(userId, bookingId, booking) =>
@@ -45,13 +42,25 @@ class BookingAggregateActor extends PersistentActor with ActorLogging {
       persist(
         EnquiryBooked(userId, bookingId, enquiryValue, LocalDateTime.now(), depositAmount, currency)
       ) { e =>
+        context become done
         sender() ! Good
       }
     case e: SaveEnquiry => log.error(s"Received SaveEnquiry with same Id $e")
   }
 
-  def booking: Receive = {
+  def done: Receive = {
     case _ =>
+      log.info("Enquiry already booked")
+      sender() ! Good
+  }
+
+  override def receiveRecover: Receive = {
+    case EnquirySaved(_, bookingId, en, _) if bookingId.id.toString == context.self.path.name =>
+      enquiryValue = en
+      context become enquiry
+    case EnquiryBooked(_, bookingId, _, _, _, _)
+        if bookingId.id.toString == context.self.path.name =>
+      context become done
   }
 
   override def persistenceId: String = BookingAggregateActor.persistenceId

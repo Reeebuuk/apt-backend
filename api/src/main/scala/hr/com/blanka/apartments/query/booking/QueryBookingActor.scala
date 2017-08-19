@@ -38,6 +38,9 @@ class QueryBookingActor(materializer: ActorMaterializer, synchronizeBookingActor
     extractShardId = UnitAvailabilityActor.extractShardId
   )
 
+  val allBookingsActor: ActorRef =
+    context.actorOf(AllBookingsActor(synchronizeBookingActor), "AllBookingsActor")
+
   override def receive: Receive = {
     case e: GetAvailableUnits =>
       val msgSender = sender()
@@ -45,5 +48,8 @@ class QueryBookingActor(materializer: ActorMaterializer, synchronizeBookingActor
     case e: GetBookedDates =>
       val msgSender = sender()
       bookedDatesActor ? e pipeTo msgSender
+    case e: GetAllBookings =>
+      val msgSender = sender()
+      allBookingsActor ? e pipeTo msgSender
   }
 }

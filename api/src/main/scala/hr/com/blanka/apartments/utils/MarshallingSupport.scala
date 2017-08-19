@@ -7,37 +7,41 @@ trait WriteMarshallingSupport extends ErrorMarshallingSupport {
 
   import hr.com.blanka.apartments.http.model._
 
-  implicit val priceForRangeDtoFormat: OWrites[PriceForRangeResponse] =
+  implicit val priceForRangeDtoWrites: OWrites[PriceForRangeResponse] =
     Json.writes[PriceForRangeResponse]
-  implicit val availableUnitsFormat: OWrites[AvailableUnitsResponse] =
+  implicit val availableUnitsWrites: OWrites[AvailableUnitsResponse] =
     Json.writes[AvailableUnitsResponse]
-  implicit val bookedDayFormat: OWrites[BookedDayResponse]   = Json.writes[BookedDayResponse]
-  implicit val bookedDaysFormat: OWrites[BookedDaysResponse] = Json.writes[BookedDaysResponse]
-  implicit val pricePerPeriodResponseFormat: OWrites[PricePerPeriodResponse] =
+  implicit val bookedDayWrites: OWrites[BookedDayResponse]   = Json.writes[BookedDayResponse]
+  implicit val bookedDaysWrites: OWrites[BookedDaysResponse] = Json.writes[BookedDaysResponse]
+  implicit val pricePerPeriodResponseWrites: OWrites[PricePerPeriodResponse] =
     Json.writes[PricePerPeriodResponse]
-  implicit val pricePerPeriodsResponseFormat: OWrites[PricePerPeriodsResponse] =
+  implicit val pricePerPeriodsResponseWrites: OWrites[PricePerPeriodsResponse] =
     Json.writes[PricePerPeriodsResponse]
+  implicit val allBookingsResponseWrites: OWrites[AllBookingsResponse] =
+    Json.writes[AllBookingsResponse]
+  implicit val bookingResponseWrites: OWrites[BookingResponse] =
+    Json.writes[BookingResponse]
 }
 
 trait ReadMarshallingSupport extends ErrorMarshallingSupport {
 
   import hr.com.blanka.apartments.http.model._
 
-  implicit val lookupPriceForRangeFormat: Reads[LookupPriceForRangeRequest] =
+  implicit val lookupPriceForRangeReads: Reads[LookupPriceForRangeRequest] =
     Json.reads[LookupPriceForRangeRequest]
-  implicit val savePriceRangeDtoFormat: Reads[SavePriceRangeRequest] =
+  implicit val savePriceRangeDtoReads: Reads[SavePriceRangeRequest] =
     Json.reads[SavePriceRangeRequest]
-  implicit val enquiryFormat: Reads[EnquiryRequest] = Json.reads[EnquiryRequest]
-  implicit val enquiryReceivedRequestFormat: Reads[EnquiryReceivedRequest] =
+  implicit val enquiryReads: Reads[EnquiryRequest] = Json.reads[EnquiryRequest]
+  implicit val enquiryReceivedRequestReads: Reads[EnquiryReceivedRequest] =
     Json.reads[EnquiryReceivedRequest]
-  implicit val depositPaidFormat: Reads[DepositPaidRequest] = Json.reads[DepositPaidRequest]
-  implicit val contactRequestFormat: Reads[ContactRequest]  = Json.reads[ContactRequest]
+  implicit val depositPaidReads: Reads[DepositPaidRequest] = Json.reads[DepositPaidRequest]
+  implicit val contactRequestReads: Reads[ContactRequest]  = Json.reads[ContactRequest]
 
 }
 
 trait ErrorMarshallingSupport {
-  implicit val errorDtoFormat: OWrites[ErrorResponse] = Json.writes[ErrorResponse]
-  implicit val newEnquiryResponseFormat: OWrites[NewEnquiryResponse] =
+  implicit val errorDtoWrites: OWrites[ErrorResponse] = Json.writes[ErrorResponse]
+  implicit val newEnquiryResponseWrites: OWrites[NewEnquiryResponse] =
     Json.writes[NewEnquiryResponse]
 
 }
