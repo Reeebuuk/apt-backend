@@ -1,22 +1,25 @@
 package hr.com.blanka.apartments.query.price
 
-import akka.actor.{ Actor, Props }
+import akka.actor.{ Actor, ActorRef, Props }
 import akka.cluster.sharding.ShardRegion
-import hr.com.blanka.apartments.command.price.DailyPriceSaved
+import hr.com.blanka.apartments.command.price.{ DailyPriceSaved, PriceAggregateActor }
 import hr.com.blanka.apartments.common.DayMonth
+import hr.com.blanka.apartments.query.PersistenceQueryEvent
+import hr.com.blanka.apartments.query.booking.StartSync
 
 object DailyPriceAggregateActor {
-  def apply() = Props(classOf[DailyPriceAggregateActor])
+  def apply(synchronizeBookingActor: ActorRef) =
+    Props(classOf[DailyPriceAggregateActor], synchronizeBookingActor)
 
   val extractEntityId: ShardRegion.ExtractEntityId = {
-    case e @ DailyPriceSaved(userId, unitId, _, _, _) => (s"$userId$unitId", e)
-    case e @ LookupPriceForDay(userId, unitId, _)     => (s"$userId$unitId", e)
+    case e @ DailyPriceSaved(userId, unitId, _, _, _) => (s"${userId.id}${unitId.id}", e)
+    case e @ LookupPriceForDay(userId, unitId, _)     => (s"${userId.id}${unitId.id}", e)
   }
 
   val extractShardId: ShardRegion.ExtractShardId = _ => "one"
 }
 
-class DailyPriceAggregateActor extends Actor {
+class DailyPriceAggregateActor(synchronizeBookingActor: ActorRef) extends Actor {
 
   def updateState(newDailyPrice: DailyPriceSaved,
                   currentDailyPrices: Map[DayMonth, List[BigDecimal]]): Unit = {
@@ -32,7 +35,7 @@ class DailyPriceAggregateActor extends Actor {
   override def receive: Receive = active(Map[DayMonth, List[BigDecimal]]())
 
   def active(currentDailyPrices: Map[DayMonth, List[BigDecimal]]): Receive = {
-    case e: DailyPriceSaved =>
+    case PersistenceQueryEvent(_, e: DailyPriceSaved) =>
       updateState(e, currentDailyPrices)
 
     case LookupPriceForDay(userId, unitId, day) =>
@@ -44,4 +47,8 @@ class DailyPriceAggregateActor extends Actor {
       sender() ! PriceDayFetched(lastPrice)
   }
 
+  override def preStart(): Unit = {
+    synchronizeBookingActor ! StartSync(self, PriceAggregateActor.persistenceId, 0)
+    super.preStart()
+  }
 }

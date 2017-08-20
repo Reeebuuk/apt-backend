@@ -2,9 +2,7 @@ package hr.com.blanka.apartments.query.booking
 
 import akka.actor.{ Actor, ActorLogging, ActorRef, Props }
 import akka.cluster.sharding.{ ClusterSharding, ClusterShardingSettings }
-import akka.stream.ActorMaterializer
 import akka.pattern.{ ask, pipe }
-
 import akka.util.Timeout
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -12,13 +10,11 @@ import scala.concurrent.duration._
 import scala.language.postfixOps
 
 object QueryBookingActor {
-  def apply(materializer: ActorMaterializer, synchronizeBookingActor: ActorRef) =
-    Props(classOf[QueryBookingActor], materializer, synchronizeBookingActor)
+  def apply(synchronizeBookingActor: ActorRef) =
+    Props(classOf[QueryBookingActor], synchronizeBookingActor)
 }
 
-class QueryBookingActor(materializer: ActorMaterializer, synchronizeBookingActor: ActorRef)
-    extends Actor
-    with ActorLogging {
+class QueryBookingActor(synchronizeBookingActor: ActorRef) extends Actor with ActorLogging {
 
   implicit val timeout = Timeout(10 seconds)
 

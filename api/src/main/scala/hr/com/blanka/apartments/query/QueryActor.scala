@@ -36,9 +36,10 @@ class QueryActor(materializer: ActorMaterializer) extends Actor with ActorLoggin
     extractShardId = CommandSideReaderActor.extractShardId
   )
 
-  val priceActor: ActorRef = context.actorOf(QueryPriceActor(materializer), "QueryPriceActor")
+  val priceActor: ActorRef =
+    context.actorOf(QueryPriceActor(commandSideReaderActor), "QueryPriceActor")
   val bookingActor: ActorRef =
-    context.actorOf(QueryBookingActor(materializer, commandSideReaderActor), "QueryBookingActor")
+    context.actorOf(QueryBookingActor(commandSideReaderActor), "QueryBookingActor")
 
   val emailSettings = EmailSettings(ConfigFactory.load("email"))
   val emailSenderActor: ActorRef =
