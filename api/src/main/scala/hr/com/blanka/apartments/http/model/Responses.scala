@@ -9,10 +9,10 @@ case class PriceForRangeResponse(price: BigDecimal)
 
 case class ErrorResponse(msg: String)
 
-case class BookedDaysResponse(bookedDays: List[BookedDayResponse])
-object BookedDaysResponse {
-  def remap(bd: BookedDays): BookedDaysResponse =
-    BookedDaysResponse(bd.bookedDays.map(BookedDayResponse.remap))
+case class BookedDatesResponse(bookedDays: List[BookedDateResponse])
+object BookedDatesResponse {
+  def remap(bd: BookedDays): BookedDatesResponse =
+    BookedDatesResponse(bd.bookedDays.map(BookedDateResponse.remap))
 }
 
 case class AvailableUnitsResponse(apartments: Set[Int])
@@ -21,10 +21,10 @@ object AvailableUnitsResponse {
     new AvailableUnitsResponse(aa.unitIds.map(_.id))
 }
 
-case class BookedDayResponse(day: LocalDate, firstDay: Boolean, lastDay: Boolean)
-object BookedDayResponse {
-  def remap(bd: BookedDay): BookedDayResponse =
-    BookedDayResponse(bd.day, bd.firstDay, bd.lastDay)
+case class BookedDateResponse(day: LocalDate, firstDay: Boolean, lastDay: Boolean)
+object BookedDateResponse {
+  def remap(bd: BookedDay): BookedDateResponse =
+    BookedDateResponse(bd.day, bd.firstDay, bd.lastDay)
 }
 
 case class NewEnquiryResponse(bookingId: Long)

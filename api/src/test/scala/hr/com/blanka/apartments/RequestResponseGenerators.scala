@@ -83,20 +83,20 @@ object RequestResponseGenerators {
       to = to
     )
 
-  def generateBookedDaysResponse(dateFrom: LocalDate, dateTo: LocalDate): BookedDaysResponse = {
+  def generateBookedDaysResponse(dateFrom: LocalDate, dateTo: LocalDate): BookedDatesResponse = {
     import hr.com.blanka.apartments.utils.HelperMethods._
 
     val days = iterateThroughDays(dateFrom, dateTo)
-    val bookedDays = days.foldLeft(List[BookedDayResponse]())(
+    val bookedDays = days.foldLeft(List[BookedDateResponse]())(
       (acc, date) =>
         acc match {
-          case Nil => List(BookedDayResponse(date, firstDay = true, lastDay = false))
+          case Nil => List(BookedDateResponse(date, firstDay = true, lastDay = false))
           case x if x.size < days.size - 1 =>
-            acc :+ BookedDayResponse(date, firstDay = false, lastDay = false)
-          case _ => acc :+ BookedDayResponse(date, firstDay = false, lastDay = true)
+            acc :+ BookedDateResponse(date, firstDay = false, lastDay = false)
+          case _ => acc :+ BookedDateResponse(date, firstDay = false, lastDay = true)
       }
     )
 
-    BookedDaysResponse(bookedDays)
+    BookedDatesResponse(bookedDays)
   }
 }

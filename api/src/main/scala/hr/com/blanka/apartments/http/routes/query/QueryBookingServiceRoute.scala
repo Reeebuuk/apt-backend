@@ -7,7 +7,7 @@ import akka.pattern.ask
 import hr.com.blanka.apartments.http.model.{
   AllBookingsResponse,
   AvailableUnitsResponse,
-  BookedDaysResponse,
+  BookedDatesResponse,
   ErrorResponse
 }
 import hr.com.blanka.apartments.http.routes.BaseServiceRoute
@@ -47,7 +47,7 @@ trait QueryBookingServiceRoute extends BaseServiceRoute with WriteMarshallingSup
     path("bookedDates") {
       parameter("unitId".as[Int]) { unitId =>
         onSuccess(query ? GetBookedDates(UserId("user"), UnitId(unitId))) {
-          case Good(bd: BookedDays) => complete(StatusCodes.OK, BookedDaysResponse.remap(bd))
+          case Good(bd: BookedDays) => complete(StatusCodes.OK, BookedDatesResponse.remap(bd))
           case Bad(response) =>
             response match {
               case One(error) => complete(StatusCodes.BadRequest, ErrorResponse(error.toString))

@@ -15,8 +15,8 @@ import hr.com.blanka.apartments.query.PersistenceQueryEvent
 import org.scalactic.Good
 
 object UnitAvailabilityActor {
-  def apply(synchronizeBookingActor: ActorRef) =
-    Props(classOf[UnitAvailabilityActor], synchronizeBookingActor)
+  def apply(commandSideReaderActor: ActorRef) =
+    Props(classOf[UnitAvailabilityActor], commandSideReaderActor)
 
   val extractEntityId: ShardRegion.ExtractEntityId = {
     case e: EnquiryBooked            => (e.userId.id.toString, e)
@@ -27,7 +27,7 @@ object UnitAvailabilityActor {
   val extractShardId: ShardRegion.ExtractShardId = _ => "two"
 }
 
-class UnitAvailabilityActor(synchronizeBookingActor: ActorRef) extends Actor with ActorLogging {
+class UnitAvailabilityActor(commandSideReaderActor: ActorRef) extends Actor with ActorLogging {
 
   var bookedUnitsPerDate: Map[LocalDate, Set[UnitId]] = Map[LocalDate, Set[UnitId]]()
   var persistenceSequenceNumber: Long                 = 0
@@ -39,9 +39,9 @@ class UnitAvailabilityActor(synchronizeBookingActor: ActorRef) extends Actor wit
     case GetAvailableUnits(_, from, to) =>
       sender() ! Good(AvailableUnits(getAvailableUnits(from, to)))
 
-    case PersistenceQueryEvent(sequenceNumber, event: EnquiryBooked) =>
-      iterateThroughDays(event.enquiry.dateFrom, event.enquiry.dateTo).foreach(
-        date => update(BookedUnit(event.userId, event.enquiry.unitId, date, sequenceNumber))
+    case PersistenceQueryEvent(sequenceNumber, e: EnquiryBooked) =>
+      iterateThroughDays(e.enquiry.dateFrom, e.enquiry.dateTo).foreach(
+        date => update(BookedUnit(e.userId, e.enquiry.unitId, date, sequenceNumber))
       )
   }
 
@@ -68,9 +68,9 @@ class UnitAvailabilityActor(synchronizeBookingActor: ActorRef) extends Actor wit
   }
 
   override def preStart(): Unit = {
-    synchronizeBookingActor ! StartSync(self,
-                                        BookingAggregateActor.persistenceId,
-                                        persistenceSequenceNumber)
+    commandSideReaderActor ! StartSync(self,
+                                       BookingAggregateActor.persistenceId,
+                                       persistenceSequenceNumber)
     super.preStart()
   }
 

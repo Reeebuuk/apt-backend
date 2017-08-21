@@ -13,11 +13,11 @@ import org.scalactic.Good
 import scala.language.postfixOps
 
 object AllBookingsActor {
-  def apply(synchronizeBookingActor: ActorRef) =
-    Props(classOf[AllBookingsActor], synchronizeBookingActor)
+  def apply(commandSideReaderActor: ActorRef) =
+    Props(classOf[AllBookingsActor], commandSideReaderActor)
 }
 
-class AllBookingsActor(synchronizeBookingActor: ActorRef) extends Actor with ActorLogging {
+class AllBookingsActor(commandSideReaderActor: ActorRef) extends Actor with ActorLogging {
 
   // temp solution, saving to DB and keeping offset would be more perm solution
   var bookings: Map[BookingId, Booking] = Map.empty
@@ -38,7 +38,7 @@ class AllBookingsActor(synchronizeBookingActor: ActorRef) extends Actor with Act
   }
 
   override def preStart(): Unit = {
-    synchronizeBookingActor ! StartSync(self, BookingAggregateActor.persistenceId, 0)
+    commandSideReaderActor ! StartSync(self, BookingAggregateActor.persistenceId, 0)
     super.preStart()
   }
 

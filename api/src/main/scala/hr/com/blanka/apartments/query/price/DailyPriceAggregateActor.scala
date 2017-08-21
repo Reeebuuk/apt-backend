@@ -8,8 +8,8 @@ import hr.com.blanka.apartments.query.PersistenceQueryEvent
 import hr.com.blanka.apartments.query.booking.StartSync
 
 object DailyPriceAggregateActor {
-  def apply(synchronizeBookingActor: ActorRef) =
-    Props(classOf[DailyPriceAggregateActor], synchronizeBookingActor)
+  def apply(commandSideReaderActor: ActorRef) =
+    Props(classOf[DailyPriceAggregateActor], commandSideReaderActor)
 
   val extractEntityId: ShardRegion.ExtractEntityId = {
     case e @ DailyPriceSaved(userId, unitId, _, _, _) => (s"${userId.id}${unitId.id}", e)
@@ -19,7 +19,7 @@ object DailyPriceAggregateActor {
   val extractShardId: ShardRegion.ExtractShardId = _ => "one"
 }
 
-class DailyPriceAggregateActor(synchronizeBookingActor: ActorRef) extends Actor {
+class DailyPriceAggregateActor(commandSideReaderActor: ActorRef) extends Actor {
 
   def updateState(newDailyPrice: DailyPriceSaved,
                   currentDailyPrices: Map[DayMonth, List[BigDecimal]]): Unit = {
@@ -48,7 +48,7 @@ class DailyPriceAggregateActor(synchronizeBookingActor: ActorRef) extends Actor 
   }
 
   override def preStart(): Unit = {
-    synchronizeBookingActor ! StartSync(self, PriceAggregateActor.persistenceId, 0)
+    commandSideReaderActor ! StartSync(self, PriceAggregateActor.persistenceId, 0)
     super.preStart()
   }
 }

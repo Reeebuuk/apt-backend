@@ -29,7 +29,7 @@ class QueryActor(materializer: ActorMaterializer) extends Actor with ActorLoggin
   implicit val timeout = Timeout(10 seconds)
 
   val commandSideReaderActor: ActorRef = ClusterSharding(context.system).start(
-    typeName = "synchronizeBookingActor",
+    typeName = "commandSideReaderActor",
     entityProps = CommandSideReaderActor(materializer),
     settings = ClusterShardingSettings(context.system),
     extractEntityId = CommandSideReaderActor.extractEntityId,

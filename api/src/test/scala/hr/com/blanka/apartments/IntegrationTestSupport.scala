@@ -11,7 +11,7 @@ object IntegrationConf {
   def config(className: String): Config =
     ConfigFactory.parseString(s"""
  |akka {
- |  loglevel = DEBUG
+ |  loglevel = INFO
  |}
  |http {
  |  interface = "0.0.0.0"

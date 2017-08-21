@@ -17,13 +17,13 @@ trait MarshallingSupport {
 
   implicit val availableApartmentsReads: Reads[AvailableUnitsResponse] =
     Json.reads[AvailableUnitsResponse]
-  implicit val bookedDayResponseReads: Reads[BookedDayResponse] =
-    Json.reads[BookedDayResponse]
-  implicit val bookedDaysResponseReads: Reads[BookedDaysResponse] =
-    Json.reads[BookedDaysResponse]
-  implicit val priceForRangeResponse1: Format[PriceForRangeResponse] =
+  implicit val bookedDateResponseReads: Reads[BookedDateResponse] =
+    Json.reads[BookedDateResponse]
+  implicit val bookedDatesResponseReads: Reads[BookedDatesResponse] =
+    Json.reads[BookedDatesResponse]
+  implicit val priceForRangeResponse: Format[PriceForRangeResponse] =
     Json.format[PriceForRangeResponse]
-  implicit val BookingIdFormat: Format[NewEnquiryResponse] =
+  implicit val bookingIdFormat: Format[NewEnquiryResponse] =
     Json.format[NewEnquiryResponse]
 }
 

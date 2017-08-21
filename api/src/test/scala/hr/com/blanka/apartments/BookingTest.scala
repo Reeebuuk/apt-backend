@@ -60,7 +60,7 @@ class BookingTest extends BaseIntegrationTest {
         }
       }
 
-      val bookedDays =
+      val expectedBookedDates: BookedDatesResponse =
         generateBookedDaysResponse(enquiryRequest.dateFrom, enquiryRequest.dateTo)
 
       eventually {
@@ -70,10 +70,11 @@ class BookingTest extends BaseIntegrationTest {
           status should be(OK)
 
           Unmarshal(response.entity.httpEntity)
-            .to[BookedDaysResponse]
+            .to[BookedDatesResponse]
             .value
             .get
-            .get shouldBe be(bookedDays)
+            .get
+            .bookedDays should contain theSameElementsAs expectedBookedDates.bookedDays
         }
       }
     }

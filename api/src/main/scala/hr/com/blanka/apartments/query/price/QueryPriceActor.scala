@@ -11,17 +11,17 @@ import scala.concurrent.duration._
 import scala.language.postfixOps
 
 object QueryPriceActor {
-  def apply(synchronizeBookingActor: ActorRef) =
-    Props(classOf[QueryPriceActor], synchronizeBookingActor)
+  def apply(commandSideReaderActor: ActorRef) =
+    Props(classOf[QueryPriceActor], commandSideReaderActor)
 }
 
-class QueryPriceActor(synchronizeBookingActor: ActorRef) extends Actor with ActorLogging {
+class QueryPriceActor(commandSideReaderActor: ActorRef) extends Actor with ActorLogging {
 
   implicit val timeout = Timeout(10 seconds)
 
   val dailyPriceAggregateActor: ActorRef = ClusterSharding(context.system).start(
     typeName = "DailyPriceAggregateActor",
-    entityProps = DailyPriceAggregateActor(synchronizeBookingActor),
+    entityProps = DailyPriceAggregateActor(commandSideReaderActor),
     settings = ClusterShardingSettings(context.system),
     extractEntityId = DailyPriceAggregateActor.extractEntityId,
     extractShardId = DailyPriceAggregateActor.extractShardId

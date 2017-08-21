@@ -10,11 +10,10 @@ import hr.com.blanka.apartments.utils.HelperMethods
 import org.scalactic.Good
 
 object BookedDatesActor {
-  def apply(synchronizeBookingActor: ActorRef) =
-    Props(classOf[BookedDatesActor], synchronizeBookingActor)
+  def apply(commandSideReaderActor: ActorRef) =
+    Props(classOf[BookedDatesActor], commandSideReaderActor)
 
   val extractEntityId: ShardRegion.ExtractEntityId = {
-    case e: EnquiryBooked  => (e.userId.id.toString, e)
     case e: GetBookedDates => (e.userId.id.toString, e)
   }
 
@@ -44,41 +43,33 @@ object BookedDatesActor {
 
   def mergeIntoExistingSchedule(currentlyBookedDates: List[BookedDay],
                                 bookedPeriod: List[BookedDay]): List[BookedDay] =
-    currentlyBookedDates.map(
-      bd =>
-        bookedPeriod.find(_.day == bd.day) match {
-          case Some(newBookedDay) => newBookedDay
-          case None               => bd
-      }
-    )
+    currentlyBookedDates.union(bookedPeriod).groupBy(t => (t.day, t)).map(c => c._2.head).toList
+
 }
 
-class BookedDatesActor(synchronizeBookingActor: ActorRef) extends Actor with ActorLogging {
+class BookedDatesActor(commandSideReaderActor: ActorRef) extends Actor with ActorLogging {
 
   var bookedDatesPerUnit: Map[UnitId, List[BookedDay]] = Map[UnitId, List[BookedDay]]()
-  var recoverySequenceNumberForQuery: Long             = 0
 
   import BookedDatesActor._
 
   override def receive: Receive = {
-    case PersistenceQueryEvent(sequenceNumber, event: EnquiryBooked) =>
+    case PersistenceQueryEvent(sequenceNumber, e: EnquiryBooked) =>
       val currentlyBookedDates: List[BookedDay] =
-        bookedDatesPerUnit.getOrElse(event.enquiry.unitId, List.empty)
+        bookedDatesPerUnit.getOrElse(e.enquiry.unitId, List.empty)
 
-      val bookedPeriod: List[BookedDay] = markNewDates(currentlyBookedDates, event.enquiry)
-      bookedDatesPerUnit = bookedDatesPerUnit + (event.enquiry.unitId -> mergeIntoExistingSchedule(
+      val bookedPeriod: List[BookedDay] = markNewDates(currentlyBookedDates, e.enquiry)
+      bookedDatesPerUnit = bookedDatesPerUnit + (e.enquiry.unitId -> mergeIntoExistingSchedule(
         currentlyBookedDates,
         bookedPeriod
       ))
-      recoverySequenceNumberForQuery = sequenceNumber
     case GetBookedDates(_, unitId) =>
       sender() ! Good(BookedDays(bookedDatesPerUnit.getOrElse(unitId, List.empty)))
   }
 
   override def preStart(): Unit = {
-    synchronizeBookingActor ! StartSync(self,
-                                        BookingAggregateActor.persistenceId,
-                                        recoverySequenceNumberForQuery)
+    commandSideReaderActor ! StartSync(self, BookingAggregateActor.persistenceId, 0)
     super.preStart()
   }
+
 }

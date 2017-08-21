@@ -10,17 +10,17 @@ import scala.concurrent.duration._
 import scala.language.postfixOps
 
 object QueryBookingActor {
-  def apply(synchronizeBookingActor: ActorRef) =
-    Props(classOf[QueryBookingActor], synchronizeBookingActor)
+  def apply(commandSideReaderActor: ActorRef) =
+    Props(classOf[QueryBookingActor], commandSideReaderActor)
 }
 
-class QueryBookingActor(synchronizeBookingActor: ActorRef) extends Actor with ActorLogging {
+class QueryBookingActor(commandSideReaderActor: ActorRef) extends Actor with ActorLogging {
 
   implicit val timeout = Timeout(10 seconds)
 
   val bookedDatesActor: ActorRef = ClusterSharding(context.system).start(
     typeName = "bookedDatesActor",
-    entityProps = BookedDatesActor(synchronizeBookingActor),
+    entityProps = BookedDatesActor(commandSideReaderActor),
     settings = ClusterShardingSettings(context.system),
     extractEntityId = BookedDatesActor.extractEntityId,
     extractShardId = BookedDatesActor.extractShardId
@@ -28,14 +28,14 @@ class QueryBookingActor(synchronizeBookingActor: ActorRef) extends Actor with Ac
 
   val unitAvailabilityActor: ActorRef = ClusterSharding(context.system).start(
     typeName = "unitAvailabilityActor",
-    entityProps = UnitAvailabilityActor(synchronizeBookingActor),
+    entityProps = UnitAvailabilityActor(commandSideReaderActor),
     settings = ClusterShardingSettings(context.system),
     extractEntityId = UnitAvailabilityActor.extractEntityId,
     extractShardId = UnitAvailabilityActor.extractShardId
   )
 
   val allBookingsActor: ActorRef =
-    context.actorOf(AllBookingsActor(synchronizeBookingActor), "AllBookingsActor")
+    context.actorOf(AllBookingsActor(commandSideReaderActor), "AllBookingsActor")
 
   override def receive: Receive = {
     case e: GetAvailableUnits =>
