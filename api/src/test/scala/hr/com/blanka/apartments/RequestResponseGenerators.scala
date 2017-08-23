@@ -6,8 +6,25 @@ import hr.com.blanka.apartments.http.model._
 
 object RequestResponseGenerators {
 
-  val USER_ID = "userId"
-  val UNIT_ID = 1
+  val USER_ID                 = "userId"
+  val UNIT_ID                 = 1
+  val DATE_FROM: LocalDate    = LocalDate.now().withMonth(11).withDayOfMonth(5)
+  val DATE_TO: LocalDate      = LocalDate.now().withMonth(11).withDayOfMonth(12)
+  val NAME                    = "John"
+  val SURNAME                 = "Cockroach"
+  val PHONE_NUMBER            = "35395443443"
+  val EMAIL                   = "john.cockr@gmail.com"
+  val ADDRESS                 = "12 street"
+  val CITY                    = "Lisbon"
+  val COUNTRY                 = "Portugal"
+  val ANIMALS                 = "Donkey"
+  val NO_OF_PEOPLE            = "2+2"
+  val NOTE                    = "We like camp fire indoors"
+  val DEPOSIT_AMOUNT          = BigDecimal(100)
+  val CURRENCY                = "EUR"
+  val DAY_PRICE               = BigDecimal(50)
+  val TIME_SAVED: LocalDate   = LocalDate.now().withMonth(11).withDayOfMonth(2)
+  val DEPOSIT_PAID: LocalDate = LocalDate.now().withMonth(11).withDayOfMonth(1)
 
   def generateEnquiryReceivedRequest(
       userId: String = USER_ID,
@@ -16,18 +33,18 @@ object RequestResponseGenerators {
     EnquiryReceivedRequest(userId = userId, enquiry = enquiryRequest)
 
   def generateEnquiryRequest(unitId: Int = UNIT_ID,
-                             fromDate: LocalDate = LocalDate.now().withMonth(11).withDayOfMonth(5),
-                             toDate: LocalDate = LocalDate.now().withMonth(11).withDayOfMonth(12),
-                             name: String = "John",
-                             surname: String = "Cockroach",
-                             phoneNumber: String = "+35395443443",
-                             email: String = "john.cockroach@gmail.com",
-                             address: String = "7 Street",
-                             city: String = "London",
-                             country: String = "UK",
-                             animals: String = "One elephant",
-                             noOfPeople: String = "2+2",
-                             note: String = "We like to barbecue indoors"): EnquiryRequest =
+                             fromDate: LocalDate = DATE_FROM,
+                             toDate: LocalDate = DATE_TO,
+                             name: String = NAME,
+                             surname: String = SURNAME,
+                             phoneNumber: String = PHONE_NUMBER,
+                             email: String = EMAIL,
+                             address: String = ADDRESS,
+                             city: String = CITY,
+                             country: String = COUNTRY,
+                             animals: String = ANIMALS,
+                             noOfPeople: String = NO_OF_PEOPLE,
+                             note: String = NOTE): EnquiryRequest =
     EnquiryRequest(
       unitId = unitId,
       dateFrom = fromDate,
@@ -47,8 +64,8 @@ object RequestResponseGenerators {
   def generateDepositPaidRequest(
       bookingId: Long,
       userId: String = USER_ID,
-      depositAmount: BigDecimal = BigDecimal(100),
-      currency: String = "EUR"
+      depositAmount: BigDecimal = DEPOSIT_AMOUNT,
+      currency: String = CURRENCY
   ): DepositPaidRequest =
     DepositPaidRequest(userId = userId,
                        bookingId = bookingId,
@@ -58,9 +75,9 @@ object RequestResponseGenerators {
   def generateSavePriceRangeRequest(
       userId: String = USER_ID,
       unitId: Int = UNIT_ID,
-      from: LocalDate = LocalDate.now().withMonth(11).withDayOfMonth(5),
-      to: LocalDate = LocalDate.now().withMonth(11).withDayOfMonth(12),
-      price: BigDecimal = BigDecimal(50)
+      from: LocalDate = DATE_FROM,
+      to: LocalDate = DATE_TO,
+      price: BigDecimal = DAY_PRICE
   ): SavePriceRangeRequest =
     SavePriceRangeRequest(
       userId = userId,
@@ -73,8 +90,8 @@ object RequestResponseGenerators {
   def generateLookupPriceForRangeRequest(
       userId: String = USER_ID,
       unitId: Int = UNIT_ID,
-      from: LocalDate = LocalDate.now().withMonth(11).withDayOfMonth(5),
-      to: LocalDate = LocalDate.now().withMonth(11).withDayOfMonth(12)
+      from: LocalDate = DATE_FROM,
+      to: LocalDate = DATE_TO
   ): LookupPriceForRangeRequest =
     LookupPriceForRangeRequest(
       userId = userId,
@@ -100,30 +117,29 @@ object RequestResponseGenerators {
     BookedDatesResponse(bookedDays)
   }
 
-  //TODO add strings into vals and share them instead of c/p
   def generateBookingResponse(
-      bookingId: Int = 1,
-      timeSaved: LocalDate = LocalDate.now().withMonth(11).withDayOfMonth(1),
+      bookingId: Long,
+      timeSaved: LocalDate = TIME_SAVED,
       unitId: Int = UNIT_ID,
-      fromDate: LocalDate = LocalDate.now().withMonth(11).withDayOfMonth(5),
-      toDate: LocalDate = LocalDate.now().withMonth(11).withDayOfMonth(12),
-      name: String = "John",
-      surname: String = "Cockroach",
-      phoneNumber: String = "+35395443443",
-      email: String = "john.cockroach@gmail.com",
-      address: String = "7 Street",
-      city: String = "London",
-      country: String = "UK",
-      animals: String = "One elephant",
-      noOfPeople: String = "2+2",
-      note: String = "We like to barbecue indoors",
+      fromDate: LocalDate = DATE_FROM,
+      toDate: LocalDate = DATE_TO,
+      name: String = NAME,
+      surname: String = SURNAME,
+      phoneNumber: String = PHONE_NUMBER,
+      email: String = EMAIL,
+      address: String = ADDRESS,
+      city: String = CITY,
+      country: String = COUNTRY,
+      animals: String = ANIMALS,
+      noOfPeople: String = NO_OF_PEOPLE,
+      note: String = NOTE,
       totalPrice: BigDecimal = BigDecimal(0),
-      depositAmount: BigDecimal = BigDecimal(100),
-      depositCurrency: String = "EUR",
-      depositWhen: LocalDate = LocalDate.now().withMonth(11).withDayOfMonth(2)
+      depositAmount: BigDecimal = DEPOSIT_AMOUNT,
+      depositCurrency: String = CURRENCY,
+      depositWhen: LocalDate = DEPOSIT_PAID
   ): BookingResponse =
     BookingResponse(
-      bookingId = 1,
+      bookingId = bookingId,
       timeSaved = timeSaved.atStartOfDay().toInstant(ZoneOffset.UTC).toEpochMilli,
       unitId = unitId,
       dateFrom = fromDate.atStartOfDay().toInstant(ZoneOffset.UTC).toEpochMilli,
@@ -144,8 +160,8 @@ object RequestResponseGenerators {
       depositWhen = depositWhen.atStartOfDay().toInstant(ZoneOffset.UTC).toEpochMilli
     )
 
-  def generateAllBookingsResponse(): AllBookingsResponse =
+  def generateAllBookingsResponse(bookingIds: List[Long]): AllBookingsResponse =
     AllBookingsResponse(
-      bookings = List(generateBookingResponse())
+      bookings = bookingIds.map(generateBookingResponse(_))
     )
 }

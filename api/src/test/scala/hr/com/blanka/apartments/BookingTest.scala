@@ -79,6 +79,8 @@ class BookingTest extends BaseIntegrationTest {
         }
       }
 
+      val expectedBookings = generateAllBookingsResponse(List(bookingId))
+
       eventually {
         Get("/booking") ~> queryBookingRoute(
           query
@@ -93,8 +95,9 @@ class BookingTest extends BaseIntegrationTest {
             .get
             .get
             .bookings
-            .map(_.bookingId) should contain theSameElementsAs generateAllBookingsResponse().bookings
-            .map(_.bookingId)
+            .map(_.bookingId) should contain theSameElementsAs expectedBookings.bookings.map(
+            _.bookingId
+          )
         }
       }
     }
