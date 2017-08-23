@@ -4,20 +4,17 @@ import akka.actor.{ ActorLogging, ActorRef, Props }
 import akka.cluster.sharding.{ ClusterSharding, ClusterShardingSettings }
 import akka.pattern.{ ask, pipe }
 import akka.persistence.PersistentActor
-import akka.util.Timeout
 import hr.com.blanka.apartments.ValueClasses.BookingId
+import hr.com.blanka.apartments.utils.PredefinedTimeout
 
 import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.duration._
 import scala.language.postfixOps
 
 object CommandBookingActor {
   def apply() = Props(classOf[CommandBookingActor])
 }
 
-class CommandBookingActor extends PersistentActor with ActorLogging {
-
-  implicit val timeout = Timeout(10 seconds)
+class CommandBookingActor extends PersistentActor with ActorLogging with PredefinedTimeout {
 
   val bookingAggregateActor: ActorRef = ClusterSharding(context.system).start(
     typeName = "commandBookingAggregateActor",

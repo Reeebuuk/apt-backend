@@ -4,7 +4,6 @@ import akka.actor.{ Actor, ActorLogging, ActorRef, Props }
 import akka.cluster.sharding.{ ClusterSharding, ClusterShardingSettings }
 import akka.pattern.{ ask, pipe }
 import akka.stream.ActorMaterializer
-import akka.util.Timeout
 import com.typesafe.config.ConfigFactory
 import hr.com.blanka.apartments.command.price.DailyPriceSaved
 import hr.com.blanka.apartments.query.booking.{ BookingQuery, QueryBookingActor, StartSync }
@@ -15,18 +14,19 @@ import hr.com.blanka.apartments.query.contact.{
   QueryContactEmailsActor
 }
 import hr.com.blanka.apartments.query.price.{ PriceQuery, QueryPriceActor }
+import hr.com.blanka.apartments.utils.PredefinedTimeout
 
 import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.duration._
 import scala.language.postfixOps
 
 object QueryActor {
   def apply(materializer: ActorMaterializer) = Props(classOf[QueryActor], materializer)
 }
 
-class QueryActor(materializer: ActorMaterializer) extends Actor with ActorLogging {
-
-  implicit val timeout: Timeout = Timeout(10 seconds)
+class QueryActor(materializer: ActorMaterializer)
+    extends Actor
+    with ActorLogging
+    with PredefinedTimeout {
 
   val commandSideReaderActor: ActorRef = ClusterSharding(context.system).start(
     typeName = "commandSideReaderActor",

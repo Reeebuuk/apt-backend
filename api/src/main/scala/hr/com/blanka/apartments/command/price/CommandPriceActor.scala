@@ -2,9 +2,8 @@ package hr.com.blanka.apartments.command.price
 
 import akka.actor._
 import akka.pattern.ask
-import akka.util.Timeout
 import hr.com.blanka.apartments.common.DayMonth
-import hr.com.blanka.apartments.utils.HelperMethods
+import hr.com.blanka.apartments.utils.{ HelperMethods, PredefinedTimeout }
 import hr.com.blanka.apartments.validation.BasicValidation._
 import hr.com.blanka.apartments.validation.ErrorMessages._
 import org.scalactic.Accumulation._
@@ -12,7 +11,6 @@ import org.scalactic._
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
-import scala.concurrent.duration._
 import scala.language.postfixOps
 import scala.util.{ Failure, Success }
 
@@ -24,9 +22,8 @@ object CommandPriceActor {
 class CommandPriceActor(priceAggregateActorProps: Props)
     extends Actor
     with HelperMethods
-    with ActorLogging {
-
-  implicit val timeout = Timeout(10 seconds)
+    with ActorLogging
+    with PredefinedTimeout {
 
   val priceAggregateActor: ActorRef =
     context.actorOf(priceAggregateActorProps, "priceAggregateActor")

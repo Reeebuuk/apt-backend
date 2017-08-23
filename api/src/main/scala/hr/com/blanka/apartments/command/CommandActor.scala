@@ -2,22 +2,19 @@ package hr.com.blanka.apartments.command
 
 import akka.actor.{ Actor, ActorLogging, ActorRef, Props }
 import akka.pattern.{ ask, pipe }
-import akka.util.Timeout
 import hr.com.blanka.apartments.command.booking.{ BookingCommand, CommandBookingActor }
 import hr.com.blanka.apartments.command.contact.{ CommandContactActor, ContactCommand }
 import hr.com.blanka.apartments.command.price.{ CommandPriceActor, PriceCommand }
+import hr.com.blanka.apartments.utils.PredefinedTimeout
 
 import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.duration._
 import scala.language.postfixOps
 
 object CommandActor {
   def apply() = Props(classOf[CommandActor])
 }
 
-class CommandActor extends Actor with ActorLogging {
-
-  implicit val timeout = Timeout(10 seconds)
+class CommandActor extends Actor with ActorLogging with PredefinedTimeout {
 
   val priceActor: ActorRef   = context.actorOf(CommandPriceActor(), "CommandPriceActor")
   val bookingActor: ActorRef = context.actorOf(CommandBookingActor(), "CommandBookingActor")

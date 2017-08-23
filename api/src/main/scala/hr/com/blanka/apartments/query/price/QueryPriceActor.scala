@@ -3,21 +3,18 @@ package hr.com.blanka.apartments.query.price
 import akka.actor.{ Actor, ActorLogging, ActorRef, Props }
 import akka.cluster.sharding.{ ClusterSharding, ClusterShardingSettings }
 import akka.pattern.{ ask, pipe }
-import akka.util.Timeout
 import hr.com.blanka.apartments.command.price.DailyPriceSaved
 import hr.com.blanka.apartments.query.booking.StartSync
+import hr.com.blanka.apartments.utils.PredefinedTimeout
 
 import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.duration._
 import scala.language.postfixOps
 
 object QueryPriceActor {
   def apply() = Props(classOf[QueryPriceActor])
 }
 
-class QueryPriceActor extends Actor with ActorLogging {
-
-  implicit val timeout: Timeout = Timeout(10 seconds)
+class QueryPriceActor extends Actor with ActorLogging with PredefinedTimeout {
 
   val dailyPriceAggregateActor: ActorRef = ClusterSharding(context.system).start(
     typeName = "DailyPriceAggregateActor",

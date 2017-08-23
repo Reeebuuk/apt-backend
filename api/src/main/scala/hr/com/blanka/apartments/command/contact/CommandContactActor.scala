@@ -2,10 +2,9 @@ package hr.com.blanka.apartments.command.contact
 
 import akka.actor.{ ActorLogging, Props }
 import akka.persistence.PersistentActor
-import akka.util.Timeout
+import hr.com.blanka.apartments.utils.PredefinedTimeout
 import org.scalactic.Good
 
-import scala.concurrent.duration._
 import scala.language.postfixOps
 
 object CommandContactActor {
@@ -14,9 +13,7 @@ object CommandContactActor {
   val persistenceId: String = "CommandContactActor"
 }
 
-class CommandContactActor extends PersistentActor with ActorLogging {
-
-  implicit val timeout = Timeout(10 seconds)
+class CommandContactActor extends PersistentActor with ActorLogging with PredefinedTimeout {
 
   override def receiveCommand: Receive = {
     case SaveContact(name, email, text) =>
