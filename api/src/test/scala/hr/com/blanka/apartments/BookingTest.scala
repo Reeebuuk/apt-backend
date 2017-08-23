@@ -8,6 +8,7 @@ import akka.http.scaladsl.unmarshalling.Unmarshal
 import com.typesafe.config.Config
 import de.heikoseeberger.akkahttpplayjson.PlayJsonSupport
 import hr.com.blanka.apartments.Main._
+import hr.com.blanka.apartments.base.{ BaseIntegrationTest, IntegrationConf }
 import hr.com.blanka.apartments.http.model._
 import play.api.libs.json.Json
 
@@ -16,7 +17,7 @@ import scala.language.implicitConversions
 class BookingTest extends BaseIntegrationTest {
 
   import PlayJsonSupport._
-  import hr.com.blanka.apartments.RequestResponseGenerators._
+  import hr.com.blanka.apartments.util.RequestResponseGenerators._
 
   override def testConfig: Config =
     IntegrationConf.config(classOf[BookingTest].getSimpleName)

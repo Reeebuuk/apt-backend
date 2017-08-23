@@ -1,4 +1,4 @@
-package hr.com.blanka.apartments
+package hr.com.blanka.apartments.base
 
 import java.io.IOException
 import java.net.ServerSocket
@@ -122,27 +122,27 @@ object IntegrationConf {
  |}""".stripMargin)
 
   lazy val freePort: Int = FreePort.nextFreePort(49152, 65535)
-}
 
-object FreePort {
+  object FreePort {
 
-  def nextFreePort(from: Int, to: Int): Int = {
-    var port = ThreadLocalRandom.current().nextInt(from, to)
-    while (true) {
-      if (isLocalPortFree(port)) {
-        return port
-      } else {
-        port = ThreadLocalRandom.current().nextInt(from, to)
+    def nextFreePort(from: Int, to: Int): Int = {
+      var port = ThreadLocalRandom.current().nextInt(from, to)
+      while (true) {
+        if (isLocalPortFree(port)) {
+          return port
+        } else {
+          port = ThreadLocalRandom.current().nextInt(from, to)
+        }
       }
+      port
     }
-    port
-  }
 
-  private def isLocalPortFree(port: Int): Boolean =
-    try {
-      new ServerSocket(port).close()
-      true
-    } catch {
-      case _: IOException => false
-    }
+    private def isLocalPortFree(port: Int): Boolean =
+      try {
+        new ServerSocket(port).close()
+        true
+      } catch {
+        case _: IOException => false
+      }
+  }
 }

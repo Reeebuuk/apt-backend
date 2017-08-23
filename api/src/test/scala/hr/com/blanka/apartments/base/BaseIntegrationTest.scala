@@ -1,4 +1,4 @@
-package hr.com.blanka.apartments
+package hr.com.blanka.apartments.base
 
 import java.io.File
 

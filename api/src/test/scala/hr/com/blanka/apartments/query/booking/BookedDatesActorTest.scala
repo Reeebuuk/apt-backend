@@ -6,7 +6,7 @@ import org.scalatest.{ FreeSpec, Matchers }
 
 class BookedDatesActorTest extends FreeSpec with Matchers {
 
-  import hr.com.blanka.apartments.InternalGenerators._
+  import hr.com.blanka.apartments.util.InternalGenerators._
 
   "BookedDatesActor with no intercepts" in {
 

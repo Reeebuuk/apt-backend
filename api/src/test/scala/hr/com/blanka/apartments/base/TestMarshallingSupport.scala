@@ -1,4 +1,4 @@
-package hr.com.blanka.apartments
+package hr.com.blanka.apartments.base
 
 import hr.com.blanka.apartments.http.model._
 import play.api.libs.json.{ Format, Json, OWrites, Reads }
