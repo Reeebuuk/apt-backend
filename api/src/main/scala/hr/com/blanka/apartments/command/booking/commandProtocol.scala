@@ -39,12 +39,6 @@ sealed trait ValidationQuery {
   def userId: UserId
 }
 
-case class CheckIfPeriodIsAvailable(userId: UserId,
-                                    unitId: UnitId,
-                                    dateFrom: LocalDate,
-                                    dateTo: LocalDate)
-    extends ValidationQuery
-
 /*
  * Events
  */

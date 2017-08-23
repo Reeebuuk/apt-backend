@@ -5,11 +5,7 @@ import java.time.{ Duration, LocalDate }
 import akka.actor.{ Actor, ActorLogging, ActorRef, Props }
 import akka.cluster.sharding.ShardRegion
 import hr.com.blanka.apartments.ValueClasses.UnitId
-import hr.com.blanka.apartments.command.booking.{
-  BookingAggregateActor,
-  CheckIfPeriodIsAvailable,
-  EnquiryBooked
-}
+import hr.com.blanka.apartments.command.booking.{ BookingAggregateActor, EnquiryBooked }
 import hr.com.blanka.apartments.common.HardcodedUnits
 import hr.com.blanka.apartments.query.PersistenceQueryEvent
 import org.scalactic.Good
@@ -18,9 +14,8 @@ object UnitAvailabilityActor {
   def apply(parent: ActorRef) = Props(classOf[UnitAvailabilityActor], parent)
 
   val extractEntityId: ShardRegion.ExtractEntityId = {
-    case e: EnquiryBooked            => (e.userId.id.toString, e)
-    case e: GetAvailableUnits        => (e.userId.id.toString, e)
-    case e: CheckIfPeriodIsAvailable => (e.userId.id.toString, e)
+    case e: EnquiryBooked     => (e.userId.id.toString, e)
+    case e: GetAvailableUnits => (e.userId.id.toString, e)
   }
 
   val extractShardId: ShardRegion.ExtractShardId = _ => "two"
@@ -32,10 +27,6 @@ class UnitAvailabilityActor(parent: ActorRef) extends Actor with ActorLogging {
   var persistenceSequenceNumber: Long                 = 0
 
   override def receive: Receive = {
-    //TODO should not be here!
-    case CheckIfPeriodIsAvailable(_, unitId, from, to) =>
-      sender() ! checkIfUnitIdIsBooked(unitId, from, to)
-
     case GetAvailableUnits(_, from, to) =>
       sender() ! Good(AvailableUnits(getAvailableUnits(from, to)))
 
