@@ -24,12 +24,12 @@ class CommandBookingActor extends PersistentActor with ActorLogging with Predefi
     extractShardId = BookingAggregateActor.extractShardId
   )
 
-  var bookingCounter: Long = 0l
+  override def receiveCommand: Receive = receive(0l)
 
-  override def receiveCommand: Receive = {
+  def receive(bookingCounter: Long): Receive = {
     case SaveEnquiryInitiated(userId, enquiry) =>
       persist(NewBookingIdAssigned(BookingId(bookingCounter + 1))) { event =>
-        bookingCounter = event.bookingId.id
+        context become receive(event.bookingId.id)
         bookingAggregateActor ? SaveEnquiry(userId, event.bookingId, enquiry) pipeTo sender()
       }
     case DepositPaid(userId, bookingId, depositAmount, currency) =>
@@ -37,7 +37,8 @@ class CommandBookingActor extends PersistentActor with ActorLogging with Predefi
   }
 
   override def receiveRecover: Receive = {
-    case NewBookingIdAssigned(counter) => bookingCounter = counter.id
+    case NewBookingIdAssigned(counter) =>
+      context become receive(counter.id)
   }
 
   override def persistenceId: String = "BookingCounter"
