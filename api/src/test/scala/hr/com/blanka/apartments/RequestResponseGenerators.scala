@@ -1,6 +1,6 @@
 package hr.com.blanka.apartments
 
-import java.time.LocalDate
+import java.time.{ LocalDate, ZoneOffset }
 
 import hr.com.blanka.apartments.http.model._
 
@@ -99,4 +99,53 @@ object RequestResponseGenerators {
 
     BookedDatesResponse(bookedDays)
   }
+
+  //TODO add strings into vals and share them instead of c/p
+  def generateBookingResponse(
+      bookingId: Int = 1,
+      timeSaved: LocalDate = LocalDate.now().withMonth(11).withDayOfMonth(1),
+      unitId: Int = UNIT_ID,
+      fromDate: LocalDate = LocalDate.now().withMonth(11).withDayOfMonth(5),
+      toDate: LocalDate = LocalDate.now().withMonth(11).withDayOfMonth(12),
+      name: String = "John",
+      surname: String = "Cockroach",
+      phoneNumber: String = "+35395443443",
+      email: String = "john.cockroach@gmail.com",
+      address: String = "7 Street",
+      city: String = "London",
+      country: String = "UK",
+      animals: String = "One elephant",
+      noOfPeople: String = "2+2",
+      note: String = "We like to barbecue indoors",
+      totalPrice: BigDecimal = BigDecimal(0),
+      depositAmount: BigDecimal = BigDecimal(100),
+      depositCurrency: String = "EUR",
+      depositWhen: LocalDate = LocalDate.now().withMonth(11).withDayOfMonth(2)
+  ): BookingResponse =
+    BookingResponse(
+      bookingId = 1,
+      timeSaved = timeSaved.atStartOfDay().toInstant(ZoneOffset.UTC).toEpochMilli,
+      unitId = unitId,
+      dateFrom = fromDate.atStartOfDay().toInstant(ZoneOffset.UTC).toEpochMilli,
+      dateTo = toDate.atStartOfDay().toInstant(ZoneOffset.UTC).toEpochMilli,
+      name = name,
+      surname = surname,
+      phoneNumber = phoneNumber,
+      email = email,
+      address = address,
+      city = city,
+      country = country,
+      animals = animals,
+      noOfPeople = noOfPeople,
+      note = note,
+      totalPrice = totalPrice,
+      depositAmount = depositAmount,
+      depositCurrency = depositCurrency,
+      depositWhen = depositWhen.atStartOfDay().toInstant(ZoneOffset.UTC).toEpochMilli
+    )
+
+  def generateAllBookingsResponse(): AllBookingsResponse =
+    AllBookingsResponse(
+      bookings = List(generateBookingResponse())
+    )
 }

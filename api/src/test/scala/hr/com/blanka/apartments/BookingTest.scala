@@ -27,6 +27,7 @@ class BookingTest extends BaseIntegrationTest {
     val enquiryRequestEntity =
       HttpEntity(MediaTypes.`application/json`, Json.toJson(enquiryRequest).toString())
 
+    //TODO add injectable mailer instance via guice
     Post("/booking", enquiryRequestEntity) ~> commandBookingRoute(command) ~> check {
       status should be(OK)
       val bookingId = Unmarshal(response.entity.httpEntity)
@@ -75,6 +76,25 @@ class BookingTest extends BaseIntegrationTest {
             .get
             .get
             .bookedDays should contain theSameElementsAs expectedBookedDates.bookedDays
+        }
+      }
+
+      eventually {
+        Get("/booking") ~> queryBookingRoute(
+          query
+        ) ~> check {
+          status should be(OK)
+
+          //TODO fix boilerplate
+          //TODO add injectable time provider to fix equality
+          Unmarshal(response.entity.httpEntity)
+            .to[AllBookingsResponse]
+            .value
+            .get
+            .get
+            .bookings
+            .map(_.bookingId) should contain theSameElementsAs generateAllBookingsResponse().bookings
+            .map(_.bookingId)
         }
       }
     }

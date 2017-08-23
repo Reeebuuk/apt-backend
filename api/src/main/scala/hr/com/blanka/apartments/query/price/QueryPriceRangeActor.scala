@@ -22,7 +22,7 @@ object QueryPriceRangeActor {
 
 class QueryPriceRangeActor(dailyPriceActor: ActorRef) extends Actor {
 
-  implicit val timeout = Timeout(10 seconds)
+  implicit val timeout: Timeout = Timeout(10 seconds)
 
   def sendMessagesForSingleDayCalculations(
       calculatePriceForRange: LookupPriceForRange

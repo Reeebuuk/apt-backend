@@ -17,10 +17,10 @@ trait WriteMarshallingSupport extends ErrorMarshallingSupport {
     Json.writes[PricePerPeriodResponse]
   implicit val pricePerPeriodsResponseWrites: OWrites[PricePerPeriodsResponse] =
     Json.writes[PricePerPeriodsResponse]
-  implicit val allBookingsResponseWrites: OWrites[AllBookingsResponse] =
-    Json.writes[AllBookingsResponse]
   implicit val bookingResponseWrites: OWrites[BookingResponse] =
     Json.writes[BookingResponse]
+  implicit val allBookingsResponsesWrites: OWrites[AllBookingsResponse] =
+    Json.writes[AllBookingsResponse]
 }
 
 trait ReadMarshallingSupport extends ErrorMarshallingSupport {

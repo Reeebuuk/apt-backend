@@ -1,6 +1,6 @@
 package hr.com.blanka.apartments.query.booking
 
-import akka.actor.{ Actor, ActorLogging, ActorRef, Props }
+import akka.actor.{ Actor, ActorLogging, Props }
 import hr.com.blanka.apartments.ValueClasses.BookingId
 import hr.com.blanka.apartments.command.booking.{
   BookingAggregateActor,
@@ -13,11 +13,10 @@ import org.scalactic.Good
 import scala.language.postfixOps
 
 object AllBookingsActor {
-  def apply(commandSideReaderActor: ActorRef) =
-    Props(classOf[AllBookingsActor], commandSideReaderActor)
+  def apply() = Props(classOf[AllBookingsActor])
 }
 
-class AllBookingsActor(commandSideReaderActor: ActorRef) extends Actor with ActorLogging {
+class AllBookingsActor extends Actor with ActorLogging {
 
   // temp solution, saving to DB and keeping offset would be more perm solution
   var bookings: Map[BookingId, Booking] = Map.empty
@@ -38,7 +37,7 @@ class AllBookingsActor(commandSideReaderActor: ActorRef) extends Actor with Acto
   }
 
   override def preStart(): Unit = {
-    commandSideReaderActor ! StartSync(self, BookingAggregateActor.persistenceId, 0)
+    context.parent ! StartSync(self, BookingAggregateActor.persistenceId, 0)
     super.preStart()
   }
 

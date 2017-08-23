@@ -18,7 +18,7 @@ trait BaseIntegrationTest
     with Matchers
     with ScalatestRouteTest
     with Eventually
-    with MarshallingSupport
+    with TestMarshallingSupport
     with ScalaFutures {
 
   CassandraLauncher.start(
@@ -28,11 +28,12 @@ trait BaseIntegrationTest
     port = 9043
   )
 
-  implicit def default(implicit system: ActorSystem) = RouteTestTimeout(new DurationInt(10).second)
+  implicit def default(implicit system: ActorSystem): RouteTestTimeout =
+    RouteTestTimeout(new DurationInt(10).second)
 
   val command: ActorRef = system.actorOf(CommandActor(), "commandActor")
   val query: ActorRef   = system.actorOf(QueryActor(materializer), "queryActor")
 
-  implicit val config = PatienceConfig(Span(10, Seconds), Span(2, Seconds))
+  implicit val config: PatienceConfig = PatienceConfig(Span(10, Seconds), Span(2, Seconds))
 
 }
