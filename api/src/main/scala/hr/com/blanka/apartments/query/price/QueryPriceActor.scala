@@ -5,23 +5,23 @@ import akka.cluster.sharding.{ ClusterSharding, ClusterShardingSettings }
 import akka.pattern.{ ask, pipe }
 import akka.util.Timeout
 import hr.com.blanka.apartments.command.price.DailyPriceSaved
+import hr.com.blanka.apartments.query.booking.StartSync
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration._
 import scala.language.postfixOps
 
 object QueryPriceActor {
-  def apply(commandSideReaderActor: ActorRef) =
-    Props(classOf[QueryPriceActor], commandSideReaderActor)
+  def apply() = Props(classOf[QueryPriceActor])
 }
 
-class QueryPriceActor(commandSideReaderActor: ActorRef) extends Actor with ActorLogging {
+class QueryPriceActor extends Actor with ActorLogging {
 
-  implicit val timeout = Timeout(10 seconds)
+  implicit val timeout: Timeout = Timeout(10 seconds)
 
   val dailyPriceAggregateActor: ActorRef = ClusterSharding(context.system).start(
     typeName = "DailyPriceAggregateActor",
-    entityProps = DailyPriceAggregateActor(commandSideReaderActor),
+    entityProps = DailyPriceAggregateActor(),
     settings = ClusterShardingSettings(context.system),
     extractEntityId = DailyPriceAggregateActor.extractEntityId,
     extractShardId = DailyPriceAggregateActor.extractShardId
@@ -46,5 +46,7 @@ class QueryPriceActor(commandSideReaderActor: ActorRef) extends Actor with Actor
     case e: LegacyLookupAllPrices =>
       val msgSender = sender()
       pricingLegacyActor ? e pipeTo msgSender
+    case e: StartSync =>
+      context.parent ! e
   }
 }

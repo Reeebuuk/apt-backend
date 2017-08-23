@@ -7,7 +7,7 @@ import akka.stream.ActorMaterializer
 import akka.util.Timeout
 import com.typesafe.config.ConfigFactory
 import hr.com.blanka.apartments.command.price.DailyPriceSaved
-import hr.com.blanka.apartments.query.booking.{ BookingQuery, QueryBookingActor }
+import hr.com.blanka.apartments.query.booking.{ BookingQuery, QueryBookingActor, StartSync }
 import hr.com.blanka.apartments.query.contact.{
   EmailSenderActor,
   EmailSettings,
@@ -26,7 +26,7 @@ object QueryActor {
 
 class QueryActor(materializer: ActorMaterializer) extends Actor with ActorLogging {
 
-  implicit val timeout = Timeout(10 seconds)
+  implicit val timeout: Timeout = Timeout(10 seconds)
 
   val commandSideReaderActor: ActorRef = ClusterSharding(context.system).start(
     typeName = "commandSideReaderActor",
@@ -37,9 +37,9 @@ class QueryActor(materializer: ActorMaterializer) extends Actor with ActorLoggin
   )
 
   val priceActor: ActorRef =
-    context.actorOf(QueryPriceActor(commandSideReaderActor), "QueryPriceActor")
+    context.actorOf(QueryPriceActor(), "QueryPriceActor")
   val bookingActor: ActorRef =
-    context.actorOf(QueryBookingActor(commandSideReaderActor), "QueryBookingActor")
+    context.actorOf(QueryBookingActor(), "QueryBookingActor")
 
   val emailSettings = EmailSettings(ConfigFactory.load("email"))
   val emailSenderActor: ActorRef =
@@ -47,14 +47,12 @@ class QueryActor(materializer: ActorMaterializer) extends Actor with ActorLoggin
 
   val queryContactEmailsActor: ActorRef =
     context.actorOf(
-      QueryContactEmailsActor(commandSideReaderActor, emailSenderActor, emailSettings.fromEmail),
+      QueryContactEmailsActor(emailSenderActor, emailSettings.fromEmail),
       "QueryContactEmailsActor"
     )
   val queryBookingsForEmailsActor: ActorRef =
     context.actorOf(
-      QueryBookingsForEmailsActor(commandSideReaderActor,
-                                  emailSenderActor,
-                                  emailSettings.fromEmail),
+      QueryBookingsForEmailsActor(emailSenderActor, emailSettings.fromEmail),
       "QueryBookingsForEmailsActor"
     )
 
@@ -68,5 +66,7 @@ class QueryActor(materializer: ActorMaterializer) extends Actor with ActorLoggin
     case e: BookingQuery =>
       val msgSender = sender()
       bookingActor ? e pipeTo msgSender
+    case e: StartSync =>
+      commandSideReaderActor ! e
   }
 }

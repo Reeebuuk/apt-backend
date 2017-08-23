@@ -2,7 +2,7 @@ package hr.com.blanka.apartments.query.booking
 
 import java.time.{ Duration, LocalDate }
 
-import akka.actor.{ Actor, ActorLogging, ActorRef, Props }
+import akka.actor.{ Actor, ActorLogging, Props }
 import akka.cluster.sharding.ShardRegion
 import hr.com.blanka.apartments.ValueClasses.UnitId
 import hr.com.blanka.apartments.command.booking.{
@@ -15,8 +15,7 @@ import hr.com.blanka.apartments.query.PersistenceQueryEvent
 import org.scalactic.Good
 
 object UnitAvailabilityActor {
-  def apply(commandSideReaderActor: ActorRef) =
-    Props(classOf[UnitAvailabilityActor], commandSideReaderActor)
+  def apply() = Props(classOf[UnitAvailabilityActor])
 
   val extractEntityId: ShardRegion.ExtractEntityId = {
     case e: EnquiryBooked            => (e.userId.id.toString, e)
@@ -27,12 +26,13 @@ object UnitAvailabilityActor {
   val extractShardId: ShardRegion.ExtractShardId = _ => "two"
 }
 
-class UnitAvailabilityActor(commandSideReaderActor: ActorRef) extends Actor with ActorLogging {
+class UnitAvailabilityActor extends Actor with ActorLogging {
 
   var bookedUnitsPerDate: Map[LocalDate, Set[UnitId]] = Map[LocalDate, Set[UnitId]]()
   var persistenceSequenceNumber: Long                 = 0
 
   override def receive: Receive = {
+    //TODO should not be here!
     case CheckIfPeriodIsAvailable(_, unitId, from, to) =>
       sender() ! checkIfUnitIdIsBooked(unitId, from, to)
 
@@ -68,9 +68,7 @@ class UnitAvailabilityActor(commandSideReaderActor: ActorRef) extends Actor with
   }
 
   override def preStart(): Unit = {
-    commandSideReaderActor ! StartSync(self,
-                                       BookingAggregateActor.persistenceId,
-                                       persistenceSequenceNumber)
+    context.parent ! StartSync(self, BookingAggregateActor.persistenceId, persistenceSequenceNumber)
     super.preStart()
   }
 

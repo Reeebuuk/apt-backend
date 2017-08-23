@@ -1,6 +1,6 @@
 package hr.com.blanka.apartments.query.booking
 
-import akka.actor.{ Actor, ActorLogging, ActorRef, Props }
+import akka.actor.{ Actor, ActorLogging, Props }
 import akka.cluster.sharding.ShardRegion
 import hr.com.blanka.apartments.ValueClasses.UnitId
 import hr.com.blanka.apartments.command.booking.{ BookingAggregateActor, EnquiryBooked }
@@ -10,8 +10,7 @@ import hr.com.blanka.apartments.utils.HelperMethods
 import org.scalactic.Good
 
 object BookedDatesActor {
-  def apply(commandSideReaderActor: ActorRef) =
-    Props(classOf[BookedDatesActor], commandSideReaderActor)
+  def apply() = Props(classOf[BookedDatesActor])
 
   val extractEntityId: ShardRegion.ExtractEntityId = {
     case e: GetBookedDates => (e.userId.id.toString, e)
@@ -47,7 +46,7 @@ object BookedDatesActor {
 
 }
 
-class BookedDatesActor(commandSideReaderActor: ActorRef) extends Actor with ActorLogging {
+class BookedDatesActor extends Actor with ActorLogging {
 
   var bookedDatesPerUnit: Map[UnitId, List[BookedDay]] = Map[UnitId, List[BookedDay]]()
 
@@ -68,7 +67,7 @@ class BookedDatesActor(commandSideReaderActor: ActorRef) extends Actor with Acto
   }
 
   override def preStart(): Unit = {
-    commandSideReaderActor ! StartSync(self, BookingAggregateActor.persistenceId, 0)
+    context.parent ! StartSync(self, BookingAggregateActor.persistenceId, 0)
     super.preStart()
   }
 

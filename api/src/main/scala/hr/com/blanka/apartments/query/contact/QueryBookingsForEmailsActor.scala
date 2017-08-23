@@ -14,13 +14,11 @@ import hr.com.blanka.apartments.query.{ PersistenceOffsetSaved, PersistenceQuery
 import scala.language.postfixOps
 
 object QueryBookingsForEmailsActor {
-  def apply(commandSideReaderActor: ActorRef, emailSenderActor: ActorRef, fromEmail: String) =
-    Props(classOf[QueryBookingsForEmailsActor], commandSideReaderActor, emailSenderActor, fromEmail)
+  def apply(emailSenderActor: ActorRef, fromEmail: String) =
+    Props(classOf[QueryBookingsForEmailsActor], emailSenderActor, fromEmail)
 }
 
-class QueryBookingsForEmailsActor(commandSideReaderActor: ActorRef,
-                                  emailSenderActor: ActorRef,
-                                  fromEmail: String)
+class QueryBookingsForEmailsActor(emailSenderActor: ActorRef, fromEmail: String)
     extends PersistentActor
     with ActorLogging {
 
@@ -88,9 +86,7 @@ class QueryBookingsForEmailsActor(commandSideReaderActor: ActorRef,
       persistenceOffset = offset
     case RecoveryCompleted =>
       persistenceOffset += 1
-      commandSideReaderActor ! StartSync(self,
-                                         BookingAggregateActor.persistenceId,
-                                         persistenceOffset)
+      context.parent ! StartSync(self, BookingAggregateActor.persistenceId, persistenceOffset)
   }
 
   override def persistenceId: String = "QueryBookingsForEmailsActor"
