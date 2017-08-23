@@ -21,7 +21,7 @@ class QueryPriceActor extends Actor with ActorLogging {
 
   val dailyPriceAggregateActor: ActorRef = ClusterSharding(context.system).start(
     typeName = "DailyPriceAggregateActor",
-    entityProps = DailyPriceAggregateActor(),
+    entityProps = DailyPriceAggregateActor(self),
     settings = ClusterShardingSettings(context.system),
     extractEntityId = DailyPriceAggregateActor.extractEntityId,
     extractShardId = DailyPriceAggregateActor.extractShardId

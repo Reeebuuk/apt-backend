@@ -19,7 +19,7 @@ class QueryBookingActor() extends Actor with ActorLogging {
 
   val bookedDatesActor: ActorRef = ClusterSharding(context.system).start(
     typeName = "BookedDatesActor",
-    entityProps = BookedDatesActor(),
+    entityProps = BookedDatesActor(self),
     settings = ClusterShardingSettings(context.system),
     extractEntityId = BookedDatesActor.extractEntityId,
     extractShardId = BookedDatesActor.extractShardId
@@ -27,7 +27,7 @@ class QueryBookingActor() extends Actor with ActorLogging {
 
   val unitAvailabilityActor: ActorRef = ClusterSharding(context.system).start(
     typeName = "UnitAvailabilityActor",
-    entityProps = UnitAvailabilityActor(),
+    entityProps = UnitAvailabilityActor(self),
     settings = ClusterShardingSettings(context.system),
     extractEntityId = UnitAvailabilityActor.extractEntityId,
     extractShardId = UnitAvailabilityActor.extractShardId

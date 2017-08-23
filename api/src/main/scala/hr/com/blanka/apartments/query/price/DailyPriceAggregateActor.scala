@@ -1,6 +1,6 @@
 package hr.com.blanka.apartments.query.price
 
-import akka.actor.{ Actor, Props }
+import akka.actor.{ Actor, ActorRef, Props }
 import akka.cluster.sharding.ShardRegion
 import hr.com.blanka.apartments.command.price.{ DailyPriceSaved, PriceAggregateActor }
 import hr.com.blanka.apartments.common.DayMonth
@@ -8,7 +8,7 @@ import hr.com.blanka.apartments.query.PersistenceQueryEvent
 import hr.com.blanka.apartments.query.booking.StartSync
 
 object DailyPriceAggregateActor {
-  def apply() = Props(classOf[DailyPriceAggregateActor])
+  def apply(parent: ActorRef) = Props(classOf[DailyPriceAggregateActor], parent)
 
   val extractEntityId: ShardRegion.ExtractEntityId = {
     case e @ DailyPriceSaved(userId, unitId, _, _, _) => (s"${userId.id}${unitId.id}", e)
@@ -18,7 +18,7 @@ object DailyPriceAggregateActor {
   val extractShardId: ShardRegion.ExtractShardId = _ => "one"
 }
 
-class DailyPriceAggregateActor extends Actor {
+class DailyPriceAggregateActor(parent: ActorRef) extends Actor {
 
   def updateState(newDailyPrice: DailyPriceSaved,
                   currentDailyPrices: Map[DayMonth, List[BigDecimal]]): Unit = {
@@ -47,7 +47,7 @@ class DailyPriceAggregateActor extends Actor {
   }
 
   override def preStart(): Unit = {
-    context.parent ! StartSync(self, PriceAggregateActor.persistenceId, 0)
+    parent ! StartSync(self, PriceAggregateActor.persistenceId, 0)
     super.preStart()
   }
 }
