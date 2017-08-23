@@ -16,7 +16,7 @@ import hr.com.blanka.apartments.utils.WriteMarshallingSupport
 import java.time.{ Instant, ZoneId }
 
 import de.heikoseeberger.akkahttpplayjson.PlayJsonSupport
-import hr.com.blanka.apartments.ValueClasses._
+import hr.com.blanka.apartments.common.ValueClasses._
 import org.scalactic._
 import play.api.libs.json.Json
 

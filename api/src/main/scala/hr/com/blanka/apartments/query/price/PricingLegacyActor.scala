@@ -2,7 +2,7 @@ package hr.com.blanka.apartments.query.price
 
 import akka.actor.{ Actor, Props }
 import com.typesafe.config.{ Config, ConfigFactory }
-import hr.com.blanka.apartments.ValueClasses.UnitId
+import hr.com.blanka.apartments.common.ValueClasses.UnitId
 import hr.com.blanka.apartments.common.DayMonth
 import org.scalactic.Good
 

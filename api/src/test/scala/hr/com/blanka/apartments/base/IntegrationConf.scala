@@ -22,7 +22,7 @@ object IntegrationConf {
  |  actor {
  |    provider = "akka.cluster.ClusterActorRefProvider"
  |    serializers {
- |      myown = "hr.com.blanka.apartments.AkkaPersistenceSerializer"
+ |      myown = "hr.com.blanka.apartments.persistence.AkkaPersistenceSerializer"
  |    }
  |    serialization-bindings {
  |      "java.io.Serializable" = none

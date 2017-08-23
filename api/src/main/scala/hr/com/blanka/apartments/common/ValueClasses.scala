@@ -1,4 +1,4 @@
-package hr.com.blanka.apartments
+package hr.com.blanka.apartments.common
 
 object ValueClasses {
 

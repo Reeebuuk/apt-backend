@@ -2,7 +2,7 @@ package hr.com.blanka.apartments.common
 
 import java.time.LocalDate
 
-import hr.com.blanka.apartments.ValueClasses.UnitId
+import ValueClasses.UnitId
 
 case class Enquiry(unitId: UnitId,
                    dateFrom: LocalDate,

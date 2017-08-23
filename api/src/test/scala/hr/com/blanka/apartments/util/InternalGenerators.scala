@@ -2,7 +2,7 @@ package hr.com.blanka.apartments.util
 
 import java.time.LocalDate
 
-import hr.com.blanka.apartments.ValueClasses.{ UnitId, UserId }
+import hr.com.blanka.apartments.common.ValueClasses.{ UnitId, UserId }
 import hr.com.blanka.apartments.common.Enquiry
 
 object InternalGenerators extends Constants {

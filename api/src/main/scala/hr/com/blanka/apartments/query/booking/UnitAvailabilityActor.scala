@@ -4,7 +4,7 @@ import java.time.{ Duration, LocalDate }
 
 import akka.actor.{ Actor, ActorLogging, ActorRef, Props }
 import akka.cluster.sharding.ShardRegion
-import hr.com.blanka.apartments.ValueClasses.UnitId
+import hr.com.blanka.apartments.common.ValueClasses.UnitId
 import hr.com.blanka.apartments.command.booking.{ BookingAggregateActor, EnquiryBooked }
 import hr.com.blanka.apartments.common.HardcodedUnits
 import hr.com.blanka.apartments.query.PersistenceQueryEvent

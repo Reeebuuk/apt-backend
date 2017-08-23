@@ -5,7 +5,7 @@ import akka.http.scaladsl.model.StatusCodes
 import akka.http.scaladsl.server.{ Directives, Route }
 import akka.pattern.ask
 import de.heikoseeberger.akkahttpplayjson.PlayJsonSupport
-import hr.com.blanka.apartments.ValueClasses.BookingId
+import hr.com.blanka.apartments.common.ValueClasses.BookingId
 import hr.com.blanka.apartments.http.model._
 import hr.com.blanka.apartments.http.routes.BaseServiceRoute
 import hr.com.blanka.apartments.utils.ReadMarshallingSupport

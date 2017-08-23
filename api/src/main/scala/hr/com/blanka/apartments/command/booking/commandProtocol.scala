@@ -2,7 +2,7 @@ package hr.com.blanka.apartments.command.booking
 
 import java.time.{ LocalDate, LocalDateTime }
 
-import hr.com.blanka.apartments.ValueClasses.{ BookingId, UnitId, UserId }
+import hr.com.blanka.apartments.common.ValueClasses.{ BookingId, UnitId, UserId }
 import hr.com.blanka.apartments.common.Enquiry
 
 /*

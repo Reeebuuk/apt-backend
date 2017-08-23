@@ -3,7 +3,7 @@ package hr.com.blanka.apartments.query.price
 import hr.com.blanka.apartments.common.DayMonth
 import java.time.LocalDate
 
-import hr.com.blanka.apartments.ValueClasses.{ UnitId, UserId }
+import hr.com.blanka.apartments.common.ValueClasses.{ UnitId, UserId }
 
 sealed trait PriceQuery
 

@@ -1,9 +1,9 @@
-package hr.com.blanka.apartments
+package hr.com.blanka.apartments.persistence
 
 import java.nio.charset.StandardCharsets
 
 import akka.serialization.SerializerWithStringManifest
-import hr.com.blanka.apartments.ValueClasses.{ BookingId, UnitId, UserId }
+import hr.com.blanka.apartments.common.ValueClasses.{ BookingId, UnitId, UserId }
 import hr.com.blanka.apartments.command.booking.{
   EnquiryBooked,
   EnquirySaved,

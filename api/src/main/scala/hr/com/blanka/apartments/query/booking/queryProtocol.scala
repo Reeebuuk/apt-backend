@@ -3,7 +3,7 @@ package hr.com.blanka.apartments.query.booking
 import java.time.{ LocalDate, LocalDateTime }
 
 import akka.actor.ActorRef
-import hr.com.blanka.apartments.ValueClasses.{ BookingId, UnitId, UserId }
+import hr.com.blanka.apartments.common.ValueClasses.{ BookingId, UnitId, UserId }
 import hr.com.blanka.apartments.common.Enquiry
 
 sealed trait BookingQuery

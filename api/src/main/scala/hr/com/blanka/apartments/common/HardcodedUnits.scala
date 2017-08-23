@@ -1,6 +1,6 @@
 package hr.com.blanka.apartments.common
 
-import hr.com.blanka.apartments.ValueClasses.UnitId
+import ValueClasses.UnitId
 
 object HardcodedUnits {
 

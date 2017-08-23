@@ -4,7 +4,7 @@ import hr.com.blanka.apartments.command.booking.{ DepositPaid, SaveEnquiryInitia
 import hr.com.blanka.apartments.command.price.SavePriceRange
 import java.time.LocalDate
 
-import hr.com.blanka.apartments.ValueClasses.{ BookingId, UnitId, UserId }
+import hr.com.blanka.apartments.common.ValueClasses.{ BookingId, UnitId, UserId }
 import hr.com.blanka.apartments.command.contact.SaveContact
 import hr.com.blanka.apartments.common.Enquiry
 import hr.com.blanka.apartments.query.price.LookupPriceForRange

@@ -2,7 +2,7 @@ package hr.com.blanka.apartments.validation
 
 import java.time.{ Duration, LocalDate }
 
-import hr.com.blanka.apartments.ValueClasses.UnitId
+import hr.com.blanka.apartments.common.ValueClasses.UnitId
 import org.scalactic.Accumulation._
 import org.scalactic._
 

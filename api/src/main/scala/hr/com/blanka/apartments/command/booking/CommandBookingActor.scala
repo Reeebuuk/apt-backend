@@ -4,7 +4,7 @@ import akka.actor.{ ActorLogging, ActorRef, Props }
 import akka.cluster.sharding.{ ClusterSharding, ClusterShardingSettings }
 import akka.pattern.{ ask, pipe }
 import akka.persistence.PersistentActor
-import hr.com.blanka.apartments.ValueClasses.BookingId
+import hr.com.blanka.apartments.common.ValueClasses.BookingId
 import hr.com.blanka.apartments.utils.PredefinedTimeout
 
 import scala.concurrent.ExecutionContext.Implicits.global

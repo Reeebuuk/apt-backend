@@ -6,7 +6,7 @@ import akka.actor.{ Actor, ActorSystem, Props }
 import akka.testkit.{ TestActorRef, TestKit, TestProbe }
 import akka.util.Timeout
 import com.typesafe.config.ConfigFactory
-import hr.com.blanka.apartments.ValueClasses.{ UnitId, UserId }
+import hr.com.blanka.apartments.common.ValueClasses.{ UnitId, UserId }
 import hr.com.blanka.apartments.validation.ErrorMessages._
 import org.scalactic.{ Bad, Good }
 import org.scalatest.{ BeforeAndAfterAll, FreeSpecLike, Matchers }

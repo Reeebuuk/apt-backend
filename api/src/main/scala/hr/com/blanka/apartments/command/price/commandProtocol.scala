@@ -2,7 +2,7 @@ package hr.com.blanka.apartments.command.price
 
 import java.time.{ LocalDate, LocalDateTime }
 
-import hr.com.blanka.apartments.ValueClasses.{ UnitId, UserId }
+import hr.com.blanka.apartments.common.ValueClasses.{ UnitId, UserId }
 import hr.com.blanka.apartments.common.DayMonth
 
 /*

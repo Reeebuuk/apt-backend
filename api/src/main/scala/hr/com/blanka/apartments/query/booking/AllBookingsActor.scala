@@ -1,7 +1,7 @@
 package hr.com.blanka.apartments.query.booking
 
 import akka.actor.{ Actor, ActorLogging, Props }
-import hr.com.blanka.apartments.ValueClasses.BookingId
+import hr.com.blanka.apartments.common.ValueClasses.BookingId
 import hr.com.blanka.apartments.command.booking.{
   BookingAggregateActor,
   EnquiryBooked,
