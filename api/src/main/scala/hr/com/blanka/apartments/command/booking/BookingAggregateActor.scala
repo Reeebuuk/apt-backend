@@ -22,33 +22,30 @@ object BookingAggregateActor {
 
 class BookingAggregateActor extends PersistentActor with ActorLogging {
 
-  var enquiryValue: Enquiry = _
-
   override def receiveCommand: Receive = init
 
   def init: Receive = {
     case SaveEnquiry(userId, bookingId, booking) =>
       persist(EnquirySaved(userId, bookingId, booking, LocalDateTime.now())) { e =>
-        enquiryValue = e.enquiry
-        context become enquiry
+        context become enquiry(e.enquiry)
         sender() ! Good(bookingId)
       }
     case e: MarkEnquiryAsBooked =>
       log.error(s"Received MarkEnquiryAsBooked for enquiry which doesn't exit $e")
   }
 
-  def enquiry: Receive = {
+  def enquiry(enquiry: Enquiry): Receive = {
     case MarkEnquiryAsBooked(userId, bookingId, depositAmount, currency) =>
       persist(
-        EnquiryBooked(userId, bookingId, enquiryValue, LocalDateTime.now(), depositAmount, currency)
+        EnquiryBooked(userId, bookingId, enquiry, LocalDateTime.now(), depositAmount, currency)
       ) { e =>
-        context become done
+        context become done(enquiry)
         sender() ! Good
       }
     case e: SaveEnquiry => log.error(s"Received SaveEnquiry with same Id $e")
   }
 
-  def done: Receive = {
+  def done(enquiry: Enquiry): Receive = {
     case _ =>
       log.info("Enquiry already booked")
       sender() ! Good
@@ -56,11 +53,10 @@ class BookingAggregateActor extends PersistentActor with ActorLogging {
 
   override def receiveRecover: Receive = {
     case EnquirySaved(_, bookingId, en, _) if bookingId.id.toString == context.self.path.name =>
-      enquiryValue = en
-      context become enquiry
-    case EnquiryBooked(_, bookingId, _, _, _, _)
+      context become enquiry(en)
+    case EnquiryBooked(_, bookingId, en, _, _, _)
         if bookingId.id.toString == context.self.path.name =>
-      context become done
+      context become done(en)
   }
 
   override def persistenceId: String = BookingAggregateActor.persistenceId
