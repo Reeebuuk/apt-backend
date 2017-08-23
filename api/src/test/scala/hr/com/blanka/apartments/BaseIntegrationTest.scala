@@ -11,6 +11,7 @@ import org.scalatest.concurrent.{ Eventually, ScalaFutures }
 import org.scalatest.time.{ Seconds, Span }
 import org.scalatest.{ AsyncWordSpec, Matchers }
 
+import scala.concurrent.Future
 import scala.concurrent.duration.DurationInt
 
 trait BaseIntegrationTest
@@ -35,5 +36,11 @@ trait BaseIntegrationTest
   val query: ActorRef   = system.actorOf(QueryActor(materializer), "queryActor")
 
   implicit val config: PatienceConfig = PatienceConfig(Span(10, Seconds), Span(2, Seconds))
+
+  // Would like to find a cleaner way
+  implicit class extractor[T](x: Future[T]) {
+    def eagerExtract: T =
+      x.value.get.get
+  }
 
 }

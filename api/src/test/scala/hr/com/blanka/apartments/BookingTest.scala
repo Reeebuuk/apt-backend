@@ -32,9 +32,7 @@ class BookingTest extends BaseIntegrationTest {
       status should be(OK)
       val bookingId = Unmarshal(response.entity.httpEntity)
         .to[NewEnquiryResponse]
-        .value
-        .get
-        .get
+        .eagerExtract
         .bookingId
 
       val depositPaid = generateDepositPaidRequest(bookingId)
@@ -55,9 +53,7 @@ class BookingTest extends BaseIntegrationTest {
 
           Unmarshal(response.entity.httpEntity)
             .to[AvailableUnitsResponse]
-            .value
-            .get
-            .get shouldBe AvailableUnitsResponse(Set(2, 3))
+            .eagerExtract shouldBe AvailableUnitsResponse(Set(2, 3))
         }
       }
 
@@ -72,9 +68,7 @@ class BookingTest extends BaseIntegrationTest {
 
           Unmarshal(response.entity.httpEntity)
             .to[BookedDatesResponse]
-            .value
-            .get
-            .get
+            .eagerExtract
             .bookedDays should contain theSameElementsAs expectedBookedDates.bookedDays
         }
       }
@@ -87,13 +81,10 @@ class BookingTest extends BaseIntegrationTest {
         ) ~> check {
           status should be(OK)
 
-          //TODO fix boilerplate
           //TODO add injectable time provider to fix equality
           Unmarshal(response.entity.httpEntity)
             .to[AllBookingsResponse]
-            .value
-            .get
-            .get
+            .eagerExtract
             .bookings
             .map(_.bookingId) should contain theSameElementsAs expectedBookings.bookings.map(
             _.bookingId

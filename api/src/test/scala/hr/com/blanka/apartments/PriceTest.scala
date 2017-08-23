@@ -51,9 +51,7 @@ class PriceTest extends BaseIntegrationTest {
       Post("/price/calculate", lookupRequestEntity) ~> queryPriceRoute(query) ~> check {
         Unmarshal(response.entity.httpEntity)
           .to[PriceForRangeResponse]
-          .value
-          .get
-          .get
+          .eagerExtract
           .price should be(BigDecimal(23))
       }
     }
