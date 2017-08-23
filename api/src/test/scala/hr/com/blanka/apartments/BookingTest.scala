@@ -77,6 +77,14 @@ class BookingTest extends BaseIntegrationTest {
             .bookedDays should contain theSameElementsAs expectedBookedDates.bookedDays
         }
       }
+
+      eventually {
+        Get("/booking") ~> queryBookingRoute(
+          query
+        ) ~> check {
+          status should be(OK)
+        }
+      }
     }
 
   }
