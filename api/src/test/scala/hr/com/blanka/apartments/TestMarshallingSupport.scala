@@ -3,7 +3,7 @@ package hr.com.blanka.apartments
 import hr.com.blanka.apartments.http.model._
 import play.api.libs.json.{ Format, Json, OWrites, Reads }
 
-trait MarshallingSupport {
+trait TestMarshallingSupport {
   implicit val enquiryRequestWrites: OWrites[EnquiryRequest] =
     Json.writes[EnquiryRequest]
   implicit val enquiryReceivedRequestWrites: OWrites[EnquiryReceivedRequest] =
@@ -25,6 +25,11 @@ trait MarshallingSupport {
     Json.format[PriceForRangeResponse]
   implicit val bookingIdFormat: Format[NewEnquiryResponse] =
     Json.format[NewEnquiryResponse]
+
+  implicit val bookingResponseReads: Reads[BookingResponse] =
+    Json.reads[BookingResponse]
+  implicit val allBookingsResponsesReads: Reads[AllBookingsResponse] =
+    Json.reads[AllBookingsResponse]
 }
 
-object MarshallingSupport extends MarshallingSupport
+object TestMarshallingSupport extends TestMarshallingSupport
