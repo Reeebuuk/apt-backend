@@ -4,9 +4,12 @@ import java.time.{ Duration, LocalDate }
 
 import akka.actor.SupervisorStrategy.Restart
 import akka.actor._
-import akka.pattern.ask
-import akka.util.Timeout
+import akka.cluster.sharding.{ ClusterSharding, ClusterShardingSettings }
+import akka.pattern.{ ask, pipe }
+import hr.com.blanka.apartments.command.price.DailyPriceSaved
 import hr.com.blanka.apartments.common.DayMonth
+import hr.com.blanka.apartments.query.booking.StartSync
+import hr.com.blanka.apartments.utils.PredefinedTimeout
 import org.scalactic.{ Bad, Good }
 
 import scala.collection.immutable
@@ -17,12 +20,18 @@ import scala.language.postfixOps
 import scala.util.{ Failure, Success }
 
 object QueryPriceRangeActor {
-  def apply(dailyPriceActor: ActorRef) = Props(classOf[QueryPriceRangeActor], dailyPriceActor)
+  def apply() = Props(classOf[QueryPriceRangeActor])
 }
 
-class QueryPriceRangeActor(dailyPriceActor: ActorRef) extends Actor {
+class QueryPriceRangeActor extends Actor with PredefinedTimeout {
 
-  implicit val timeout: Timeout = Timeout(10 seconds)
+  val dailyPriceAggregateActor: ActorRef = ClusterSharding(context.system).start(
+    typeName = "DailyPriceAggregateActor",
+    entityProps = DailyPriceAggregateActor(self),
+    settings = ClusterShardingSettings(context.system),
+    extractEntityId = DailyPriceAggregateActor.extractEntityId,
+    extractShardId = DailyPriceAggregateActor.extractShardId
+  )
 
   def sendMessagesForSingleDayCalculations(
       calculatePriceForRange: LookupPriceForRange
@@ -32,12 +41,15 @@ class QueryPriceRangeActor(dailyPriceActor: ActorRef) extends Actor {
     (0l until Duration.between(from.atStartOfDay(), to.atStartOfDay()).toDays)
       .map(daysFromStart => {
         val day = DayMonth(LocalDate.from(from).plusDays(daysFromStart))
-        dailyPriceActor ? LookupPriceForDay(userId, unitId, day)
+        dailyPriceAggregateActor ? LookupPriceForDay(userId, unitId, day)
       })
 
   }
 
   override def receive: Receive = {
+    case e: DailyPriceSaved =>
+      val msgSender = sender()
+      dailyPriceAggregateActor ? e pipeTo msgSender
     case cpfr: LookupPriceForRange =>
       val msgSender                         = sender()
       val newlySentDailyCalculationMessages = sendMessagesForSingleDayCalculations(cpfr)
@@ -70,6 +82,8 @@ class QueryPriceRangeActor(dailyPriceActor: ActorRef) extends Actor {
           )
         case Failure(t) => msgSender ! Bad("An error has occurred: " + t.getMessage)
       }
+    case e: StartSync =>
+      context.parent ! e
 
   }
 

@@ -16,28 +16,32 @@ object DailyPriceAggregateActor {
   }
 
   val extractShardId: ShardRegion.ExtractShardId = _ => "one"
-}
 
-class DailyPriceAggregateActor(parent: ActorRef) extends Actor {
-
-  def updateState(newDailyPrice: DailyPriceSaved,
-                  currentDailyPrices: Map[DayMonth, List[BigDecimal]]): Unit = {
+  def updateState(
+      newDailyPrice: DailyPriceSaved,
+      currentDailyPrices: Map[DayMonth, List[BigDecimal]]
+  ): Map[DayMonth, List[BigDecimal]] = {
 
     val newPrices: List[BigDecimal] = currentDailyPrices.get(newDailyPrice.dayMonth) match {
       case Some(priceForDay) => newDailyPrice.price :: priceForDay
       case None              => List(newDailyPrice.price)
     }
 
-    context become active(currentDailyPrices + (newDailyPrice.dayMonth -> newPrices))
+    currentDailyPrices + (newDailyPrice.dayMonth -> newPrices)
   }
+}
 
-  override def receive: Receive = active(Map[DayMonth, List[BigDecimal]]())
+class DailyPriceAggregateActor(parent: ActorRef) extends Actor {
+
+  import DailyPriceAggregateActor._
+
+  override def receive: Receive = active(Map.empty)
 
   def active(currentDailyPrices: Map[DayMonth, List[BigDecimal]]): Receive = {
     case PersistenceQueryEvent(_, e: DailyPriceSaved) =>
-      updateState(e, currentDailyPrices)
+      context become active(updateState(e, currentDailyPrices))
 
-    case LookupPriceForDay(userId, unitId, day) =>
+    case LookupPriceForDay(_, _, day) =>
       val lastPrice: BigDecimal = currentDailyPrices.get(day) match {
         case None        => 0
         case Some(price) => price.head
