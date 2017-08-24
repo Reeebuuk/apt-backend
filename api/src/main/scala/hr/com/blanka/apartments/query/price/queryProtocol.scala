@@ -9,7 +9,6 @@ sealed trait PriceQuery
 
 case class LookupPriceForRange(userId: UserId, unitId: UnitId, from: LocalDate, to: LocalDate)
     extends PriceQuery
-case class LookupAllPrices(userId: UserId, unitId: UnitId)                  extends PriceQuery
 case class LegacyLookupAllPrices(userId: UserId)                            extends PriceQuery
 case class LookupPriceForDay(userId: UserId, unitId: UnitId, day: DayMonth) extends PriceQuery
 

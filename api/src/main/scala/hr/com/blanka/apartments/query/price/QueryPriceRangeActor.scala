@@ -1,7 +1,5 @@
 package hr.com.blanka.apartments.query.price
 
-import java.time.LocalDate
-
 import akka.actor.SupervisorStrategy.Restart
 import akka.actor._
 import akka.cluster.sharding.{ ClusterSharding, ClusterShardingSettings }
@@ -49,29 +47,11 @@ class QueryPriceRangeActor extends Actor with PredefinedTimeout {
     case e: DailyPriceSaved =>
       val msgSender = sender()
       dailyPriceAggregateActor ? e pipeTo msgSender
-    case cpfr: LookupPriceForRange =>
+    case lookupPriceForRange: LookupPriceForRange =>
       val msgSender = sender()
       val newlySentDailyCalculationMessages = sendMessagesForSingleDayCalculations(
         dailyPriceAggregateActor = dailyPriceAggregateActor,
-        lookupPriceForRange = cpfr
-      )
-
-      Future.sequence(newlySentDailyCalculationMessages).map { result =>
-        msgSender ! Good(
-          result.foldLeft(BigDecimal(0))(
-            (sum, next) => next.asInstanceOf[PriceDayFetched].price + sum
-          )
-        )
-      }
-    case lap: LookupAllPrices =>
-      val msgSender   = sender()
-      val currentYear = LocalDate.now().getYear
-      val newlySentDailyCalculationMessages = sendMessagesForSingleDayCalculations(
-        dailyPriceAggregateActor = dailyPriceAggregateActor,
-        lookupPriceForRange = LookupPriceForRange(userId = lap.userId,
-                                                  unitId = lap.unitId,
-                                                  from = LocalDate.ofYearDay(currentYear, 1),
-                                                  to = LocalDate.of(currentYear, 12, 31))
+        lookupPriceForRange = lookupPriceForRange
       )
 
       Future.sequence(newlySentDailyCalculationMessages).map { result =>

@@ -22,7 +22,7 @@ class QueryPriceActor extends Actor with ActorLogging with PredefinedTimeout {
     context.actorOf(PricingLegacyActor(), "PricingLegacyActor")
 
   override def receive: Receive = {
-    case e @ (_: LookupAllPrices | _: LookupPriceForRange | _: DailyPriceSaved) =>
+    case e @ (_: LookupPriceForRange | _: DailyPriceSaved) =>
       val msgSender = sender()
       queryPriceRangeActor ? e pipeTo msgSender
     case e: LegacyLookupAllPrices =>
