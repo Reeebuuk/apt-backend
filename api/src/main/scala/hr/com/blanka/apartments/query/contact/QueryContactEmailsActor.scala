@@ -36,6 +36,8 @@ class QueryContactEmailsActor(emailSenderActor: ActorRef, fromEmail: String)
 
   override def receiveCommand: Receive = {
     case PersistenceQueryEvent(offset, cs: ContactSaved) =>
+      log.info("Email request from contact received")
+      log.debug(cs.toString)
       emailSenderActor ! SendEmail(fromEmail,
                                    List(cs.email, fromEmail),
                                    "Apartments Blanka contact",

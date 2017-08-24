@@ -14,6 +14,8 @@ class EmailSenderActor(emailSettings: EmailSettings) extends Actor with ActorLog
   override def receive: Receive = {
     case email: SendEmail =>
       // Check session length, would rather prefer opening it one off than every time
+      log.info(s"Sending email to ${email.to}")
+      log.debug(email.toString)
       val session: Session = Session.getDefaultInstance(
         emailSettings.toProperties,
         new Authenticator() {
@@ -30,5 +32,6 @@ class EmailSenderActor(emailSettings: EmailSettings) extends Actor with ActorLog
       message.setText(email.text)
       Transport.send(message)
       sender() ! email.persistenceOffset
+      log.info("Email successfully sent/**/")
   }
 }

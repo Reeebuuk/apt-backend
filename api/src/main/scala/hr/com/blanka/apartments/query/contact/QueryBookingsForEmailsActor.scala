@@ -60,6 +60,8 @@ class QueryBookingsForEmailsActor(emailSenderActor: ActorRef, fromEmail: String)
 
   override def receiveCommand: Receive = {
     case PersistenceQueryEvent(offset, event: EnquirySaved) =>
+      log.info("Email request from enquiry saved")
+      log.debug(event.toString)
       emailSenderActor ! SendEmail(
         from = fromEmail,
         to = List(event.enquiry.email, fromEmail),
@@ -68,6 +70,8 @@ class QueryBookingsForEmailsActor(emailSenderActor: ActorRef, fromEmail: String)
         persistenceOffset = offset
       )
     case PersistenceQueryEvent(offset, event: EnquiryBooked) =>
+      log.info("Email request from enquiry booked")
+      log.debug(event.toString)
       emailSenderActor ! SendEmail(
         from = fromEmail,
         to = List(event.enquiry.email, fromEmail),

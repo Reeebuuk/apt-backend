@@ -15,10 +15,10 @@ object BookedDatesResponse {
     BookedDatesResponse(bd.bookedDays.map(BookedDateResponse.remap))
 }
 
-case class AvailableUnitsResponse(apartments: Set[Int])
+case class AvailableUnitsResponse(unitIds: Set[Int])
 object AvailableUnitsResponse {
-  def remap(aa: AvailableUnits): AvailableUnitsResponse =
-    new AvailableUnitsResponse(aa.unitIds.map(_.id))
+  def remap(au: AvailableUnits): AvailableUnitsResponse =
+    new AvailableUnitsResponse(au.unitIds.map(_.id))
 }
 
 case class BookedDateResponse(day: LocalDate, firstDay: Boolean, lastDay: Boolean)
