@@ -3,7 +3,7 @@ package hr.com.blanka.apartments.command.price
 import akka.actor._
 import akka.pattern.ask
 import hr.com.blanka.apartments.common.DayMonth
-import hr.com.blanka.apartments.utils.{ HelperMethods, PredefinedTimeout }
+import hr.com.blanka.apartments.utils.{ DateHelperMethods, PredefinedTimeout }
 import hr.com.blanka.apartments.validation.BasicValidation._
 import hr.com.blanka.apartments.validation.ErrorMessages._
 import org.scalactic.Accumulation._
@@ -21,7 +21,7 @@ object CommandPriceActor {
 
 class CommandPriceActor(priceAggregateActorProps: Props)
     extends Actor
-    with HelperMethods
+    with DateHelperMethods
     with ActorLogging
     with PredefinedTimeout {
 
@@ -34,7 +34,7 @@ class CommandPriceActor(priceAggregateActorProps: Props)
 
       withGood(getDuration(from, to), validUnitId(unitId)) { (_, _) =>
         {
-          val savedPrices = iterateThroughDays(from, to).map { localDate =>
+          val savedPrices = iterateThroughDaysIncludingLast(from, to).map { localDate =>
             val day = DayMonth(localDate)
 
             priceAggregateActor ? SavePriceForSingleDay(userId, unitId, day, price)

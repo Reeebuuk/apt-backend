@@ -1,13 +1,14 @@
 package hr.com.blanka.apartments.query.booking
 
-import java.time.{ Duration, LocalDate }
+import java.time.LocalDate
 
 import akka.actor.{ Actor, ActorLogging, ActorRef, Props }
 import akka.cluster.sharding.ShardRegion
-import hr.com.blanka.apartments.common.ValueClasses.UnitId
 import hr.com.blanka.apartments.command.booking.{ BookingAggregateActor, EnquiryBooked }
 import hr.com.blanka.apartments.common.HardcodedUnits
+import hr.com.blanka.apartments.common.ValueClasses.UnitId
 import hr.com.blanka.apartments.query.PersistenceQueryEvent
+import hr.com.blanka.apartments.utils.DateHelperMethods
 import org.scalactic.Good
 
 object UnitAvailabilityActor {
@@ -21,7 +22,10 @@ object UnitAvailabilityActor {
   val extractShardId: ShardRegion.ExtractShardId = _ => "two"
 }
 
-class UnitAvailabilityActor(parent: ActorRef) extends Actor with ActorLogging {
+class UnitAvailabilityActor(parent: ActorRef)
+    extends Actor
+    with ActorLogging
+    with DateHelperMethods {
 
   var bookedUnitsPerDate: Map[LocalDate, Set[UnitId]] = Map[LocalDate, Set[UnitId]]()
   var persistenceSequenceNumber: Long                 = 0
@@ -31,7 +35,7 @@ class UnitAvailabilityActor(parent: ActorRef) extends Actor with ActorLogging {
       sender() ! Good(AvailableUnits(getAvailableUnits(from, to)))
 
     case PersistenceQueryEvent(sequenceNumber, e: EnquiryBooked) =>
-      iterateThroughDays(e.enquiry.dateFrom, e.enquiry.dateTo).foreach(
+      iterateThroughDaysIncludingLast(e.enquiry.dateFrom, e.enquiry.dateTo).foreach(
         date => update(BookedUnit(e.userId, e.enquiry.unitId, date, sequenceNumber))
       )
   }
@@ -40,15 +44,10 @@ class UnitAvailabilityActor(parent: ActorRef) extends Actor with ActorLogging {
     HardcodedUnits.units.keySet.diff(getBookedUnits(from, to))
 
   def getBookedUnits(from: LocalDate, to: LocalDate): Set[UnitId] =
-    iterateThroughDays(from, to).flatMap(bookedUnitsPerDate.getOrElse(_, Set())).toSet
+    iterateThroughDaysIncludingLast(from, to).flatMap(bookedUnitsPerDate.getOrElse(_, Set())).toSet
 
   def checkIfUnitIdIsBooked(unitId: UnitId, from: LocalDate, to: LocalDate): Boolean =
     getBookedUnits(from, to).toList.contains(unitId)
-
-  def iterateThroughDays(from: LocalDate, to: LocalDate): List[LocalDate] =
-    (0l to Duration.between(from.atStartOfDay(), to.atStartOfDay()).toDays)
-      .map(from.plusDays)
-      .toList
 
   def update(e: BookedUnit): Unit = {
     bookedUnitsPerDate = bookedUnitsPerDate.get(e.date) match {

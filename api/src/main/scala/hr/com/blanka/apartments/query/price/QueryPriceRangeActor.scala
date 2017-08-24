@@ -1,6 +1,6 @@
 package hr.com.blanka.apartments.query.price
 
-import java.time.{ Duration, LocalDate }
+import java.time.LocalDate
 
 import akka.actor.SupervisorStrategy.Restart
 import akka.actor._
@@ -10,20 +10,32 @@ import hr.com.blanka.apartments.command.price.DailyPriceSaved
 import hr.com.blanka.apartments.common.DayMonth
 import hr.com.blanka.apartments.query.booking.StartSync
 import hr.com.blanka.apartments.utils.PredefinedTimeout
-import org.scalactic.{ Bad, Good }
+import org.scalactic.Good
 
-import scala.collection.immutable
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.concurrent.duration.DurationInt
 import scala.language.postfixOps
-import scala.util.{ Failure, Success }
 
-object QueryPriceRangeActor {
+object QueryPriceRangeActor extends PredefinedTimeout {
   def apply() = Props(classOf[QueryPriceRangeActor])
+
+  import hr.com.blanka.apartments.utils.DateHelperMethods._
+
+  def sendMessagesForSingleDayCalculations(
+      dailyPriceAggregateActor: ActorRef,
+      lookupPriceForRange: LookupPriceForRange
+  ): List[Future[Any]] =
+    iterateThroughDaysExcludingLast(lookupPriceForRange.from, lookupPriceForRange.to).map { date =>
+      dailyPriceAggregateActor ? LookupPriceForDay(lookupPriceForRange.userId,
+                                                   lookupPriceForRange.unitId,
+                                                   DayMonth(date))
+    }
 }
 
 class QueryPriceRangeActor extends Actor with PredefinedTimeout {
+
+  import QueryPriceRangeActor._
 
   val dailyPriceAggregateActor: ActorRef = ClusterSharding(context.system).start(
     typeName = "DailyPriceAggregateActor",
@@ -33,54 +45,41 @@ class QueryPriceRangeActor extends Actor with PredefinedTimeout {
     extractShardId = DailyPriceAggregateActor.extractShardId
   )
 
-  def sendMessagesForSingleDayCalculations(
-      calculatePriceForRange: LookupPriceForRange
-  ): immutable.IndexedSeq[Future[Any]] = {
-    import calculatePriceForRange._
-
-    (0l until Duration.between(from.atStartOfDay(), to.atStartOfDay()).toDays)
-      .map(daysFromStart => {
-        val day = DayMonth(LocalDate.from(from).plusDays(daysFromStart))
-        dailyPriceAggregateActor ? LookupPriceForDay(userId, unitId, day)
-      })
-
-  }
-
   override def receive: Receive = {
     case e: DailyPriceSaved =>
       val msgSender = sender()
       dailyPriceAggregateActor ? e pipeTo msgSender
     case cpfr: LookupPriceForRange =>
-      val msgSender                         = sender()
-      val newlySentDailyCalculationMessages = sendMessagesForSingleDayCalculations(cpfr)
+      val msgSender = sender()
+      val newlySentDailyCalculationMessages = sendMessagesForSingleDayCalculations(
+        dailyPriceAggregateActor = dailyPriceAggregateActor,
+        lookupPriceForRange = cpfr
+      )
 
-      Future.sequence(newlySentDailyCalculationMessages).onComplete {
-        case Success(result) =>
-          msgSender ! Good(
-            result.foldLeft(BigDecimal(0))(
-              (sum, next) => next.asInstanceOf[PriceDayFetched].price + sum
-            )
+      Future.sequence(newlySentDailyCalculationMessages).map { result =>
+        msgSender ! Good(
+          result.foldLeft(BigDecimal(0))(
+            (sum, next) => next.asInstanceOf[PriceDayFetched].price + sum
           )
-        case Failure(t) => msgSender ! Bad("An error has occurred: " + t.getMessage)
+        )
       }
     case lap: LookupAllPrices =>
       val msgSender   = sender()
       val currentYear = LocalDate.now().getYear
       val newlySentDailyCalculationMessages = sendMessagesForSingleDayCalculations(
-        LookupPriceForRange(userId = lap.userId,
-                            unitId = lap.unitId,
-                            from = LocalDate.ofYearDay(currentYear, 1),
-                            to = LocalDate.of(currentYear, 12, 31))
+        dailyPriceAggregateActor = dailyPriceAggregateActor,
+        lookupPriceForRange = LookupPriceForRange(userId = lap.userId,
+                                                  unitId = lap.unitId,
+                                                  from = LocalDate.ofYearDay(currentYear, 1),
+                                                  to = LocalDate.of(currentYear, 12, 31))
       )
 
-      Future.sequence(newlySentDailyCalculationMessages).onComplete {
-        case Success(result) =>
-          msgSender ! Good(
-            result.foldLeft(BigDecimal(0))(
-              (sum, next) => next.asInstanceOf[PriceDayFetched].price + sum
-            )
+      Future.sequence(newlySentDailyCalculationMessages).map { result =>
+        msgSender ! Good(
+          result.foldLeft(BigDecimal(0))(
+            (sum, next) => next.asInstanceOf[PriceDayFetched].price + sum
           )
-        case Failure(t) => msgSender ! Bad("An error has occurred: " + t.getMessage)
+        )
       }
     case e: StartSync =>
       context.parent ! e

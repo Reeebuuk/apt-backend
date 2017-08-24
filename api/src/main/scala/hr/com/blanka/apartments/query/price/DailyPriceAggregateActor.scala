@@ -29,6 +29,13 @@ object DailyPriceAggregateActor {
 
     currentDailyPrices + (newDailyPrice.dayMonth -> newPrices)
   }
+
+  def fetchLatestPriceForDay(currentDailyPrices: Map[DayMonth, List[BigDecimal]],
+                             day: DayMonth): BigDecimal =
+    currentDailyPrices.get(day) match {
+      case None        => 0
+      case Some(price) => price.head
+    }
 }
 
 class DailyPriceAggregateActor(parent: ActorRef) extends Actor {
@@ -42,12 +49,7 @@ class DailyPriceAggregateActor(parent: ActorRef) extends Actor {
       context become active(updateState(e, currentDailyPrices))
 
     case LookupPriceForDay(_, _, day) =>
-      val lastPrice: BigDecimal = currentDailyPrices.get(day) match {
-        case None        => 0
-        case Some(price) => price.head
-      }
-
-      sender() ! PriceDayFetched(lastPrice)
+      sender() ! PriceDayFetched(fetchLatestPriceForDay(currentDailyPrices, day))
   }
 
   override def preStart(): Unit = {

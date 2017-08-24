@@ -6,7 +6,7 @@ import hr.com.blanka.apartments.common.ValueClasses.UnitId
 import hr.com.blanka.apartments.command.booking.{ BookingAggregateActor, EnquiryBooked }
 import hr.com.blanka.apartments.common.Enquiry
 import hr.com.blanka.apartments.query.PersistenceQueryEvent
-import hr.com.blanka.apartments.utils.HelperMethods
+import hr.com.blanka.apartments.utils.DateHelperMethods
 import org.scalactic.Good
 
 object BookedDatesActor {
@@ -20,9 +20,9 @@ object BookedDatesActor {
 
   def markNewDates(currentlyBookedDates: List[BookedDay], enquiry: Enquiry): List[BookedDay] = {
 
-    import HelperMethods._
+    import DateHelperMethods._
 
-    iterateThroughDays(enquiry.dateFrom, enquiry.dateTo).map {
+    iterateThroughDaysIncludingLast(enquiry.dateFrom, enquiry.dateTo).map {
       case day if day == enquiry.dateFrom =>
         currentlyBookedDates.find(_.day == day) match {
           case Some(bd) if bd.lastDay || !bd.firstDay =>
@@ -53,7 +53,7 @@ class BookedDatesActor(parent: ActorRef) extends Actor with ActorLogging {
   import BookedDatesActor._
 
   override def receive: Receive = {
-    case PersistenceQueryEvent(sequenceNumber, e: EnquiryBooked) =>
+    case PersistenceQueryEvent(_, e: EnquiryBooked) =>
       val currentlyBookedDates: List[BookedDay] =
         bookedDatesPerUnit.getOrElse(e.enquiry.unitId, List.empty)
 

@@ -1,12 +1,13 @@
 package hr.com.blanka.apartments.validation
 
-import java.time.{ Duration, LocalDate }
+import java.time.LocalDate
 
 import hr.com.blanka.apartments.common.ValueClasses.UnitId
+import hr.com.blanka.apartments.utils.DateHelperMethods
 import org.scalactic.Accumulation._
 import org.scalactic._
 
-object BasicValidation {
+object BasicValidation extends DateHelperMethods {
 
   import ErrorMessages._
 
@@ -22,7 +23,7 @@ object BasicValidation {
     }
 
     dates.flatMap(x => {
-      val duration = Duration.between(x._1.atStartOfDay(), x._2.atStartOfDay()).toDays.toInt
+      val duration = iterateThroughDaysIncludingLast(from = x._1, to = x._2).length
       if (duration >= 0)
         Good(duration)
       else

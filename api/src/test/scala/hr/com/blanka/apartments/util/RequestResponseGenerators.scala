@@ -81,9 +81,9 @@ object RequestResponseGenerators extends Constants {
     )
 
   def generateBookedDaysResponse(dateFrom: LocalDate, dateTo: LocalDate): BookedDatesResponse = {
-    import hr.com.blanka.apartments.utils.HelperMethods._
+    import hr.com.blanka.apartments.utils.DateHelperMethods._
 
-    val days = iterateThroughDays(dateFrom, dateTo)
+    val days = iterateThroughDaysIncludingLast(dateFrom, dateTo)
     val bookedDays = days.foldLeft(List[BookedDateResponse]())(
       (acc, date) =>
         acc match {
