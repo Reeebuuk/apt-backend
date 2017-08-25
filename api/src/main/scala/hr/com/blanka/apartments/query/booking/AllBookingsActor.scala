@@ -33,7 +33,7 @@ class AllBookingsActor extends Actor with ActorLogging {
                 Some(BookingDeposit(eb.depositAmount, eb.currency, eb.timeSaved)))
       )
     case _: GetAllBookings =>
-      sender() ! Good(AllBookings(bookings.values.toList))
+      sender() ! Good(AllBookings(bookings.values.toList.sortBy(_.bookingId.id)))
   }
 
   override def preStart(): Unit = {
