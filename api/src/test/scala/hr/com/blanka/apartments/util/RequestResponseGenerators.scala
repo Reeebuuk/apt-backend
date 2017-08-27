@@ -99,7 +99,8 @@ object RequestResponseGenerators extends Constants {
 
   def generateBookingResponse(
       bookingId: Long,
-      timeSaved: LocalDate = TIME_SAVED,
+      enquiryDttm: LocalDate = TIME_SAVED,
+      approvalDttm: LocalDate = TIME_SAVED,
       unitId: Int = UNIT_ID,
       fromDate: LocalDate = DATE_FROM,
       toDate: LocalDate = DATE_TO,
@@ -120,7 +121,8 @@ object RequestResponseGenerators extends Constants {
   ): BookingResponse =
     BookingResponse(
       bookingId = bookingId,
-      timeSaved = timeSaved.atStartOfDay().toInstant(ZoneOffset.UTC).toEpochMilli,
+      enquiryDttm = enquiryDttm.atStartOfDay().toInstant(ZoneOffset.UTC).toEpochMilli,
+      approvalDttm = approvalDttm.atStartOfDay().toInstant(ZoneOffset.UTC).toEpochMilli,
       unitId = unitId,
       dateFrom = fromDate.atStartOfDay().toInstant(ZoneOffset.UTC).toEpochMilli,
       dateTo = toDate.atStartOfDay().toInstant(ZoneOffset.UTC).toEpochMilli,

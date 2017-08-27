@@ -35,8 +35,8 @@ class UnitAvailabilityActor(parent: ActorRef)
       sender() ! Good(AvailableUnits(getAvailableUnits(from, to)))
 
     case PersistenceQueryEvent(sequenceNumber, e: EnquiryBooked) =>
-      iterateThroughDaysIncludingLast(e.enquiry.dateFrom, e.enquiry.dateTo).foreach(
-        date => update(BookedUnit(e.userId, e.enquiry.unitId, date, sequenceNumber))
+      iterateThroughDaysIncludingLast(e.dateFrom, e.dateTo).foreach(
+        date => update(BookedUnit(e.userId, e.unitId, date, sequenceNumber))
       )
   }
 

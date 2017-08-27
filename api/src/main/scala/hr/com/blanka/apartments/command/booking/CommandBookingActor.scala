@@ -27,13 +27,13 @@ class CommandBookingActor extends PersistentActor with ActorLogging with Predefi
   override def receiveCommand: Receive = receive(0l)
 
   def receive(bookingCounter: Long): Receive = {
-    case SaveEnquiryInitiated(userId, enquiry) =>
+    case SaveEnquiryInitiated(userId, enquiry, source) =>
       persist(NewBookingIdAssigned(BookingId(bookingCounter + 1))) { event =>
         context become receive(event.bookingId.id)
-        bookingAggregateActor ? SaveEnquiry(userId, event.bookingId, enquiry) pipeTo sender()
+        bookingAggregateActor ? SaveEnquiry(userId, event.bookingId, enquiry, source) pipeTo sender()
       }
-    case DepositPaid(userId, bookingId, depositAmount, currency) =>
-      bookingAggregateActor ? MarkEnquiryAsBooked(userId, bookingId, depositAmount, currency) pipeTo sender()
+    case e @ (_: DepositPaid | _: ApproveEnquiry) =>
+      bookingAggregateActor ? e pipeTo sender()
   }
 
   override def receiveRecover: Receive = {

@@ -1,6 +1,6 @@
 package hr.com.blanka.apartments.http.model
 
-import hr.com.blanka.apartments.command.booking.{ DepositPaid, SaveEnquiryInitiated }
+import hr.com.blanka.apartments.command.booking.{ DepositPaid, SaveEnquiryInitiated, Source }
 import hr.com.blanka.apartments.command.price.SavePriceRange
 import java.time.LocalDate
 
@@ -41,7 +41,8 @@ case class EnquiryReceivedRequest(userId: String, enquiry: EnquiryRequest) {
         enquiry.animals,
         enquiry.noOfPeople,
         enquiry.note
-      )
+      ),
+      Source.Website
     )
 }
 case class DepositPaidRequest(userId: String,

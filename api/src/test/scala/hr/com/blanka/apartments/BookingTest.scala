@@ -40,6 +40,10 @@ class BookingTest extends BaseIntegrationTest {
       val depositPaidEntity =
         HttpEntity(MediaTypes.`application/json`, Json.toJson(depositPaid).toString())
 
+      Put(s"/booking/$bookingId/authorize") ~> commandBookingRoute(command) ~> check {
+        status should be(OK)
+      }
+
       Post("/booking/depositPaid", depositPaidEntity) ~> commandBookingRoute(command) ~> check {
         status should be(OK)
       }

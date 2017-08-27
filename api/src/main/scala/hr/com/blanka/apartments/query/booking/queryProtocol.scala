@@ -24,6 +24,7 @@ case class BookedDay(day: LocalDate, firstDay: Boolean, lastDay: Boolean)
 case class StartSync(actor: ActorRef, persistenceId: String, initialIndex: Long)
 case class BookingDeposit(amount: BigDecimal, currency: String, when: LocalDateTime)
 case class Booking(bookingId: BookingId,
-                   timeSaved: LocalDateTime,
+                   enquiryDttm: LocalDateTime,
                    enquiry: Enquiry,
-                   bookingDeposit: Option[BookingDeposit] = None)
+                   approvedDttm: LocalDateTime,
+                   bookingDeposit: BookingDeposit)

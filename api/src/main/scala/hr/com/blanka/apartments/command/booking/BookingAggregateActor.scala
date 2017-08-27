@@ -1,12 +1,12 @@
 package hr.com.blanka.apartments.command.booking
 
-import java.time.LocalDateTime
+import java.time.{ LocalDate, LocalDateTime }
 
 import akka.actor.{ ActorLogging, Props }
 import akka.cluster.sharding.ShardRegion
 import akka.persistence.PersistentActor
-import hr.com.blanka.apartments.common.Enquiry
-import org.scalactic.Good
+import hr.com.blanka.apartments.common.ValueClasses.UnitId
+import org.scalactic.{ Bad, Good, One }
 
 object BookingAggregateActor {
   def apply() = Props(classOf[BookingAggregateActor])
@@ -25,38 +25,71 @@ class BookingAggregateActor extends PersistentActor with ActorLogging {
   override def receiveCommand: Receive = init
 
   def init: Receive = {
-    case SaveEnquiry(userId, bookingId, booking) =>
-      persist(EnquirySaved(userId, bookingId, booking, LocalDateTime.now())) { e =>
-        context become enquiry(e.enquiry)
+    case SaveEnquiry(userId, bookingId, enq, source) =>
+      persist(EnquiryReceived(userId, bookingId, enq, source, LocalDateTime.now())) { e =>
+        if (Source.needsApproval(source))
+          context become enquiry(enq.unitId, enq.dateFrom, enq.dateTo)
+        else
+          context become approvedEnquiry(enq.unitId, enq.dateFrom, enq.dateTo)
         sender() ! Good(bookingId)
       }
-    case e: MarkEnquiryAsBooked =>
-      log.error(s"Received MarkEnquiryAsBooked for enquiry which doesn't exit $e")
+    case e =>
+      val error = s"Received ${e.toString} in init state"
+      log.error(error)
+      sender() ! Bad(One(error))
   }
 
-  def enquiry(enquiry: Enquiry): Receive = {
-    case MarkEnquiryAsBooked(userId, bookingId, depositAmount, currency) =>
+  def enquiry(unitId: UnitId, from: LocalDate, to: LocalDate): Receive = {
+    case ApproveEnquiry(userId, bookingId) =>
       persist(
-        EnquiryBooked(userId, bookingId, enquiry, LocalDateTime.now(), depositAmount, currency)
+        EnquiryApproved(userId, bookingId, LocalDateTime.now(), unitId, from, to)
       ) { e =>
-        context become done(enquiry)
+        context become approvedEnquiry(unitId, from, to)
         sender() ! Good
       }
-    case e: SaveEnquiry => log.error(s"Received SaveEnquiry with same Id $e")
+    case e =>
+      val error = s"Received ${e.toString} in enquiry state"
+      log.error(error)
+      sender() ! Bad(One(error))
   }
 
-  def done(enquiry: Enquiry): Receive = {
-    case _ =>
-      log.info("Enquiry already booked")
-      sender() ! Good
+  def approvedEnquiry(unitId: UnitId, from: LocalDate, to: LocalDate): Receive = {
+    case DepositPaid(userId, bookingId, depositAmount, currency) =>
+      persist(
+        EnquiryBooked(
+          userId = userId,
+          bookingId = bookingId,
+          timeSaved = LocalDateTime.now(),
+          unitId = unitId,
+          dateFrom = from,
+          dateTo = to,
+          depositAmount = depositAmount,
+          currency = currency
+        )
+      ) { e =>
+        context become done
+        sender() ! Good
+      }
+    case e =>
+      val error = s"Received ${e.toString} in approvedEnquiry state"
+      log.error(error)
+      sender() ! Bad(One(error))
+  }
+
+  def done: Receive = {
+    case e =>
+      val error = s"Received ${e.toString} in done state"
+      log.error(error)
+      sender() ! Bad(One(error))
   }
 
   override def receiveRecover: Receive = {
-    case EnquirySaved(_, bookingId, en, _) if bookingId.id.toString == context.self.path.name =>
-      context become enquiry(en)
-    case EnquiryBooked(_, bookingId, en, _, _, _)
+    case EnquiryReceived(_, bookingId, e, _, source)
         if bookingId.id.toString == context.self.path.name =>
-      context become done(en)
+      context become enquiry(e.unitId, e.dateFrom, e.dateTo)
+    case EnquiryBooked(_, bookingId, _, _, _, _, _, _)
+        if bookingId.id.toString == context.self.path.name =>
+      context become done
   }
 
   override def persistenceId: String = BookingAggregateActor.persistenceId

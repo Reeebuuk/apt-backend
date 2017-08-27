@@ -55,7 +55,8 @@ object PricePerPeriodsResponse {
 
 case class AllBookingsResponse(bookings: List[BookingResponse])
 case class BookingResponse(bookingId: Long,
-                           timeSaved: Long,
+                           enquiryDttm: Long,
+                           approvalDttm: Long,
                            unitId: Int,
                            dateFrom: Long,
                            dateTo: Long,
@@ -81,7 +82,8 @@ object AllBookingsResponse {
         b =>
           BookingResponse(
             bookingId = b.bookingId.id,
-            timeSaved = b.timeSaved.toInstant(ZoneOffset.UTC).toEpochMilli,
+            enquiryDttm = b.enquiryDttm.toInstant(ZoneOffset.UTC).toEpochMilli,
+            approvalDttm = b.approvedDttm.toInstant(ZoneOffset.UTC).toEpochMilli,
             unitId = b.enquiry.unitId.id,
             dateFrom = b.enquiry.dateFrom.atStartOfDay().toInstant(ZoneOffset.UTC).toEpochMilli,
             dateTo = b.enquiry.dateTo.atStartOfDay().toInstant(ZoneOffset.UTC).toEpochMilli,
@@ -96,10 +98,9 @@ object AllBookingsResponse {
             noOfPeople = b.enquiry.noOfPeople,
             note = b.enquiry.note,
             totalPrice = BigDecimal.valueOf(0),
-            depositAmount = b.bookingDeposit.map(_.amount).getOrElse(BigDecimal.valueOf(0)),
-            depositCurrency = b.bookingDeposit.map(_.currency).getOrElse("EUR"),
-            depositWhen =
-              b.bookingDeposit.map(_.when.toInstant(ZoneOffset.UTC).toEpochMilli).getOrElse(0l)
+            depositAmount = b.bookingDeposit.amount,
+            depositCurrency = b.bookingDeposit.currency,
+            depositWhen = b.bookingDeposit.when.toInstant(ZoneOffset.UTC).toEpochMilli
         )
       )
     )

@@ -5,8 +5,9 @@ import akka.persistence.{ PersistentActor, RecoveryCompleted }
 import hr.com.blanka.apartments.command.booking.{
   BookingAggregateActor,
   EnquiryBooked,
-  EnquirySaved
+  EnquiryReceived
 }
+import hr.com.blanka.apartments.common.ValueClasses.BookingId
 import hr.com.blanka.apartments.common.{ Enquiry, HardcodedUnits }
 import hr.com.blanka.apartments.query.booking.StartSync
 import hr.com.blanka.apartments.query.{ PersistenceOffsetSaved, PersistenceQueryEvent }
@@ -16,13 +17,6 @@ import scala.language.postfixOps
 object QueryBookingsForEmailsActor {
   def apply(emailSenderActor: ActorRef, fromEmail: String) =
     Props(classOf[QueryBookingsForEmailsActor], emailSenderActor, fromEmail)
-}
-
-class QueryBookingsForEmailsActor(emailSenderActor: ActorRef, fromEmail: String)
-    extends PersistentActor
-    with ActorLogging {
-
-  var persistenceOffset: Long = 0
 
   def enquiryReceived(enquiry: Enquiry): String =
     s"""Hello ${enquiry.name},
@@ -57,9 +51,20 @@ class QueryBookingsForEmailsActor(emailSenderActor: ActorRef, fromEmail: String)
        |
        |www.apartments-blanka.com.hr
      """.stripMargin
+}
+
+class QueryBookingsForEmailsActor(emailSenderActor: ActorRef, fromEmail: String)
+    extends PersistentActor
+    with ActorLogging {
+
+  import QueryBookingsForEmailsActor._
+
+  var persistenceOffset: Long = 0
+
+  var bookings: Map[BookingId, Enquiry] = Map.empty
 
   override def receiveCommand: Receive = {
-    case PersistenceQueryEvent(offset, event: EnquirySaved) =>
+    case PersistenceQueryEvent(offset, event: EnquiryReceived) =>
       log.info("Email request from enquiry saved")
       log.debug(event.toString)
       emailSenderActor ! SendEmail(
@@ -69,16 +74,24 @@ class QueryBookingsForEmailsActor(emailSenderActor: ActorRef, fromEmail: String)
         text = enquiryReceived(event.enquiry),
         persistenceOffset = offset
       )
+
+      bookings = bookings + (event.bookingId -> event.enquiry)
+
     case PersistenceQueryEvent(offset, event: EnquiryBooked) =>
       log.info("Email request from enquiry booked")
       log.debug(event.toString)
-      emailSenderActor ! SendEmail(
-        from = fromEmail,
-        to = List(event.enquiry.email, fromEmail),
-        subject = "Apartments Blanka booking deposit received",
-        text = enquiryBooked(event.enquiry, event.depositAmount, event.currency),
-        persistenceOffset = offset
-      )
+      bookings
+        .get(event.bookingId)
+        .foreach(
+          enquiry =>
+            emailSenderActor ! SendEmail(
+              from = fromEmail,
+              to = List(enquiry.email, fromEmail),
+              subject = "Apartments Blanka booking deposit received",
+              text = enquiryBooked(enquiry, event.depositAmount, event.currency),
+              persistenceOffset = offset
+          )
+        )
     case offset: Long =>
       persist(PersistenceOffsetSaved(offset)) { _ =>
         persistenceOffset = offset + 1

@@ -26,7 +26,8 @@ object IntegrationConf {
  |    }
  |    serialization-bindings {
  |      "java.io.Serializable" = none
- |      "hr.com.blanka.apartments.command.booking.EnquirySaved" = myown
+ |      "hr.com.blanka.apartments.command.booking.EnquiryReceived" = myown
+ |      "hr.com.blanka.apartments.command.booking.EnquiryApproved" = myown
  |      "hr.com.blanka.apartments.command.booking.EnquiryBooked" = myown
  |      "hr.com.blanka.apartments.command.booking.NewBookingIdAssigned" = myown
  |      "hr.com.blanka.apartments.command.price.DailyPriceSaved" = myown
