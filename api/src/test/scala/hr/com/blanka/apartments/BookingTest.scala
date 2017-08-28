@@ -90,8 +90,8 @@ class BookingTest extends BaseIntegrationTest {
           Unmarshal(response.entity.httpEntity)
             .to[AllBookingsResponse]
             .eagerExtract
-            .bookings
-            .map(_.bookingId) should contain theSameElementsAs expectedBookings.bookings.map(
+            .enquiries
+            .map(_.bookingId) should contain theSameElementsAs expectedBookings.enquiries.map(
             _.bookingId
           )
         }

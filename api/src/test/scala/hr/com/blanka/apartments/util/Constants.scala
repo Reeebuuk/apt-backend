@@ -12,7 +12,6 @@ trait Constants {
   val SURNAME                 = "Cockroach"
   val PHONE_NUMBER            = "35395443443"
   val EMAIL                   = "john.cockr@gmail.com"
-  val CITY                    = "Lisbon"
   val COUNTRY                 = "Portugal"
   val ANIMALS                 = "Donkey"
   val NO_OF_PEOPLE            = "2+2"

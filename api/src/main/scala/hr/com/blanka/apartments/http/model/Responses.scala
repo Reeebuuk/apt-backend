@@ -61,7 +61,6 @@ case class EnquiryResponse(unitId: Int,
                            surname: String,
                            phoneNumber: String,
                            email: String,
-                           city: String,
                            country: String,
                            animals: String,
                            noOfPeople: String,
@@ -77,7 +76,6 @@ object EnquiryResponse {
       surname = e.surname,
       phoneNumber = e.phoneNumber,
       email = e.email,
-      city = e.city,
       country = e.country,
       animals = e.animals,
       noOfPeople = e.noOfPeople,
@@ -85,7 +83,7 @@ object EnquiryResponse {
     )
 }
 
-case class AllBookingsResponse(bookings: List[BookingResponse])
+case class AllBookingsResponse(enquiries: List[BookingResponse])
 case class BookingResponse(bookingId: Long,
                            enquiryDttm: Long,
                            approvalDttm: Long,

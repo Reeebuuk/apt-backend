@@ -40,7 +40,7 @@ class QueryBookingActor() extends Actor with ActorLogging with PredefinedTimeout
     case e: GetBookedDates =>
       val msgSender = sender()
       bookedDatesActor ? e pipeTo msgSender
-    case e: GetAllBookings =>
+    case e @ (_: GetAllBookings | _: GetAllUnapprovedEnquiries | _: GetAllApprovedEnquiries) =>
       val msgSender = sender()
       allBookingsActor ? e pipeTo msgSender
     case e: StartSync =>

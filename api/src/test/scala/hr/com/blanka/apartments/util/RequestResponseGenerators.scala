@@ -19,7 +19,6 @@ object RequestResponseGenerators extends Constants {
                              surname: String = SURNAME,
                              phoneNumber: String = PHONE_NUMBER,
                              email: String = EMAIL,
-                             city: String = CITY,
                              country: String = COUNTRY,
                              animals: String = ANIMALS,
                              noOfPeople: String = NO_OF_PEOPLE,
@@ -32,7 +31,6 @@ object RequestResponseGenerators extends Constants {
       surname = surname,
       phoneNumber = phoneNumber,
       email = email,
-      city = city,
       country = country,
       animals = animals,
       noOfPeople = noOfPeople,
@@ -106,7 +104,6 @@ object RequestResponseGenerators extends Constants {
       surname: String = SURNAME,
       phoneNumber: String = PHONE_NUMBER,
       email: String = EMAIL,
-      city: String = CITY,
       country: String = COUNTRY,
       animals: String = ANIMALS,
       noOfPeople: String = NO_OF_PEOPLE,
@@ -128,7 +125,6 @@ object RequestResponseGenerators extends Constants {
         surname = surname,
         phoneNumber = phoneNumber,
         email = email,
-        city = city,
         country = country,
         animals = animals,
         noOfPeople = noOfPeople,
@@ -142,6 +138,6 @@ object RequestResponseGenerators extends Constants {
 
   def generateAllBookingsResponse(bookingIds: List[Long]): AllBookingsResponse =
     AllBookingsResponse(
-      bookings = bookingIds.map(generateBookingResponse(_))
+      enquiries = bookingIds.map(generateBookingResponse(_))
     )
 }

@@ -1,6 +1,7 @@
 package hr.com.blanka.apartments.http
 
 import akka.actor.ActorRef
+import akka.http.scaladsl.model.HttpMethods.{ GET, POST, PUT }
 import akka.http.scaladsl.model.StatusCodes
 import akka.http.scaladsl.model.headers.{ HttpOrigin, HttpOriginRange }
 import akka.http.scaladsl.server.Directives._
@@ -27,7 +28,8 @@ trait BaseService
     with CommandContactServiceRoute {
 
   val corsSettings: CorsSettings.Default = CorsSettings.defaultSettings.copy(
-    allowedOrigins = HttpOriginRange(HttpOrigin("http://localhost:9000"))
+    allowedOrigins = HttpOriginRange(HttpOrigin("http://localhost:9000")),
+    allowedMethods = List(GET, POST, PUT)
   )
 
   val rejectionHandler

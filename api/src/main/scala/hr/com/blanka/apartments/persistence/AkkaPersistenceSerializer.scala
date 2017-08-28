@@ -39,10 +39,10 @@ class AkkaPersistenceSerializer extends SerializerWithStringManifest {
   implicit lazy val unitIdFormat: ValueClassJson[Int, UnitId] =
     ValueClassJson(UnitId)(UnitId.unapply)
 
-  implicit lazy val enquiryFormat: OFormat[Enquiry]              = Json.format[Enquiry]
-  implicit lazy val sourceFormat: Format[booking.Source.Value]   = EnumUtils.enumFormat(Source)
-  implicit lazy val enquirySavedFormat: OFormat[EnquiryReceived] = Json.format[EnquiryReceived]
-  implicit lazy val enquiryBookedFormat: OFormat[EnquiryBooked]  = Json.format[EnquiryBooked]
+  implicit lazy val enquiryFormat: OFormat[Enquiry]                 = Json.format[Enquiry]
+  implicit lazy val sourceFormat: Format[booking.Source.Value]      = EnumUtils.enumFormat(Source)
+  implicit lazy val enquiryReceivedFormat: OFormat[EnquiryReceived] = Json.format[EnquiryReceived]
+  implicit lazy val enquiryBookedFormat: OFormat[EnquiryBooked]     = Json.format[EnquiryBooked]
   implicit lazy val newBookingIdAssignedFormat: OFormat[NewBookingIdAssigned] =
     Json.format[NewBookingIdAssigned]
   implicit lazy val dayMonthFormat: OFormat[DayMonth]               = Json.format[DayMonth]

@@ -26,17 +26,19 @@ trait QueryBookingServiceRoute extends BaseServiceRoute with WriteMarshallingSup
 
   def queryBookingRoute(query: ActorRef): Route = pathPrefix("booking") {
     pathEndOrSingleSlash {
-      parameter("year".as[Int]) { year =>
-        onSuccess(query ? GetAllBookings(UserId("user"), year)) {
-          case Good(bd: AllBookings) =>
-            complete(StatusCodes.OK, AllBookingsResponse.remap(bd))
-          case Bad(response) =>
-            response match {
-              case One(error) => complete(StatusCodes.BadRequest, ErrorResponse(error.toString))
-              case Many(first, second) =>
-                complete(StatusCodes.BadRequest, ErrorResponse(Seq(first, second).mkString(", ")))
-              case error => complete(StatusCodes.BadRequest, ErrorResponse(error.toString))
-            }
+      get {
+        parameter("year".as[Int]) { year =>
+          onSuccess(query ? GetAllBookings(UserId("user"), year)) {
+            case Good(bd: AllBookings) =>
+              complete(StatusCodes.OK, AllBookingsResponse.remap(bd))
+            case Bad(response) =>
+              response match {
+                case One(error) => complete(StatusCodes.BadRequest, ErrorResponse(error.toString))
+                case Many(first, second) =>
+                  complete(StatusCodes.BadRequest, ErrorResponse(Seq(first, second).mkString(", ")))
+                case error => complete(StatusCodes.BadRequest, ErrorResponse(error.toString))
+              }
+          }
         }
       }
     } ~
