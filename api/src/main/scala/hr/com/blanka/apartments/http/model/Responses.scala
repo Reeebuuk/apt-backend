@@ -2,6 +2,7 @@ package hr.com.blanka.apartments.http.model
 
 import java.time.{ LocalDate, ZoneOffset }
 
+import hr.com.blanka.apartments.common.Enquiry
 import hr.com.blanka.apartments.query.booking._
 import hr.com.blanka.apartments.query.price.PricePerPeriod
 
@@ -53,23 +54,42 @@ object PricePerPeriodsResponse {
     )
 }
 
-case class AllBookingsResponse(bookings: List[BookingResponse])
-case class BookingResponse(bookingId: Long,
-                           enquiryDttm: Long,
-                           approvalDttm: Long,
-                           unitId: Int,
+case class EnquiryResponse(unitId: Int,
                            dateFrom: Long,
                            dateTo: Long,
                            name: String,
                            surname: String,
                            phoneNumber: String,
                            email: String,
-                           address: String,
                            city: String,
                            country: String,
                            animals: String,
                            noOfPeople: String,
-                           note: String,
+                           note: String)
+
+object EnquiryResponse {
+  def remap(e: Enquiry): EnquiryResponse =
+    EnquiryResponse(
+      unitId = e.unitId.id,
+      dateFrom = e.dateFrom.atStartOfDay().toInstant(ZoneOffset.UTC).toEpochMilli,
+      dateTo = e.dateTo.atStartOfDay().toInstant(ZoneOffset.UTC).toEpochMilli,
+      name = e.name,
+      surname = e.surname,
+      phoneNumber = e.phoneNumber,
+      email = e.email,
+      city = e.city,
+      country = e.country,
+      animals = e.animals,
+      noOfPeople = e.noOfPeople,
+      note = e.note
+    )
+}
+
+case class AllBookingsResponse(bookings: List[BookingResponse])
+case class BookingResponse(bookingId: Long,
+                           enquiryDttm: Long,
+                           approvalDttm: Long,
+                           enquiry: EnquiryResponse,
                            totalPrice: BigDecimal,
                            depositAmount: BigDecimal,
                            depositCurrency: String,
@@ -84,20 +104,8 @@ object AllBookingsResponse {
             bookingId = b.bookingId.id,
             enquiryDttm = b.enquiryDttm.toInstant(ZoneOffset.UTC).toEpochMilli,
             approvalDttm = b.approvedDttm.toInstant(ZoneOffset.UTC).toEpochMilli,
-            unitId = b.enquiry.unitId.id,
-            dateFrom = b.enquiry.dateFrom.atStartOfDay().toInstant(ZoneOffset.UTC).toEpochMilli,
-            dateTo = b.enquiry.dateTo.atStartOfDay().toInstant(ZoneOffset.UTC).toEpochMilli,
-            name = b.enquiry.name,
-            surname = b.enquiry.surname,
-            phoneNumber = b.enquiry.phoneNumber,
-            email = b.enquiry.email,
-            address = b.enquiry.address,
-            city = b.enquiry.city,
-            country = b.enquiry.country,
-            animals = b.enquiry.animals,
-            noOfPeople = b.enquiry.noOfPeople,
-            note = b.enquiry.note,
-            totalPrice = BigDecimal.valueOf(0),
+            enquiry = EnquiryResponse.remap(b.enquiry),
+            totalPrice = BigDecimal(0),
             depositAmount = b.bookingDeposit.amount,
             depositCurrency = b.bookingDeposit.currency,
             depositWhen = b.bookingDeposit.when.toInstant(ZoneOffset.UTC).toEpochMilli
@@ -110,19 +118,7 @@ case class AllApprovedEnquiriesResponse(enquiries: List[ApprovedEnquiryResponse]
 case class ApprovedEnquiryResponse(bookingId: Long,
                                    enquiryDttm: Long,
                                    approvalDttm: Long,
-                                   unitId: Int,
-                                   dateFrom: Long,
-                                   dateTo: Long,
-                                   name: String,
-                                   surname: String,
-                                   phoneNumber: String,
-                                   email: String,
-                                   address: String,
-                                   city: String,
-                                   country: String,
-                                   animals: String,
-                                   noOfPeople: String,
-                                   note: String,
+                                   enquiry: EnquiryResponse,
                                    totalPrice: BigDecimal)
 
 object AllApprovedEnquiriesResponse {
@@ -134,20 +130,8 @@ object AllApprovedEnquiriesResponse {
             bookingId = b.bookingId.id,
             enquiryDttm = b.enquiryDttm.toInstant(ZoneOffset.UTC).toEpochMilli,
             approvalDttm = b.approvedDttm.toInstant(ZoneOffset.UTC).toEpochMilli,
-            unitId = b.enquiry.unitId.id,
-            dateFrom = b.enquiry.dateFrom.atStartOfDay().toInstant(ZoneOffset.UTC).toEpochMilli,
-            dateTo = b.enquiry.dateTo.atStartOfDay().toInstant(ZoneOffset.UTC).toEpochMilli,
-            name = b.enquiry.name,
-            surname = b.enquiry.surname,
-            phoneNumber = b.enquiry.phoneNumber,
-            email = b.enquiry.email,
-            address = b.enquiry.address,
-            city = b.enquiry.city,
-            country = b.enquiry.country,
-            animals = b.enquiry.animals,
-            noOfPeople = b.enquiry.noOfPeople,
-            note = b.enquiry.note,
-            totalPrice = BigDecimal.valueOf(0)
+            enquiry = EnquiryResponse.remap(b.enquiry),
+            totalPrice = BigDecimal(0)
         )
       )
     )
@@ -156,19 +140,7 @@ object AllApprovedEnquiriesResponse {
 case class AllUnapprovedEnquiriesResponse(enquiries: List[UnapprovedEnquiryResponse])
 case class UnapprovedEnquiryResponse(bookingId: Long,
                                      enquiryDttm: Long,
-                                     unitId: Int,
-                                     dateFrom: Long,
-                                     dateTo: Long,
-                                     name: String,
-                                     surname: String,
-                                     phoneNumber: String,
-                                     email: String,
-                                     address: String,
-                                     city: String,
-                                     country: String,
-                                     animals: String,
-                                     noOfPeople: String,
-                                     note: String,
+                                     enquiry: EnquiryResponse,
                                      totalPrice: BigDecimal)
 
 object AllUnapprovedEnquiriesResponse {
@@ -179,20 +151,8 @@ object AllUnapprovedEnquiriesResponse {
           UnapprovedEnquiryResponse(
             bookingId = b.bookingId.id,
             enquiryDttm = b.enquiryDttm.toInstant(ZoneOffset.UTC).toEpochMilli,
-            unitId = b.enquiry.unitId.id,
-            dateFrom = b.enquiry.dateFrom.atStartOfDay().toInstant(ZoneOffset.UTC).toEpochMilli,
-            dateTo = b.enquiry.dateTo.atStartOfDay().toInstant(ZoneOffset.UTC).toEpochMilli,
-            name = b.enquiry.name,
-            surname = b.enquiry.surname,
-            phoneNumber = b.enquiry.phoneNumber,
-            email = b.enquiry.email,
-            address = b.enquiry.address,
-            city = b.enquiry.city,
-            country = b.enquiry.country,
-            animals = b.enquiry.animals,
-            noOfPeople = b.enquiry.noOfPeople,
-            note = b.enquiry.note,
-            totalPrice = BigDecimal.valueOf(0)
+            enquiry = EnquiryResponse.remap(b.enquiry),
+            totalPrice = BigDecimal(0)
         )
       )
     )

@@ -26,6 +26,8 @@ trait TestMarshallingSupport {
   implicit val bookingIdFormat: Format[NewEnquiryResponse] =
     Json.format[NewEnquiryResponse]
 
+  implicit val enquiryResponseReads: Reads[EnquiryResponse] =
+    Json.reads[EnquiryResponse]
   implicit val bookingResponseReads: Reads[BookingResponse] =
     Json.reads[BookingResponse]
   implicit val allBookingsResponsesReads: Reads[AllBookingsResponse] =
