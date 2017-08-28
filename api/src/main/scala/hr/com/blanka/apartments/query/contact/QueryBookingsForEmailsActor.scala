@@ -7,7 +7,7 @@ import hr.com.blanka.apartments.command.booking.{
   EnquiryBooked,
   EnquiryReceived
 }
-import hr.com.blanka.apartments.common.ValueClasses.BookingId
+import hr.com.blanka.apartments.common.ValueClasses.EnquiryId
 import hr.com.blanka.apartments.common.{ Enquiry, HardcodedUnits }
 import hr.com.blanka.apartments.query.booking.StartSync
 import hr.com.blanka.apartments.query.{ PersistenceOffsetSaved, PersistenceQueryEvent }
@@ -61,7 +61,7 @@ class QueryBookingsForEmailsActor(emailSenderActor: ActorRef, fromEmail: String)
 
   var persistenceOffset: Long = 0
 
-  var bookings: Map[BookingId, Enquiry] = Map.empty
+  var bookings: Map[EnquiryId, Enquiry] = Map.empty
 
   override def receiveCommand: Receive = {
     case PersistenceQueryEvent(offset, event: EnquiryReceived) =>
@@ -75,13 +75,13 @@ class QueryBookingsForEmailsActor(emailSenderActor: ActorRef, fromEmail: String)
         persistenceOffset = offset
       )
 
-      bookings = bookings + (event.bookingId -> event.enquiry)
+      bookings = bookings + (event.enquiryId -> event.enquiry)
 
     case PersistenceQueryEvent(offset, event: EnquiryBooked) =>
       log.info("Email request from enquiry booked")
       log.debug(event.toString)
       bookings
-        .get(event.bookingId)
+        .get(event.enquiryId)
         .foreach(
           enquiry =>
             emailSenderActor ! SendEmail(

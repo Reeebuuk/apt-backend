@@ -28,7 +28,7 @@ object BookedDateResponse {
     BookedDateResponse(bd.day, bd.firstDay, bd.lastDay)
 }
 
-case class NewEnquiryResponse(bookingId: Long)
+case class NewEnquiryResponse(enquiryId: Long)
 
 case class PricePerPeriodResponse(from: Long, to: Long, appPrice: Map[Int, Int])
 case class PricePerPeriodsResponse(prices: List[PricePerPeriodResponse])
@@ -84,7 +84,7 @@ object EnquiryResponse {
 }
 
 case class AllBookingsResponse(enquiries: List[BookingResponse])
-case class BookingResponse(bookingId: Long,
+case class BookingResponse(enquiryId: Long,
                            enquiryDttm: Long,
                            approvalDttm: Long,
                            enquiry: EnquiryResponse,
@@ -94,12 +94,12 @@ case class BookingResponse(bookingId: Long,
                            depositWhen: Long)
 
 object AllBookingsResponse {
-  def remap(allBookings: AllBookings): AllBookingsResponse =
+  def remap(allBookings: AllBookedEnquiries): AllBookingsResponse =
     AllBookingsResponse(
       allBookings.bookings.map(
         b =>
           BookingResponse(
-            bookingId = b.bookingId.id,
+            enquiryId = b.enquiryId.id,
             enquiryDttm = b.enquiryDttm.toInstant(ZoneOffset.UTC).toEpochMilli,
             approvalDttm = b.approvedDttm.toInstant(ZoneOffset.UTC).toEpochMilli,
             enquiry = EnquiryResponse.remap(b.enquiry),
@@ -113,7 +113,7 @@ object AllBookingsResponse {
 }
 
 case class AllApprovedEnquiriesResponse(enquiries: List[ApprovedEnquiryResponse])
-case class ApprovedEnquiryResponse(bookingId: Long,
+case class ApprovedEnquiryResponse(enquiryId: Long,
                                    enquiryDttm: Long,
                                    approvalDttm: Long,
                                    enquiry: EnquiryResponse,
@@ -125,7 +125,7 @@ object AllApprovedEnquiriesResponse {
       allApprovedEnquiries.enquiries.map(
         b =>
           ApprovedEnquiryResponse(
-            bookingId = b.bookingId.id,
+            enquiryId = b.enquiryId.id,
             enquiryDttm = b.enquiryDttm.toInstant(ZoneOffset.UTC).toEpochMilli,
             approvalDttm = b.approvedDttm.toInstant(ZoneOffset.UTC).toEpochMilli,
             enquiry = EnquiryResponse.remap(b.enquiry),
@@ -136,7 +136,7 @@ object AllApprovedEnquiriesResponse {
 }
 
 case class AllUnapprovedEnquiriesResponse(enquiries: List[UnapprovedEnquiryResponse])
-case class UnapprovedEnquiryResponse(bookingId: Long,
+case class UnapprovedEnquiryResponse(enquiryId: Long,
                                      enquiryDttm: Long,
                                      enquiry: EnquiryResponse,
                                      totalPrice: BigDecimal)
@@ -147,7 +147,7 @@ object AllUnapprovedEnquiriesResponse {
       allUnapprovedEnquiries.enquiries.map(
         b =>
           UnapprovedEnquiryResponse(
-            bookingId = b.bookingId.id,
+            enquiryId = b.enquiryId.id,
             enquiryDttm = b.enquiryDttm.toInstant(ZoneOffset.UTC).toEpochMilli,
             enquiry = EnquiryResponse.remap(b.enquiry),
             totalPrice = BigDecimal(0)

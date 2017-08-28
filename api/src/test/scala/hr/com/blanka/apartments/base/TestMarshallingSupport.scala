@@ -23,7 +23,7 @@ trait TestMarshallingSupport {
     Json.reads[BookedDatesResponse]
   implicit val priceForRangeResponse: Format[PriceForRangeResponse] =
     Json.format[PriceForRangeResponse]
-  implicit val bookingIdFormat: Format[NewEnquiryResponse] =
+  implicit val enquiryIdFormat: Format[NewEnquiryResponse] =
     Json.format[NewEnquiryResponse]
 
   implicit val enquiryResponseReads: Reads[EnquiryResponse] =

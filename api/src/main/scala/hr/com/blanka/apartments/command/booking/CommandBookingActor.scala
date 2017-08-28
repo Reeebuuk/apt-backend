@@ -4,7 +4,7 @@ import akka.actor.{ ActorLogging, ActorRef, Props }
 import akka.cluster.sharding.{ ClusterSharding, ClusterShardingSettings }
 import akka.pattern.{ ask, pipe }
 import akka.persistence.PersistentActor
-import hr.com.blanka.apartments.common.ValueClasses.BookingId
+import hr.com.blanka.apartments.common.ValueClasses.EnquiryId
 import hr.com.blanka.apartments.utils.PredefinedTimeout
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -28,16 +28,16 @@ class CommandBookingActor extends PersistentActor with ActorLogging with Predefi
 
   def receive(bookingCounter: Long): Receive = {
     case SaveEnquiryInitiated(userId, enquiry, source) =>
-      persist(NewBookingIdAssigned(BookingId(bookingCounter + 1))) { event =>
-        context become receive(event.bookingId.id)
-        bookingAggregateActor ? SaveEnquiry(userId, event.bookingId, enquiry, source) pipeTo sender()
+      persist(NewEnquiryIdAssigned(EnquiryId(bookingCounter + 1))) { event =>
+        context become receive(event.enquiryId.id)
+        bookingAggregateActor ? SaveEnquiry(userId, event.enquiryId, enquiry, source) pipeTo sender()
       }
     case e @ (_: DepositPaid | _: ApproveEnquiry) =>
       bookingAggregateActor ? e pipeTo sender()
   }
 
   override def receiveRecover: Receive = {
-    case NewBookingIdAssigned(counter) =>
+    case NewEnquiryIdAssigned(counter) =>
       context become receive(counter.id)
   }
 

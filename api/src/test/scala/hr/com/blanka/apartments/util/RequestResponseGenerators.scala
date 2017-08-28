@@ -38,13 +38,13 @@ object RequestResponseGenerators extends Constants {
     )
 
   def generateDepositPaidRequest(
-      bookingId: Long,
+      enquiryId: Long,
       userId: String = USER_ID,
       depositAmount: BigDecimal = DEPOSIT_AMOUNT,
       currency: String = CURRENCY
   ): DepositPaidRequest =
     DepositPaidRequest(userId = userId,
-                       bookingId = bookingId,
+                       enquiryId = enquiryId,
                        depositAmount = depositAmount,
                        currency = currency)
 
@@ -94,7 +94,7 @@ object RequestResponseGenerators extends Constants {
   }
 
   def generateBookingResponse(
-      bookingId: Long,
+      enquiryId: Long,
       enquiryDttm: LocalDate = TIME_SAVED,
       approvalDttm: LocalDate = TIME_SAVED,
       unitId: Int = UNIT_ID,
@@ -114,7 +114,7 @@ object RequestResponseGenerators extends Constants {
       depositWhen: LocalDate = DEPOSIT_PAID
   ): BookingResponse =
     BookingResponse(
-      bookingId = bookingId,
+      enquiryId = enquiryId,
       enquiryDttm = enquiryDttm.atStartOfDay().toInstant(ZoneOffset.UTC).toEpochMilli,
       approvalDttm = approvalDttm.atStartOfDay().toInstant(ZoneOffset.UTC).toEpochMilli,
       enquiry = EnquiryResponse(
@@ -136,8 +136,8 @@ object RequestResponseGenerators extends Constants {
       depositWhen = depositWhen.atStartOfDay().toInstant(ZoneOffset.UTC).toEpochMilli
     )
 
-  def generateAllBookingsResponse(bookingIds: List[Long]): AllBookingsResponse =
+  def generateAllBookingsResponse(enquiryIds: List[Long]): AllBookingsResponse =
     AllBookingsResponse(
-      enquiries = bookingIds.map(generateBookingResponse(_))
+      enquiries = enquiryIds.map(generateBookingResponse(_))
     )
 }

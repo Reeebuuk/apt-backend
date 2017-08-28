@@ -3,7 +3,7 @@ package hr.com.blanka.apartments.command.booking
 import java.time.{ LocalDate, LocalDateTime }
 
 import hr.com.blanka.apartments.command.booking.Source.Source
-import hr.com.blanka.apartments.common.ValueClasses.{ BookingId, UnitId, UserId }
+import hr.com.blanka.apartments.common.ValueClasses.{ EnquiryId, UnitId, UserId }
 import hr.com.blanka.apartments.common.Enquiry
 
 /*
@@ -13,17 +13,17 @@ import hr.com.blanka.apartments.common.Enquiry
 sealed trait BookingCommand
 
 sealed trait KnownBookingCommand extends BookingCommand {
-  def bookingId: BookingId
+  def enquiryId: EnquiryId
 }
 
 case class SaveEnquiryInitiated(userId: UserId, enquiry: Enquiry, source: Source)
     extends BookingCommand
 
-case class SaveEnquiry(userId: UserId, bookingId: BookingId, enquiry: Enquiry, source: Source)
+case class SaveEnquiry(userId: UserId, enquiryId: EnquiryId, enquiry: Enquiry, source: Source)
     extends KnownBookingCommand
-case class ApproveEnquiry(userId: UserId, bookingId: BookingId) extends KnownBookingCommand
+case class ApproveEnquiry(userId: UserId, enquiryId: EnquiryId) extends KnownBookingCommand
 case class DepositPaid(userId: UserId,
-                       bookingId: BookingId,
+                       enquiryId: EnquiryId,
                        depositAmount: BigDecimal,
                        currency: String)
     extends KnownBookingCommand
@@ -40,20 +40,20 @@ sealed trait ValidationQuery {
  * Events
  */
 
-case class NewBookingIdAssigned(bookingId: BookingId)
+case class NewEnquiryIdAssigned(enquiryId: EnquiryId)
 case class EnquiryReceived(userId: UserId,
-                           bookingId: BookingId,
+                           enquiryId: EnquiryId,
                            enquiry: Enquiry,
                            source: Source,
                            timeSaved: LocalDateTime)
 case class EnquiryApproved(userId: UserId,
-                           bookingId: BookingId,
+                           enquiryId: EnquiryId,
                            timeSaved: LocalDateTime,
                            unitId: UnitId,
                            dateFrom: LocalDate,
                            dateTo: LocalDate)
 case class EnquiryBooked(userId: UserId,
-                         bookingId: BookingId,
+                         enquiryId: EnquiryId,
                          timeSaved: LocalDateTime,
                          unitId: UnitId,
                          dateFrom: LocalDate,

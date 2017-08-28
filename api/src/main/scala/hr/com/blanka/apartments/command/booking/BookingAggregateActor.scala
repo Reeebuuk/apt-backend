@@ -12,7 +12,7 @@ object BookingAggregateActor {
   def apply() = Props(classOf[BookingAggregateActor])
 
   def extractEntityId: ShardRegion.ExtractEntityId = {
-    case e: KnownBookingCommand => (e.bookingId.id.toString, e)
+    case e: KnownBookingCommand => (e.enquiryId.id.toString, e)
   }
 
   def extractShardId: ShardRegion.ExtractShardId = _ => "one"
@@ -25,13 +25,13 @@ class BookingAggregateActor extends PersistentActor with ActorLogging {
   override def receiveCommand: Receive = init
 
   def init: Receive = {
-    case SaveEnquiry(userId, bookingId, enq, source) =>
-      persist(EnquiryReceived(userId, bookingId, enq, source, LocalDateTime.now())) { e =>
+    case SaveEnquiry(userId, enquiryId, enq, source) =>
+      persist(EnquiryReceived(userId, enquiryId, enq, source, LocalDateTime.now())) { e =>
         if (Source.needsApproval(source))
           context become enquiry(enq.unitId, enq.dateFrom, enq.dateTo)
         else
           context become approvedEnquiry(enq.unitId, enq.dateFrom, enq.dateTo)
-        sender() ! Good(bookingId)
+        sender() ! Good(enquiryId)
       }
     case e =>
       val error = s"Received ${e.toString} in init state"
@@ -40,9 +40,9 @@ class BookingAggregateActor extends PersistentActor with ActorLogging {
   }
 
   def enquiry(unitId: UnitId, from: LocalDate, to: LocalDate): Receive = {
-    case ApproveEnquiry(userId, bookingId) =>
+    case ApproveEnquiry(userId, enquiryId) =>
       persist(
-        EnquiryApproved(userId, bookingId, LocalDateTime.now(), unitId, from, to)
+        EnquiryApproved(userId, enquiryId, LocalDateTime.now(), unitId, from, to)
       ) { e =>
         context become approvedEnquiry(unitId, from, to)
         sender() ! Good
@@ -54,11 +54,11 @@ class BookingAggregateActor extends PersistentActor with ActorLogging {
   }
 
   def approvedEnquiry(unitId: UnitId, from: LocalDate, to: LocalDate): Receive = {
-    case DepositPaid(userId, bookingId, depositAmount, currency) =>
+    case DepositPaid(userId, enquiryId, depositAmount, currency) =>
       persist(
         EnquiryBooked(
           userId = userId,
-          bookingId = bookingId,
+          enquiryId = enquiryId,
           timeSaved = LocalDateTime.now(),
           unitId = unitId,
           dateFrom = from,
@@ -84,11 +84,11 @@ class BookingAggregateActor extends PersistentActor with ActorLogging {
   }
 
   override def receiveRecover: Receive = {
-    case EnquiryReceived(_, bookingId, e, _, source)
-        if bookingId.id.toString == context.self.path.name =>
+    case EnquiryReceived(_, enquiryId, e, _, source)
+        if enquiryId.id.toString == context.self.path.name =>
       context become enquiry(e.unitId, e.dateFrom, e.dateTo)
-    case EnquiryBooked(_, bookingId, _, _, _, _, _, _)
-        if bookingId.id.toString == context.self.path.name =>
+    case EnquiryBooked(_, enquiryId, _, _, _, _, _, _)
+        if enquiryId.id.toString == context.self.path.name =>
       context become done
   }
 

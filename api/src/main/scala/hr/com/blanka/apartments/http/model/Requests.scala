@@ -4,7 +4,7 @@ import hr.com.blanka.apartments.command.booking.{ DepositPaid, SaveEnquiryInitia
 import hr.com.blanka.apartments.command.price.SavePriceRange
 import java.time.LocalDate
 
-import hr.com.blanka.apartments.common.ValueClasses.{ BookingId, UnitId, UserId }
+import hr.com.blanka.apartments.common.ValueClasses.{ EnquiryId, UnitId, UserId }
 import hr.com.blanka.apartments.command.contact.SaveContact
 import hr.com.blanka.apartments.common.Enquiry
 import hr.com.blanka.apartments.query.price.LookupPriceForRange
@@ -42,11 +42,11 @@ case class EnquiryReceivedRequest(userId: String, enquiry: EnquiryRequest) {
     )
 }
 case class DepositPaidRequest(userId: String,
-                              bookingId: Long,
+                              enquiryId: Long,
                               depositAmount: BigDecimal,
                               currency: String) {
   def toCommand: DepositPaid =
-    DepositPaid(UserId(userId), BookingId(bookingId), depositAmount, currency)
+    DepositPaid(UserId(userId), EnquiryId(enquiryId), depositAmount, currency)
 }
 
 case class SavePriceRangeRequest(userId: String,

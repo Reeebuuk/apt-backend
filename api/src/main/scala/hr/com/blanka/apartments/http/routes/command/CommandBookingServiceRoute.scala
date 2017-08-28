@@ -6,7 +6,7 @@ import akka.http.scaladsl.server.{ Directives, Route }
 import akka.pattern.ask
 import de.heikoseeberger.akkahttpplayjson.PlayJsonSupport
 import hr.com.blanka.apartments.command.booking.ApproveEnquiry
-import hr.com.blanka.apartments.common.ValueClasses.{ BookingId, UserId }
+import hr.com.blanka.apartments.common.ValueClasses.{ EnquiryId, UserId }
 import hr.com.blanka.apartments.http.model._
 import hr.com.blanka.apartments.http.routes.BaseServiceRoute
 import hr.com.blanka.apartments.utils.ReadMarshallingSupport
@@ -23,9 +23,9 @@ trait CommandBookingServiceRoute extends BaseServiceRoute with ReadMarshallingSu
         decodeRequest {
           entity(as[EnquiryRequest]) { booking =>
             onSuccess(command ? EnquiryReceivedRequest("userId", booking).toCommand) {
-              case Good(bookingId) =>
-                complete(StatusCodes.OK, NewEnquiryResponse(bookingId match {
-                  case x: BookingId => x.id
+              case Good(enquiryId) =>
+                complete(StatusCodes.OK, NewEnquiryResponse(enquiryId match {
+                  case x: EnquiryId => x.id
                   case _            => 0l
                 }))
               case Bad(response) =>
@@ -60,10 +60,10 @@ trait CommandBookingServiceRoute extends BaseServiceRoute with ReadMarshallingSu
         }
       }
     } ~
-    pathPrefix(LongNumber) { bookingId =>
+    pathPrefix(LongNumber) { enquiryId =>
       path("authorize") {
         put {
-          onSuccess(command ? ApproveEnquiry(UserId("user"), BookingId(bookingId))) {
+          onSuccess(command ? ApproveEnquiry(UserId("user"), EnquiryId(enquiryId))) {
             case Good => complete(StatusCodes.OK)
             case Bad(response) =>
               response match {

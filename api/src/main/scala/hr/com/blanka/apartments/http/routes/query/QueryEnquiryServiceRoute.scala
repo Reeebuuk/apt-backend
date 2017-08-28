@@ -18,6 +18,23 @@ trait QueryEnquiryServiceRoute extends BaseServiceRoute with WriteMarshallingSup
   import PlayJsonSupport._
 
   def queryEnquiryRoute(query: ActorRef): Route = pathPrefix("enquiry") {
+    path("booked") {
+      get {
+        parameter("year".as[Int]) { year =>
+          onSuccess(query ? GetAllBookedEnquiries(UserId("user"), year)) {
+            case Good(bd: AllBookedEnquiries) =>
+              complete(StatusCodes.OK, AllBookingsResponse.remap(bd))
+            case Bad(response) =>
+              response match {
+                case One(error) => complete(StatusCodes.BadRequest, ErrorResponse(error.toString))
+                case Many(first, second) =>
+                  complete(StatusCodes.BadRequest, ErrorResponse(Seq(first, second).mkString(", ")))
+                case error => complete(StatusCodes.BadRequest, ErrorResponse(error.toString))
+              }
+          }
+        }
+      }
+    } ~
     path("approved") {
       get {
         parameter("year".as[Int]) { year =>

@@ -30,8 +30,8 @@ class QueryBookingActor() extends Actor with ActorLogging with PredefinedTimeout
     extractShardId = UnitAvailabilityActor.extractShardId
   )
 
-  val allBookingsActor: ActorRef =
-    context.actorOf(AllBookingsActor(), "AllBookingsActor")
+  val allEnquiriesActor: ActorRef =
+    context.actorOf(AllEnquiriesActor(), "AllEnquiriesActor")
 
   override def receive: Receive = {
     case e: GetAvailableUnits =>
@@ -40,9 +40,10 @@ class QueryBookingActor() extends Actor with ActorLogging with PredefinedTimeout
     case e: GetBookedDates =>
       val msgSender = sender()
       bookedDatesActor ? e pipeTo msgSender
-    case e @ (_: GetAllBookings | _: GetAllUnapprovedEnquiries | _: GetAllApprovedEnquiries) =>
+    case e @ (_: GetAllBookedEnquiries | _: GetAllUnapprovedEnquiries |
+        _: GetAllApprovedEnquiries) =>
       val msgSender = sender()
-      allBookingsActor ? e pipeTo msgSender
+      allEnquiriesActor ? e pipeTo msgSender
     case e: StartSync =>
       context.parent ! e
   }

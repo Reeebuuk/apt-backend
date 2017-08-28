@@ -31,16 +31,16 @@ class BookingTest extends BaseIntegrationTest {
     //TODO add injectable mailer instance via guice
     Post("/booking", enquiryRequestEntity) ~> commandBookingRoute(command) ~> check {
       status should be(OK)
-      val bookingId = Unmarshal(response.entity.httpEntity)
+      val enquiryId = Unmarshal(response.entity.httpEntity)
         .to[NewEnquiryResponse]
         .eagerExtract
-        .bookingId
+        .enquiryId
 
-      val depositPaid = generateDepositPaidRequest(bookingId)
+      val depositPaid = generateDepositPaidRequest(enquiryId)
       val depositPaidEntity =
         HttpEntity(MediaTypes.`application/json`, Json.toJson(depositPaid).toString())
 
-      Put(s"/booking/$bookingId/authorize") ~> commandBookingRoute(command) ~> check {
+      Put(s"/booking/$enquiryId/authorize") ~> commandBookingRoute(command) ~> check {
         status should be(OK)
       }
 
@@ -78,10 +78,10 @@ class BookingTest extends BaseIntegrationTest {
         }
       }
 
-      val expectedBookings = generateAllBookingsResponse(List(bookingId))
+      val expectedBookings = generateAllBookingsResponse(List(enquiryId))
 
       eventually {
-        Get(s"/booking?year=${enquiryRequest.dateFrom.getYear}") ~> queryBookingRoute(
+        Get(s"/enquiry/booked?year=${enquiryRequest.dateFrom.getYear}") ~> queryEnquiryRoute(
           query
         ) ~> check {
           status should be(OK)
@@ -91,8 +91,8 @@ class BookingTest extends BaseIntegrationTest {
             .to[AllBookingsResponse]
             .eagerExtract
             .enquiries
-            .map(_.bookingId) should contain theSameElementsAs expectedBookings.enquiries.map(
-            _.bookingId
+            .map(_.enquiryId) should contain theSameElementsAs expectedBookings.enquiries.map(
+            _.enquiryId
           )
         }
       }

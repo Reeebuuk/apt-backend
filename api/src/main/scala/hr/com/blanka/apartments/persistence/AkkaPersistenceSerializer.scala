@@ -4,7 +4,7 @@ import java.nio.charset.StandardCharsets
 
 import akka.serialization.SerializerWithStringManifest
 import hr.com.blanka.apartments.command.booking
-import hr.com.blanka.apartments.common.ValueClasses.{ BookingId, UnitId, UserId }
+import hr.com.blanka.apartments.common.ValueClasses.{ EnquiryId, UnitId, UserId }
 import hr.com.blanka.apartments.command.booking._
 import hr.com.blanka.apartments.command.contact.ContactSaved
 import hr.com.blanka.apartments.command.price.DailyPriceSaved
@@ -16,7 +16,7 @@ class AkkaPersistenceSerializer extends SerializerWithStringManifest {
   val EnquiryReceived        = "EnquiryReceived"
   val EnquiryApproved        = "EnquiryApproved"
   val EnquiryBooked          = "EnquiryBooked"
-  val NewBookingIdAssigned   = "NewBookingIdAssigned"
+  val NewEnquiryIdAssigned   = "NewEnquiryIdAssigned"
   val DailyPriceSaved        = "DailyPriceSaved"
   val ContactSaved           = "ContactSaved"
   val PersistenceOffsetSaved = "PersistenceOffsetSaved"
@@ -34,8 +34,8 @@ class AkkaPersistenceSerializer extends SerializerWithStringManifest {
 
   implicit lazy val userIdFormat: ValueClassJson[String, UserId] =
     ValueClassJson(UserId)(UserId.unapply)
-  implicit lazy val bookingIdFormat: ValueClassJson[Long, BookingId] =
-    ValueClassJson(BookingId)(BookingId.unapply)
+  implicit lazy val enquiryIdFormat: ValueClassJson[Long, EnquiryId] =
+    ValueClassJson(EnquiryId)(EnquiryId.unapply)
   implicit lazy val unitIdFormat: ValueClassJson[Int, UnitId] =
     ValueClassJson(UnitId)(UnitId.unapply)
 
@@ -43,8 +43,8 @@ class AkkaPersistenceSerializer extends SerializerWithStringManifest {
   implicit lazy val sourceFormat: Format[booking.Source.Value]      = EnumUtils.enumFormat(Source)
   implicit lazy val enquiryReceivedFormat: OFormat[EnquiryReceived] = Json.format[EnquiryReceived]
   implicit lazy val enquiryBookedFormat: OFormat[EnquiryBooked]     = Json.format[EnquiryBooked]
-  implicit lazy val newBookingIdAssignedFormat: OFormat[NewBookingIdAssigned] =
-    Json.format[NewBookingIdAssigned]
+  implicit lazy val newEnquiryIdAssignedFormat: OFormat[NewEnquiryIdAssigned] =
+    Json.format[NewEnquiryIdAssigned]
   implicit lazy val dayMonthFormat: OFormat[DayMonth]               = Json.format[DayMonth]
   implicit lazy val dailyPriceSavedFormat: OFormat[DailyPriceSaved] = Json.format[DailyPriceSaved]
   implicit lazy val contactSavedFormat: OFormat[ContactSaved]       = Json.format[ContactSaved]
@@ -60,7 +60,7 @@ class AkkaPersistenceSerializer extends SerializerWithStringManifest {
       case _: EnquiryReceived        => EnquiryReceived
       case _: EnquiryApproved        => EnquiryApproved
       case _: EnquiryBooked          => EnquiryBooked
-      case _: NewBookingIdAssigned   => NewBookingIdAssigned
+      case _: NewEnquiryIdAssigned   => NewEnquiryIdAssigned
       case _: DailyPriceSaved        => DailyPriceSaved
       case _: ContactSaved           => ContactSaved
       case _: PersistenceOffsetSaved => PersistenceOffsetSaved
@@ -71,7 +71,7 @@ class AkkaPersistenceSerializer extends SerializerWithStringManifest {
       case x: EnquiryReceived        => Json.toJson(x).toString().getBytes(UTF_8)
       case x: EnquiryApproved        => Json.toJson(x).toString().getBytes(UTF_8)
       case x: EnquiryBooked          => Json.toJson(x).toString().getBytes(UTF_8)
-      case x: NewBookingIdAssigned   => Json.toJson(x).toString().getBytes(UTF_8)
+      case x: NewEnquiryIdAssigned   => Json.toJson(x).toString().getBytes(UTF_8)
       case x: DailyPriceSaved        => Json.toJson(x).toString().getBytes(UTF_8)
       case x: ContactSaved           => Json.toJson(x).toString().getBytes(UTF_8)
       case x: PersistenceOffsetSaved => Json.toJson(x).toString().getBytes(UTF_8)
@@ -85,8 +85,8 @@ class AkkaPersistenceSerializer extends SerializerWithStringManifest {
         Json.parse(new String(bytes, UTF_8)).as[EnquiryApproved]
       case EnquiryBooked =>
         Json.parse(new String(bytes, UTF_8)).as[EnquiryBooked]
-      case NewBookingIdAssigned =>
-        Json.parse(new String(bytes, UTF_8)).as[NewBookingIdAssigned]
+      case NewEnquiryIdAssigned =>
+        Json.parse(new String(bytes, UTF_8)).as[NewEnquiryIdAssigned]
       case DailyPriceSaved =>
         Json.parse(new String(bytes, UTF_8)).as[DailyPriceSaved]
       case ContactSaved =>
