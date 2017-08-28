@@ -18,7 +18,6 @@ import java.time.{ Instant, ZoneId }
 import de.heikoseeberger.akkahttpplayjson.PlayJsonSupport
 import hr.com.blanka.apartments.common.ValueClasses._
 import org.scalactic._
-import play.api.libs.json.Json
 
 trait QueryBookingServiceRoute extends BaseServiceRoute with WriteMarshallingSupport {
 
@@ -27,12 +26,9 @@ trait QueryBookingServiceRoute extends BaseServiceRoute with WriteMarshallingSup
 
   def queryBookingRoute(query: ActorRef): Route = pathPrefix("booking") {
     pathEndOrSingleSlash {
-      get {
-        onSuccess(query ? GetAllBookings(UserId("user"))) {
+      parameter("year".as[Int]) { year =>
+        onSuccess(query ? GetAllBookings(UserId("user"), year)) {
           case Good(bd: AllBookings) =>
-            val lala = AllBookingsResponse.remap(bd)
-
-            val hoho = Json.toJson[AllBookingsResponse](lala)
             complete(StatusCodes.OK, AllBookingsResponse.remap(bd))
           case Bad(response) =>
             response match {

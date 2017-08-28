@@ -2,7 +2,7 @@ package hr.com.blanka.apartments.http.model
 
 import java.time.{ LocalDate, ZoneOffset }
 
-import hr.com.blanka.apartments.query.booking.{ AllBookings, AvailableUnits, BookedDay, BookedDays }
+import hr.com.blanka.apartments.query.booking._
 import hr.com.blanka.apartments.query.price.PricePerPeriod
 
 case class PriceForRangeResponse(price: BigDecimal)
@@ -101,6 +101,98 @@ object AllBookingsResponse {
             depositAmount = b.bookingDeposit.amount,
             depositCurrency = b.bookingDeposit.currency,
             depositWhen = b.bookingDeposit.when.toInstant(ZoneOffset.UTC).toEpochMilli
+        )
+      )
+    )
+}
+
+case class AllApprovedEnquiriesResponse(enquiries: List[ApprovedEnquiryResponse])
+case class ApprovedEnquiryResponse(bookingId: Long,
+                                   enquiryDttm: Long,
+                                   approvalDttm: Long,
+                                   unitId: Int,
+                                   dateFrom: Long,
+                                   dateTo: Long,
+                                   name: String,
+                                   surname: String,
+                                   phoneNumber: String,
+                                   email: String,
+                                   address: String,
+                                   city: String,
+                                   country: String,
+                                   animals: String,
+                                   noOfPeople: String,
+                                   note: String,
+                                   totalPrice: BigDecimal)
+
+object AllApprovedEnquiriesResponse {
+  def remap(allApprovedEnquiries: AllApprovedEnquiries): AllApprovedEnquiriesResponse =
+    AllApprovedEnquiriesResponse(
+      allApprovedEnquiries.enquiries.map(
+        b =>
+          ApprovedEnquiryResponse(
+            bookingId = b.bookingId.id,
+            enquiryDttm = b.enquiryDttm.toInstant(ZoneOffset.UTC).toEpochMilli,
+            approvalDttm = b.approvedDttm.toInstant(ZoneOffset.UTC).toEpochMilli,
+            unitId = b.enquiry.unitId.id,
+            dateFrom = b.enquiry.dateFrom.atStartOfDay().toInstant(ZoneOffset.UTC).toEpochMilli,
+            dateTo = b.enquiry.dateTo.atStartOfDay().toInstant(ZoneOffset.UTC).toEpochMilli,
+            name = b.enquiry.name,
+            surname = b.enquiry.surname,
+            phoneNumber = b.enquiry.phoneNumber,
+            email = b.enquiry.email,
+            address = b.enquiry.address,
+            city = b.enquiry.city,
+            country = b.enquiry.country,
+            animals = b.enquiry.animals,
+            noOfPeople = b.enquiry.noOfPeople,
+            note = b.enquiry.note,
+            totalPrice = BigDecimal.valueOf(0)
+        )
+      )
+    )
+}
+
+case class AllUnapprovedEnquiriesResponse(enquiries: List[UnapprovedEnquiryResponse])
+case class UnapprovedEnquiryResponse(bookingId: Long,
+                                     enquiryDttm: Long,
+                                     unitId: Int,
+                                     dateFrom: Long,
+                                     dateTo: Long,
+                                     name: String,
+                                     surname: String,
+                                     phoneNumber: String,
+                                     email: String,
+                                     address: String,
+                                     city: String,
+                                     country: String,
+                                     animals: String,
+                                     noOfPeople: String,
+                                     note: String,
+                                     totalPrice: BigDecimal)
+
+object AllUnapprovedEnquiriesResponse {
+  def remap(allUnapprovedEnquiries: AllUnapprovedEnquiries): AllUnapprovedEnquiriesResponse =
+    AllUnapprovedEnquiriesResponse(
+      allUnapprovedEnquiries.enquiries.map(
+        b =>
+          UnapprovedEnquiryResponse(
+            bookingId = b.bookingId.id,
+            enquiryDttm = b.enquiryDttm.toInstant(ZoneOffset.UTC).toEpochMilli,
+            unitId = b.enquiry.unitId.id,
+            dateFrom = b.enquiry.dateFrom.atStartOfDay().toInstant(ZoneOffset.UTC).toEpochMilli,
+            dateTo = b.enquiry.dateTo.atStartOfDay().toInstant(ZoneOffset.UTC).toEpochMilli,
+            name = b.enquiry.name,
+            surname = b.enquiry.surname,
+            phoneNumber = b.enquiry.phoneNumber,
+            email = b.enquiry.email,
+            address = b.enquiry.address,
+            city = b.enquiry.city,
+            country = b.enquiry.country,
+            animals = b.enquiry.animals,
+            noOfPeople = b.enquiry.noOfPeople,
+            note = b.enquiry.note,
+            totalPrice = BigDecimal.valueOf(0)
         )
       )
     )

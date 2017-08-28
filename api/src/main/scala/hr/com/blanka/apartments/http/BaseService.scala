@@ -14,12 +14,14 @@ import hr.com.blanka.apartments.http.routes.command.{
 }
 import hr.com.blanka.apartments.http.routes.query.{
   QueryBookingServiceRoute,
+  QueryEnquiryServiceRoute,
   QueryPriceServiceRoute
 }
 
 trait BaseService
     extends QueryPriceServiceRoute
     with QueryBookingServiceRoute
+    with QueryEnquiryServiceRoute
     with CommandBookingServiceRoute
     with CommandPriceServiceRoute
     with CommandContactServiceRoute {
@@ -44,7 +46,7 @@ trait BaseService
       cors(corsSettings) {
         handleErrors {
           pathPrefix("v1") {
-            queryPriceRoute(query) ~ queryBookingRoute(query) ~
+            queryPriceRoute(query) ~ queryBookingRoute(query) ~ queryEnquiryRoute(query) ~
             commandPriceRoute(command) ~ commandBookingRoute(command) ~ commandContactRoute(command)
           }
         }

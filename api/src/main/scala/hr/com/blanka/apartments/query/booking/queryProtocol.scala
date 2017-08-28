@@ -10,13 +10,17 @@ sealed trait BookingQuery
 
 case class GetBookedDates(userId: UserId, unitId: UnitId)                    extends BookingQuery
 case class GetAvailableUnits(userId: UserId, from: LocalDate, to: LocalDate) extends BookingQuery
-case class GetAllBookings(userId: UserId)                                    extends BookingQuery
+case class GetAllUnapprovedEnquiries(userId: UserId, year: Int)              extends BookingQuery
+case class GetAllApprovedEnquiries(userId: UserId, year: Int)                extends BookingQuery
+case class GetAllBookings(userId: UserId, year: Int)                         extends BookingQuery
 
 sealed trait BookingQueryResponse
 
-case class BookedDays(bookedDays: List[BookedDay]) extends BookingQueryResponse
-case class AvailableUnits(unitIds: Set[UnitId])    extends BookingQueryResponse
-case class AllBookings(bookings: List[Booking])    extends BookingQueryResponse
+case class BookedDays(bookedDays: List[BookedDay])                    extends BookingQueryResponse
+case class AvailableUnits(unitIds: Set[UnitId])                       extends BookingQueryResponse
+case class AllUnapprovedEnquiries(enquiries: List[UnapprovedEnquiry]) extends BookingQueryResponse
+case class AllApprovedEnquiries(enquiries: List[ApprovedEnquiry])     extends BookingQueryResponse
+case class AllBookings(bookings: List[Booking])                       extends BookingQueryResponse
 
 case class BookedUnit(userId: UserId, unitId: UnitId, date: LocalDate, sequenceNumber: Long)
 
@@ -28,3 +32,8 @@ case class Booking(bookingId: BookingId,
                    enquiry: Enquiry,
                    approvedDttm: LocalDateTime,
                    bookingDeposit: BookingDeposit)
+case class UnapprovedEnquiry(bookingId: BookingId, enquiryDttm: LocalDateTime, enquiry: Enquiry)
+case class ApprovedEnquiry(bookingId: BookingId,
+                           enquiryDttm: LocalDateTime,
+                           enquiry: Enquiry,
+                           approvedDttm: LocalDateTime)

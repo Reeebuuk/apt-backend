@@ -19,8 +19,16 @@ trait WriteMarshallingSupport extends ErrorMarshallingSupport {
     Json.writes[PricePerPeriodsResponse]
   implicit val bookingResponseWrites: OWrites[BookingResponse] =
     Json.writes[BookingResponse]
+  implicit val unapprovedEnquiryResponseWrites: OWrites[UnapprovedEnquiryResponse] =
+    Json.writes[UnapprovedEnquiryResponse]
+  implicit val approvedEnquiryResponseWrites: OWrites[ApprovedEnquiryResponse] =
+    Json.writes[ApprovedEnquiryResponse]
   implicit val allBookingsResponsesWrites: OWrites[AllBookingsResponse] =
     Json.writes[AllBookingsResponse]
+  implicit val allUnapprovedEnquiriesWrites: OWrites[AllUnapprovedEnquiriesResponse] =
+    Json.writes[AllUnapprovedEnquiriesResponse]
+  implicit val allApprovedEnquiriesWrites: OWrites[AllApprovedEnquiriesResponse] =
+    Json.writes[AllApprovedEnquiriesResponse]
 }
 
 trait ReadMarshallingSupport extends ErrorMarshallingSupport {

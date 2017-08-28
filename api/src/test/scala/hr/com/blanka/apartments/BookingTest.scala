@@ -81,7 +81,7 @@ class BookingTest extends BaseIntegrationTest {
       val expectedBookings = generateAllBookingsResponse(List(bookingId))
 
       eventually {
-        Get("/booking") ~> queryBookingRoute(
+        Get(s"/booking?year=${enquiryRequest.dateFrom.getYear}") ~> queryBookingRoute(
           query
         ) ~> check {
           status should be(OK)

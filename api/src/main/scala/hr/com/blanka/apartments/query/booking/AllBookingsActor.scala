@@ -31,6 +31,18 @@ object AllBookingsActor {
         case (None, Some(bd))     => Some(Booking(bookingId, enquiryDttm, enquiry, enquiryDttm, bd))
         case _                    => None
       }
+
+    def toApprovedEnquiry: Option[ApprovedEnquiry] =
+      approvedDttm match {
+        case Some(appDttm) => Some(ApprovedEnquiry(bookingId, enquiryDttm, enquiry, appDttm))
+        case None          => None
+      }
+
+    def toUnapprovedEnquiry: Option[UnapprovedEnquiry] =
+      approvedDttm match {
+        case None => Some(UnapprovedEnquiry(bookingId, enquiryDttm, enquiry))
+        case _    => None
+      }
   }
 
 }
@@ -79,8 +91,23 @@ class AllBookingsActor extends Actor with ActorLogging {
                              ))
           )
       }
-    case _: GetAllBookings =>
-      val b = bookings.values.toList.sortBy(_.bookingId.id).flatMap(_.toBooking)
+    case GetAllUnapprovedEnquiries(_, year) =>
+      val b = bookings.values.toList
+        .withFilter(_.enquiry.dateFrom.getYear == year)
+        .flatMap(_.toUnapprovedEnquiry)
+        .sortBy(_.bookingId.id)
+      sender() ! Good(AllUnapprovedEnquiries(b))
+    case GetAllApprovedEnquiries(_, year) =>
+      val b = bookings.values.toList
+        .withFilter(_.enquiry.dateFrom.getYear == year)
+        .flatMap(_.toApprovedEnquiry)
+        .sortBy(_.bookingId.id)
+      sender() ! Good(AllApprovedEnquiries(b))
+    case GetAllBookings(_, year) =>
+      val b = bookings.values.toList
+        .withFilter(_.enquiry.dateFrom.getYear == year)
+        .flatMap(_.toBooking)
+        .sortBy(_.bookingId.id)
       sender() ! Good(AllBookings(b))
   }
 
