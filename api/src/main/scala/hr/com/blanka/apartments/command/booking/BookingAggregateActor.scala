@@ -64,7 +64,7 @@ class BookingAggregateActor extends PersistentActor with ActorLogging {
           dateFrom = from,
           dateTo = to,
           depositAmount = depositAmount,
-          currency = currency
+          depositCurrency = currency
         )
       ) { e =>
         context become done

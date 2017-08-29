@@ -40,13 +40,10 @@ object RequestResponseGenerators extends Constants {
   def generateDepositPaidRequest(
       enquiryId: Long,
       userId: String = USER_ID,
-      depositAmount: BigDecimal = DEPOSIT_AMOUNT,
+      amount: BigDecimal = DEPOSIT_AMOUNT,
       currency: String = CURRENCY
   ): DepositPaidRequest =
-    DepositPaidRequest(userId = userId,
-                       enquiryId = enquiryId,
-                       depositAmount = depositAmount,
-                       currency = currency)
+    DepositPaidRequest(userId = userId, enquiryId = enquiryId, amount = amount, currency = currency)
 
   def generateSavePriceRangeRequest(
       userId: String = USER_ID,

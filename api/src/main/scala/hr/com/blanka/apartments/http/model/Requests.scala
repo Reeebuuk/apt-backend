@@ -43,10 +43,10 @@ case class EnquiryReceivedRequest(userId: String, enquiry: EnquiryRequest) {
 }
 case class DepositPaidRequest(userId: String,
                               enquiryId: Long,
-                              depositAmount: BigDecimal,
+                              amount: BigDecimal,
                               currency: String) {
   def toCommand: DepositPaid =
-    DepositPaid(UserId(userId), EnquiryId(enquiryId), depositAmount, currency)
+    DepositPaid(UserId(userId), EnquiryId(enquiryId), amount, currency)
 }
 
 case class SavePriceRangeRequest(userId: String,

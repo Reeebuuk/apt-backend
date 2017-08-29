@@ -85,7 +85,7 @@ class AllEnquiriesActor extends Actor with ActorLogging {
                                bookingDeposit = Some(
                                  BookingDeposit(
                                    amount = eb.depositAmount,
-                                   currency = eb.currency,
+                                   currency = eb.depositCurrency,
                                    when = eb.timeSaved
                                  )
                                )

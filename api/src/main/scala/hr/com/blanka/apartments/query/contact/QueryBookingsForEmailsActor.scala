@@ -88,7 +88,7 @@ class QueryBookingsForEmailsActor(emailSenderActor: ActorRef, fromEmail: String)
               from = fromEmail,
               to = List(enquiry.email, fromEmail),
               subject = "Apartments Blanka booking deposit received",
-              text = enquiryBooked(enquiry, event.depositAmount, event.currency),
+              text = enquiryBooked(enquiry, event.depositAmount, event.depositCurrency),
               persistenceOffset = offset
           )
         )

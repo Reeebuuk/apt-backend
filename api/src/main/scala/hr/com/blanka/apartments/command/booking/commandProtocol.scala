@@ -22,10 +22,7 @@ case class SaveEnquiryInitiated(userId: UserId, enquiry: Enquiry, source: Source
 case class SaveEnquiry(userId: UserId, enquiryId: EnquiryId, enquiry: Enquiry, source: Source)
     extends KnownBookingCommand
 case class ApproveEnquiry(userId: UserId, enquiryId: EnquiryId) extends KnownBookingCommand
-case class DepositPaid(userId: UserId,
-                       enquiryId: EnquiryId,
-                       depositAmount: BigDecimal,
-                       currency: String)
+case class DepositPaid(userId: UserId, enquiryId: EnquiryId, amount: BigDecimal, currency: String)
     extends KnownBookingCommand
 
 /*
@@ -59,7 +56,7 @@ case class EnquiryBooked(userId: UserId,
                          dateFrom: LocalDate,
                          dateTo: LocalDate,
                          depositAmount: BigDecimal,
-                         currency: String)
+                         depositCurrency: String)
 
 object Source extends Enumeration {
   type Source = Value
