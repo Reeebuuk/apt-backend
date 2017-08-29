@@ -87,6 +87,9 @@ class BookingAggregateActor extends PersistentActor with ActorLogging {
     case EnquiryReceived(_, enquiryId, e, _, source)
         if enquiryId.id.toString == context.self.path.name =>
       context become enquiry(e.unitId, e.dateFrom, e.dateTo)
+    case EnquiryApproved(_, enquiryId, _, unitId, dateFrom, dateTo)
+        if enquiryId.id.toString == context.self.path.name =>
+      context become approvedEnquiry(unitId, dateFrom, dateTo)
     case EnquiryBooked(_, enquiryId, _, _, _, _, _, _)
         if enquiryId.id.toString == context.self.path.name =>
       context become done
