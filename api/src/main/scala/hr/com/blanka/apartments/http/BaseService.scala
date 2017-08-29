@@ -9,8 +9,8 @@ import akka.http.scaladsl.server.{ Directive, ExceptionHandler, RejectionHandler
 import ch.megard.akka.http.cors.scaladsl.CorsDirectives.{ cors, corsRejectionHandler }
 import ch.megard.akka.http.cors.scaladsl.settings.CorsSettings
 import hr.com.blanka.apartments.http.routes.command.{
-  CommandBookingServiceRoute,
   CommandContactServiceRoute,
+  CommandEnquiryServiceRoute,
   CommandPriceServiceRoute
 }
 import hr.com.blanka.apartments.http.routes.query.{
@@ -23,7 +23,7 @@ trait BaseService
     extends QueryPriceServiceRoute
     with QueryBookingServiceRoute
     with QueryEnquiryServiceRoute
-    with CommandBookingServiceRoute
+    with CommandEnquiryServiceRoute
     with CommandPriceServiceRoute
     with CommandContactServiceRoute {
 
@@ -49,7 +49,7 @@ trait BaseService
         handleErrors {
           pathPrefix("v1") {
             queryPriceRoute(query) ~ queryBookingRoute(query) ~ queryEnquiryRoute(query) ~
-            commandPriceRoute(command) ~ commandBookingRoute(command) ~ commandContactRoute(command)
+            commandPriceRoute(command) ~ commandEnquiryRoute(command) ~ commandContactRoute(command)
           }
         }
       }

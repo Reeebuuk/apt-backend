@@ -12,12 +12,12 @@ import hr.com.blanka.apartments.http.routes.BaseServiceRoute
 import hr.com.blanka.apartments.utils.ReadMarshallingSupport
 import org.scalactic._
 
-trait CommandBookingServiceRoute extends BaseServiceRoute with ReadMarshallingSupport {
+trait CommandEnquiryServiceRoute extends BaseServiceRoute with ReadMarshallingSupport {
 
   import Directives._
   import PlayJsonSupport._
 
-  def commandBookingRoute(command: ActorRef): Route = pathPrefix("booking") {
+  def commandEnquiryRoute(command: ActorRef): Route = pathPrefix("enquiry") {
     pathEndOrSingleSlash {
       post {
         decodeRequest {

@@ -29,7 +29,7 @@ class BookingTest extends BaseIntegrationTest {
       HttpEntity(MediaTypes.`application/json`, Json.toJson(enquiryRequest).toString())
 
     //TODO add injectable mailer instance via guice
-    Post("/booking", enquiryRequestEntity) ~> commandBookingRoute(command) ~> check {
+    Post("/enquiry", enquiryRequestEntity) ~> commandEnquiryRoute(command) ~> check {
       status should be(OK)
       val enquiryId = Unmarshal(response.entity.httpEntity)
         .to[NewEnquiryResponse]
@@ -40,11 +40,11 @@ class BookingTest extends BaseIntegrationTest {
       val depositPaidEntity =
         HttpEntity(MediaTypes.`application/json`, Json.toJson(depositPaid).toString())
 
-      Put(s"/booking/$enquiryId/authorize") ~> commandBookingRoute(command) ~> check {
+      Put(s"/enquiry/$enquiryId/authorize") ~> commandEnquiryRoute(command) ~> check {
         status should be(OK)
       }
 
-      Post("/booking/depositPaid", depositPaidEntity) ~> commandBookingRoute(command) ~> check {
+      Post("/enquiry/depositPaid", depositPaidEntity) ~> commandEnquiryRoute(command) ~> check {
         status should be(OK)
       }
 
