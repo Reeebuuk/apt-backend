@@ -34,9 +34,10 @@ object AllEnquiriesActor {
       }
 
     def toApprovedEnquiry: Option[ApprovedEnquiry] =
-      approvedDttm match {
-        case Some(appDttm) => Some(ApprovedEnquiry(enquiryId, enquiryDttm, enquiry, appDttm))
-        case None          => None
+      (approvedDttm, bookingDeposit) match {
+        case (Some(appDttm), None) =>
+          Some(ApprovedEnquiry(enquiryId, enquiryDttm, enquiry, appDttm))
+        case _ => None
       }
 
     def toUnapprovedEnquiry: Option[UnapprovedEnquiry] =
