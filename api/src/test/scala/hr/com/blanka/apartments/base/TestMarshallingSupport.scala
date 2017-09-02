@@ -6,8 +6,6 @@ import play.api.libs.json.{ Format, Json, OWrites, Reads }
 trait TestMarshallingSupport {
   implicit val enquiryRequestWrites: OWrites[EnquiryRequest] =
     Json.writes[EnquiryRequest]
-  implicit val enquiryReceivedRequestWrites: OWrites[EnquiryReceivedRequest] =
-    Json.writes[EnquiryReceivedRequest]
   implicit val depositPaidRequestWrites: OWrites[DepositPaidRequest] =
     Json.writes[DepositPaidRequest]
   implicit val savePriceRangeRequestWrites: OWrites[SavePriceRangeRequest] =

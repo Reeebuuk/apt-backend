@@ -19,49 +19,41 @@ case class EnquiryRequest(unitId: Int,
                           country: String,
                           animals: String,
                           noOfPeople: String,
-                          note: String)
-
-case class EnquiryReceivedRequest(userId: String, enquiry: EnquiryRequest) {
-  def toCommand: SaveEnquiryInitiated =
+                          note: String) {
+  def toCommand(userId: UserId): SaveEnquiryInitiated =
     SaveEnquiryInitiated(
-      UserId(userId),
+      userId,
       Enquiry(
-        UnitId(enquiry.unitId),
-        enquiry.dateFrom,
-        enquiry.dateTo,
-        enquiry.name,
-        enquiry.surname,
-        enquiry.phoneNumber,
-        enquiry.email,
-        enquiry.country,
-        enquiry.animals,
-        enquiry.noOfPeople,
-        enquiry.note
+        UnitId(unitId),
+        dateFrom,
+        dateTo,
+        name,
+        surname,
+        phoneNumber,
+        email,
+        country,
+        animals,
+        noOfPeople,
+        note
       ),
       Source.Website
     )
 }
-case class DepositPaidRequest(userId: String,
-                              enquiryId: Long,
-                              amount: BigDecimal,
-                              currency: String) {
-  def toCommand: DepositPaid =
-    DepositPaid(UserId(userId), EnquiryId(enquiryId), amount, currency)
+
+case class DepositPaidRequest(enquiryId: Long, amount: BigDecimal, currency: String) {
+  def toCommand(userId: UserId): DepositPaid =
+    DepositPaid(userId, EnquiryId(enquiryId), amount, currency)
 }
 
-case class SavePriceRangeRequest(userId: String,
-                                 unitId: Int,
-                                 from: LocalDate,
-                                 to: LocalDate,
-                                 price: BigDecimal) {
-  def toCommand: SavePriceRange =
-    SavePriceRange(UserId(userId), UnitId(unitId), from, to, price)
+case class SavePriceRangeRequest(unitId: Int, from: LocalDate, to: LocalDate, price: BigDecimal) {
+  def toCommand(userId: UserId): SavePriceRange =
+    SavePriceRange(userId, UnitId(unitId), from, to, price)
 }
 
-case class LookupPriceForRangeRequest(userId: String, unitId: Int, from: LocalDate, to: LocalDate) {
-  def toQuery: LookupPriceForRange =
+case class LookupPriceForRangeRequest(unitId: Int, from: LocalDate, to: LocalDate) {
+  def toQuery(userId: UserId): LookupPriceForRange =
     LookupPriceForRange(enquiryId = None,
-                        userId = UserId(userId),
+                        userId = userId,
                         unitId = UnitId(unitId),
                         from = from,
                         to = to,

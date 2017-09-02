@@ -41,9 +41,7 @@ trait ReadMarshallingSupport extends ErrorMarshallingSupport {
     Json.reads[LookupPriceForRangeRequest]
   implicit val savePriceRangeDtoReads: Reads[SavePriceRangeRequest] =
     Json.reads[SavePriceRangeRequest]
-  implicit val enquiryReads: Reads[EnquiryRequest] = Json.reads[EnquiryRequest]
-  implicit val enquiryReceivedRequestReads: Reads[EnquiryReceivedRequest] =
-    Json.reads[EnquiryReceivedRequest]
+  implicit val enquiryReads: Reads[EnquiryRequest]         = Json.reads[EnquiryRequest]
   implicit val depositPaidReads: Reads[DepositPaidRequest] = Json.reads[DepositPaidRequest]
   implicit val contactRequestReads: Reads[ContactRequest]  = Json.reads[ContactRequest]
 

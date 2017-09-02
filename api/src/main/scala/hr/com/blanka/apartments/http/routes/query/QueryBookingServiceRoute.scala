@@ -25,37 +25,41 @@ trait QueryBookingServiceRoute extends BaseServiceRoute with WriteMarshallingSup
 
   def queryBookingRoute(query: ActorRef): Route = pathPrefix("booking") {
     path("bookedDates") {
-      parameter("unitId".as[Int]) { unitId =>
-        onSuccess(query ? GetBookedDates(UserId("user"), UnitId(unitId))) {
-          case Good(bd: BookedDays) => complete(StatusCodes.OK, BookedDatesResponse.remap(bd))
-          case Bad(response) =>
-            response match {
-              case One(error) => complete(StatusCodes.BadRequest, ErrorResponse(error.toString))
-              case Many(first, second) =>
-                complete(StatusCodes.BadRequest, ErrorResponse(Seq(first, second).mkString(", ")))
-              case error => complete(StatusCodes.BadRequest, ErrorResponse(error.toString))
-            }
+      extractUser { userId =>
+        parameter("unitId".as[Int]) { unitId =>
+          onSuccess(query ? GetBookedDates(userId, UnitId(unitId))) {
+            case Good(bd: BookedDays) => complete(StatusCodes.OK, BookedDatesResponse.remap(bd))
+            case Bad(response) =>
+              response match {
+                case One(error) => complete(StatusCodes.BadRequest, ErrorResponse(error.toString))
+                case Many(first, second) =>
+                  complete(StatusCodes.BadRequest, ErrorResponse(Seq(first, second).mkString(", ")))
+                case error => complete(StatusCodes.BadRequest, ErrorResponse(error.toString))
+              }
+          }
         }
       }
     } ~
     path("available") {
-      parameters('from.as[Long], 'to.as[Long]) { (from, to) =>
-        onSuccess(
-          query ? GetAvailableUnits(
-            userId = UserId("user"),
-            from = Instant.ofEpochMilli(from).atZone(ZoneId.of("UTC")).toLocalDate,
-            to = Instant.ofEpochMilli(to).atZone(ZoneId.of("UTC")).toLocalDate
-          )
-        ) {
-          case Good(aa: AvailableUnits) =>
-            complete(StatusCodes.OK, AvailableUnitsResponse.remap(aa))
-          case Bad(response) =>
-            response match {
-              case One(error) => complete(StatusCodes.BadRequest, ErrorResponse(error.toString))
-              case Many(first, second) =>
-                complete(StatusCodes.BadRequest, ErrorResponse(Seq(first, second).mkString(", ")))
-              case error => complete(StatusCodes.BadRequest, ErrorResponse(error.toString))
-            }
+      extractUser { userId =>
+        parameters('from.as[Long], 'to.as[Long]) { (from, to) =>
+          onSuccess(
+            query ? GetAvailableUnits(
+              userId = userId,
+              from = Instant.ofEpochMilli(from).atZone(ZoneId.of("UTC")).toLocalDate,
+              to = Instant.ofEpochMilli(to).atZone(ZoneId.of("UTC")).toLocalDate
+            )
+          ) {
+            case Good(aa: AvailableUnits) =>
+              complete(StatusCodes.OK, AvailableUnitsResponse.remap(aa))
+            case Bad(response) =>
+              response match {
+                case One(error) => complete(StatusCodes.BadRequest, ErrorResponse(error.toString))
+                case Many(first, second) =>
+                  complete(StatusCodes.BadRequest, ErrorResponse(Seq(first, second).mkString(", ")))
+                case error => complete(StatusCodes.BadRequest, ErrorResponse(error.toString))
+              }
+          }
         }
       }
     }

@@ -6,12 +6,6 @@ import hr.com.blanka.apartments.http.model._
 
 object RequestResponseGenerators extends Constants {
 
-  def generateEnquiryReceivedRequest(
-      userId: String = USER_ID,
-      enquiryRequest: EnquiryRequest = generateEnquiryRequest()
-  ): EnquiryReceivedRequest =
-    EnquiryReceivedRequest(userId = userId, enquiry = enquiryRequest)
-
   def generateEnquiryRequest(unitId: Int = UNIT_ID,
                              fromDate: LocalDate = DATE_FROM,
                              toDate: LocalDate = DATE_TO,
@@ -39,21 +33,18 @@ object RequestResponseGenerators extends Constants {
 
   def generateDepositPaidRequest(
       enquiryId: Long,
-      userId: String = USER_ID,
       amount: BigDecimal = DEPOSIT_AMOUNT,
       currency: String = CURRENCY
   ): DepositPaidRequest =
-    DepositPaidRequest(userId = userId, enquiryId = enquiryId, amount = amount, currency = currency)
+    DepositPaidRequest(enquiryId = enquiryId, amount = amount, currency = currency)
 
   def generateSavePriceRangeRequest(
-      userId: String = USER_ID,
       unitId: Int = UNIT_ID,
       from: LocalDate = DATE_FROM,
       to: LocalDate = DATE_TO,
       price: BigDecimal = DAY_PRICE
   ): SavePriceRangeRequest =
     SavePriceRangeRequest(
-      userId = userId,
       unitId = unitId,
       from = from,
       to = to,
@@ -61,13 +52,11 @@ object RequestResponseGenerators extends Constants {
     )
 
   def generateLookupPriceForRangeRequest(
-      userId: String = USER_ID,
       unitId: Int = UNIT_ID,
       from: LocalDate = DATE_FROM,
       to: LocalDate = DATE_TO
   ): LookupPriceForRangeRequest =
     LookupPriceForRangeRequest(
-      userId = userId,
       unitId = unitId,
       from = from,
       to = to

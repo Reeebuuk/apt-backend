@@ -7,8 +7,9 @@ import hr.com.blanka.apartments.utils.PredefinedTimeout
 import scala.concurrent.ExecutionContext
 import scala.language.postfixOps
 
-trait BaseServiceRoute extends PredefinedTimeout {
+trait BaseServiceRoute extends PredefinedTimeout with UserDirectives {
   protected implicit def executor: ExecutionContext
   protected implicit def materializer: ActorMaterializer
   protected def log: LoggingAdapter
+
 }
