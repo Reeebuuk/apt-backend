@@ -22,7 +22,7 @@ trait CommandEnquiryServiceRoute extends BaseServiceRoute with ReadMarshallingSu
       post {
         decodeRequest {
           entity(as[EnquiryRequest]) { booking =>
-            onSuccess(command ? EnquiryReceivedRequest("userId", booking).toCommand) {
+            onSuccess(command ? EnquiryReceivedRequest("user", booking).toCommand) {
               case Good(enquiryId) =>
                 complete(StatusCodes.OK, NewEnquiryResponse(enquiryId match {
                   case x: EnquiryId => x.id

@@ -2,7 +2,7 @@ package hr.com.blanka.apartments.http.model
 
 import hr.com.blanka.apartments.command.booking.{ DepositPaid, SaveEnquiryInitiated, Source }
 import hr.com.blanka.apartments.command.price.SavePriceRange
-import java.time.LocalDate
+import java.time.{ LocalDate, LocalDateTime }
 
 import hr.com.blanka.apartments.common.ValueClasses.{ EnquiryId, UnitId, UserId }
 import hr.com.blanka.apartments.command.contact.SaveContact
@@ -60,7 +60,12 @@ case class SavePriceRangeRequest(userId: String,
 
 case class LookupPriceForRangeRequest(userId: String, unitId: Int, from: LocalDate, to: LocalDate) {
   def toQuery: LookupPriceForRange =
-    LookupPriceForRange(UserId(userId), UnitId(unitId), from, to)
+    LookupPriceForRange(enquiryId = None,
+                        userId = UserId(userId),
+                        unitId = UnitId(unitId),
+                        from = from,
+                        to = to,
+                        validOn = LocalDateTime.now())
 }
 
 case class ContactRequest(name: String, email: String, text: String) {

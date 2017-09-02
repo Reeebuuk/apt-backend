@@ -8,7 +8,11 @@ import de.heikoseeberger.akkahttpplayjson.PlayJsonSupport
 import hr.com.blanka.apartments.common.ValueClasses.UserId
 import hr.com.blanka.apartments.http.model._
 import hr.com.blanka.apartments.http.routes.BaseServiceRoute
-import hr.com.blanka.apartments.query.price.{ LegacyLookupAllPrices, PricePerPeriod }
+import hr.com.blanka.apartments.query.price.{
+  LegacyLookupAllPrices,
+  PriceForRangeCalculated,
+  PricePerPeriod
+}
 import hr.com.blanka.apartments.utils.{ ReadMarshallingSupport, WriteMarshallingSupport }
 import org.scalactic._
 
@@ -40,8 +44,8 @@ trait QueryPriceServiceRoute
         decodeRequest {
           entity(as[LookupPriceForRangeRequest]) { lookupPriceForRange =>
             onSuccess(query ? lookupPriceForRange.toQuery) {
-              case Good(result) =>
-                complete(StatusCodes.OK, PriceForRangeResponse(result.asInstanceOf[BigDecimal]))
+              case Good(PriceForRangeCalculated(_, price)) =>
+                complete(StatusCodes.OK, PriceForRangeResponse(price))
               case Bad(response) =>
                 response match {
                   case One(error) => complete(StatusCodes.BadRequest, ErrorResponse(error.toString))

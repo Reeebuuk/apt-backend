@@ -3,8 +3,8 @@ package hr.com.blanka.apartments.query.price
 import akka.actor.SupervisorStrategy.Restart
 import akka.actor._
 import akka.cluster.sharding.{ ClusterSharding, ClusterShardingSettings }
-import akka.pattern.{ ask, pipe }
-import hr.com.blanka.apartments.command.price.DailyPriceSaved
+import akka.pattern.ask
+import hr.com.blanka.apartments.command.price.PriceAggregateActor
 import hr.com.blanka.apartments.common.DayMonth
 import hr.com.blanka.apartments.query.booking.StartSync
 import hr.com.blanka.apartments.utils.PredefinedTimeout
@@ -27,7 +27,8 @@ object QueryPriceRangeActor extends PredefinedTimeout {
     iterateThroughDaysExcludingLast(lookupPriceForRange.from, lookupPriceForRange.to).map { date =>
       dailyPriceAggregateActor ? LookupPriceForDay(lookupPriceForRange.userId,
                                                    lookupPriceForRange.unitId,
-                                                   DayMonth(date))
+                                                   DayMonth(date),
+                                                   lookupPriceForRange.validOn)
     }
 }
 
@@ -43,10 +44,9 @@ class QueryPriceRangeActor extends Actor with PredefinedTimeout {
     extractShardId = DailyPriceAggregateActor.extractShardId
   )
 
+  context.parent ! StartSync(dailyPriceAggregateActor, PriceAggregateActor.persistenceId, 0)
+
   override def receive: Receive = {
-    case e: DailyPriceSaved =>
-      val msgSender = sender()
-      dailyPriceAggregateActor ? e pipeTo msgSender
     case lookupPriceForRange: LookupPriceForRange =>
       val msgSender = sender()
       val newlySentDailyCalculationMessages = sendMessagesForSingleDayCalculations(
@@ -56,14 +56,14 @@ class QueryPriceRangeActor extends Actor with PredefinedTimeout {
 
       Future.sequence(newlySentDailyCalculationMessages).map { result =>
         msgSender ! Good(
-          result.foldLeft(BigDecimal(0))(
-            (sum, next) => next.asInstanceOf[PriceDayFetched].price + sum
+          PriceForRangeCalculated(
+            enquiryId = lookupPriceForRange.enquiryId,
+            price = result.foldLeft(BigDecimal(0))(
+              (sum, next) => next.asInstanceOf[PriceDayFetched].price + sum
+            )
           )
         )
       }
-    case e: StartSync =>
-      context.parent ! e
-
   }
 
   override val supervisorStrategy: OneForOneStrategy =

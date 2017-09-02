@@ -4,7 +4,7 @@ import java.time.LocalDate
 
 trait Constants {
 
-  val USER_ID                 = "userId"
+  val USER_ID                 = "user"
   val UNIT_ID                 = 1
   val DATE_FROM: LocalDate    = LocalDate.now().withMonth(11).withDayOfMonth(5)
   val DATE_TO: LocalDate      = LocalDate.now().withMonth(11).withDayOfMonth(12)

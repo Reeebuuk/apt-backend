@@ -22,7 +22,7 @@ case class AllUnapprovedEnquiries(enquiries: List[UnapprovedEnquiry]) extends Bo
 case class AllApprovedEnquiries(enquiries: List[ApprovedEnquiry])     extends BookingQueryResponse
 case class AllBookedEnquiries(bookings: List[BookedEnquiry])          extends BookingQueryResponse
 
-case class BookedUnit(userId: UserId, unitId: UnitId, date: LocalDate, sequenceNumber: Long)
+case class BookedUnit(userId: UserId, unitId: UnitId, date: LocalDate)
 
 case class BookedDay(day: LocalDate, firstDay: Boolean, lastDay: Boolean)
 case class StartSync(actor: ActorRef, persistenceId: String, initialIndex: Long)
@@ -30,10 +30,15 @@ case class BookingDeposit(amount: BigDecimal, currency: String, when: LocalDateT
 case class BookedEnquiry(enquiryId: EnquiryId,
                          enquiryDttm: LocalDateTime,
                          enquiry: Enquiry,
+                         totalAmount: BigDecimal,
                          approvedDttm: LocalDateTime,
                          bookingDeposit: BookingDeposit)
-case class UnapprovedEnquiry(enquiryId: EnquiryId, enquiryDttm: LocalDateTime, enquiry: Enquiry)
+case class UnapprovedEnquiry(enquiryId: EnquiryId,
+                             enquiryDttm: LocalDateTime,
+                             enquiry: Enquiry,
+                             totalAmount: BigDecimal)
 case class ApprovedEnquiry(enquiryId: EnquiryId,
                            enquiryDttm: LocalDateTime,
                            enquiry: Enquiry,
+                           totalAmount: BigDecimal,
                            approvedDttm: LocalDateTime)

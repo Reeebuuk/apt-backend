@@ -3,7 +3,6 @@ package hr.com.blanka.apartments.query.booking
 import java.time.LocalDateTime
 
 import akka.actor.{ Actor, ActorLogging, Props }
-import hr.com.blanka.apartments.common.ValueClasses.EnquiryId
 import hr.com.blanka.apartments.command.booking.{
   BookingAggregateActor,
   EnquiryApproved,
@@ -11,8 +10,10 @@ import hr.com.blanka.apartments.command.booking.{
   EnquiryReceived
 }
 import hr.com.blanka.apartments.common.Enquiry
+import hr.com.blanka.apartments.common.ValueClasses.EnquiryId
 import hr.com.blanka.apartments.query.PersistenceQueryEvent
 import hr.com.blanka.apartments.query.booking.AllEnquiriesActor.InternalBooking
+import hr.com.blanka.apartments.query.price.{ LookupPriceForRange, PriceForRangeCalculated }
 import org.scalactic.Good
 
 import scala.language.postfixOps
@@ -23,27 +24,27 @@ object AllEnquiriesActor {
   case class InternalBooking(enquiryId: EnquiryId,
                              enquiryDttm: LocalDateTime,
                              enquiry: Enquiry,
+                             totalAmount: Option[BigDecimal],
                              approvedDttm: Option[LocalDateTime] = None,
                              bookingDeposit: Option[BookingDeposit] = None) {
     def toBooking: Option[BookedEnquiry] =
-      (approvedDttm, bookingDeposit) match {
-        case (Some(ad), Some(bd)) => Some(BookedEnquiry(enquiryId, enquiryDttm, enquiry, ad, bd))
-        case (None, Some(bd)) =>
-          Some(BookedEnquiry(enquiryId, enquiryDttm, enquiry, enquiryDttm, bd))
+      (approvedDttm, bookingDeposit, totalAmount) match {
+        case (Some(ad), Some(bd), Some(ta)) =>
+          Some(BookedEnquiry(enquiryId, enquiryDttm, enquiry, ta, ad, bd))
         case _ => None
       }
 
     def toApprovedEnquiry: Option[ApprovedEnquiry] =
-      (approvedDttm, bookingDeposit) match {
-        case (Some(appDttm), None) =>
-          Some(ApprovedEnquiry(enquiryId, enquiryDttm, enquiry, appDttm))
+      (approvedDttm, bookingDeposit, totalAmount) match {
+        case (Some(appDttm), None, Some(ta)) =>
+          Some(ApprovedEnquiry(enquiryId, enquiryDttm, enquiry, ta, appDttm))
         case _ => None
       }
 
     def toUnapprovedEnquiry: Option[UnapprovedEnquiry] =
-      approvedDttm match {
-        case None => Some(UnapprovedEnquiry(enquiryId, enquiryDttm, enquiry))
-        case _    => None
+      (approvedDttm, totalAmount) match {
+        case (None, Some(ta)) => Some(UnapprovedEnquiry(enquiryId, enquiryDttm, enquiry, ta))
+        case _                => None
       }
   }
 
@@ -54,13 +55,32 @@ class AllEnquiriesActor extends Actor with ActorLogging {
   override def receive: Receive = init(Map.empty)
 
   def init(bookings: Map[EnquiryId, InternalBooking]): Receive = {
+    case PriceForRangeCalculated(enquiryId, price) =>
+      enquiryId.foreach { id =>
+        bookings.get(id) match {
+          case None =>
+            log.info(s"PriceForRangeCalculated received without having an enquiry ${id.id}")
+          case Some(booking) =>
+            log.info(price.toString())
+            context become init(
+              bookings.updated(id, booking.copy(totalAmount = Some(price)))
+            )
+        }
+      }
     case PersistenceQueryEvent(_, es: EnquiryReceived) =>
+      context.parent ! LookupPriceForRange(Some(es.enquiryId),
+                                           es.userId,
+                                           es.enquiry.unitId,
+                                           es.enquiry.dateFrom,
+                                           es.enquiry.dateTo,
+                                           es.timeSaved)
       context become init(
         bookings.updated(
           es.enquiryId,
           InternalBooking(enquiryId = es.enquiryId,
                           enquiryDttm = es.timeSaved,
-                          enquiry = es.enquiry)
+                          enquiry = es.enquiry,
+                          totalAmount = None)
         )
       )
     case PersistenceQueryEvent(_, es: EnquiryApproved) =>
@@ -112,10 +132,4 @@ class AllEnquiriesActor extends Actor with ActorLogging {
         .sortBy(_.enquiryId.id)
       sender() ! Good(AllBookedEnquiries(b))
   }
-
-  override def preStart(): Unit = {
-    context.parent ! StartSync(self, BookingAggregateActor.persistenceId, 0)
-    super.preStart()
-  }
-
 }

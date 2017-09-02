@@ -24,6 +24,14 @@ class BookingTest extends BaseIntegrationTest {
 
   "Booking service should save booking and update availability" in {
 
+    val firstPrice = generateSavePriceRangeRequest(price = BigDecimal(1)) //5.11-12.11
+    val firstRequestEntity =
+      HttpEntity(MediaTypes.`application/json`, Json.toJson(firstPrice).toString())
+
+    Post("/price", firstRequestEntity) ~> commandPriceRoute(command) ~> check {
+      status should be(OK)
+    }
+
     val enquiryRequest = generateEnquiryRequest()
     val enquiryRequestEntity =
       HttpEntity(MediaTypes.`application/json`, Json.toJson(enquiryRequest).toString())
@@ -87,12 +95,16 @@ class BookingTest extends BaseIntegrationTest {
           status should be(OK)
 
           //TODO add injectable time provider to fix equality
-          Unmarshal(response.entity.httpEntity)
+          val res: List[BookingResponse] = Unmarshal(response.entity.httpEntity)
             .to[AllBookingsResponse]
             .eagerExtract
             .enquiries
-            .map(_.enquiryId) should contain theSameElementsAs expectedBookings.enquiries.map(
+
+          res.map(_.enquiryId) should contain theSameElementsAs expectedBookings.enquiries.map(
             _.enquiryId
+          )
+          res.map(_.totalPrice) should contain theSameElementsAs expectedBookings.enquiries.map(
+            _.totalPrice
           )
         }
       }

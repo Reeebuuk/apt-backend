@@ -103,7 +103,7 @@ object AllBookingsResponse {
             enquiryDttm = b.enquiryDttm.toInstant(ZoneOffset.UTC).toEpochMilli,
             approvalDttm = b.approvedDttm.toInstant(ZoneOffset.UTC).toEpochMilli,
             enquiry = EnquiryResponse.remap(b.enquiry),
-            totalPrice = BigDecimal(0),
+            totalPrice = b.totalAmount,
             depositAmount = b.bookingDeposit.amount,
             depositCurrency = b.bookingDeposit.currency,
             depositWhen = b.bookingDeposit.when.toInstant(ZoneOffset.UTC).toEpochMilli
@@ -129,7 +129,7 @@ object AllApprovedEnquiriesResponse {
             enquiryDttm = b.enquiryDttm.toInstant(ZoneOffset.UTC).toEpochMilli,
             approvalDttm = b.approvedDttm.toInstant(ZoneOffset.UTC).toEpochMilli,
             enquiry = EnquiryResponse.remap(b.enquiry),
-            totalPrice = BigDecimal(0)
+            totalPrice = b.totalAmount
         )
       )
     )
@@ -150,7 +150,7 @@ object AllUnapprovedEnquiriesResponse {
             enquiryId = b.enquiryId.id,
             enquiryDttm = b.enquiryDttm.toInstant(ZoneOffset.UTC).toEpochMilli,
             enquiry = EnquiryResponse.remap(b.enquiry),
-            totalPrice = BigDecimal(0)
+            totalPrice = b.totalAmount
         )
       )
     )

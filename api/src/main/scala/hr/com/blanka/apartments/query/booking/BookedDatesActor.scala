@@ -2,19 +2,20 @@ package hr.com.blanka.apartments.query.booking
 
 import java.time.LocalDate
 
-import akka.actor.{ Actor, ActorLogging, ActorRef, Props }
+import akka.actor.{ Actor, ActorLogging, Props }
 import akka.cluster.sharding.ShardRegion
-import hr.com.blanka.apartments.command.booking.{ BookingAggregateActor, EnquiryBooked }
+import hr.com.blanka.apartments.command.booking.EnquiryBooked
 import hr.com.blanka.apartments.common.ValueClasses.UnitId
 import hr.com.blanka.apartments.query.PersistenceQueryEvent
 import hr.com.blanka.apartments.utils.DateHelperMethods
 import org.scalactic.Good
 
 object BookedDatesActor {
-  def apply(parent: ActorRef) = Props(classOf[BookedDatesActor], parent)
+  def apply() = Props(classOf[BookedDatesActor])
 
   val extractEntityId: ShardRegion.ExtractEntityId = {
-    case e: GetBookedDates => (e.userId.id.toString, e)
+    case PersistenceQueryEvent(_, e: EnquiryBooked) => (e.userId.id.toString, e)
+    case e: GetBookedDates                          => (e.userId.id.toString, e)
   }
 
   val extractShardId: ShardRegion.ExtractShardId = _ => "two"
@@ -49,14 +50,14 @@ object BookedDatesActor {
 
 }
 
-class BookedDatesActor(parent: ActorRef) extends Actor with ActorLogging {
+class BookedDatesActor extends Actor with ActorLogging {
 
   var bookedDatesPerUnit: Map[UnitId, List[BookedDay]] = Map.empty
 
   import BookedDatesActor._
 
   override def receive: Receive = {
-    case PersistenceQueryEvent(_, e: EnquiryBooked) =>
+    case e: EnquiryBooked =>
       val currentlyBookedDates: List[BookedDay] =
         bookedDatesPerUnit.getOrElse(e.unitId, List.empty)
 
@@ -67,11 +68,6 @@ class BookedDatesActor(parent: ActorRef) extends Actor with ActorLogging {
       ))
     case GetBookedDates(_, unitId) =>
       sender() ! Good(BookedDays(bookedDatesPerUnit.getOrElse(unitId, List.empty)))
-  }
-
-  override def preStart(): Unit = {
-    parent ! StartSync(self, BookingAggregateActor.persistenceId, 0)
-    super.preStart()
   }
 
 }

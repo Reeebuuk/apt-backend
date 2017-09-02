@@ -12,6 +12,7 @@ object IntegrationConf {
     ConfigFactory.parseString(s"""
  |akka {
  |  loglevel = INFO
+ |  test.timefactor = 2
  |}
  |http {
  |  interface = "0.0.0.0"

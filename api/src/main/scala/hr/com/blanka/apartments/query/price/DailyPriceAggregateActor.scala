@@ -1,18 +1,22 @@
 package hr.com.blanka.apartments.query.price
 
-import akka.actor.{ Actor, ActorRef, Props }
+import akka.actor.{ Actor, ActorLogging, ActorRef, Props }
 import akka.cluster.sharding.ShardRegion
-import hr.com.blanka.apartments.command.price.{ DailyPriceSaved, PriceAggregateActor }
+import hr.com.blanka.apartments.command.price.DailyPriceSaved
 import hr.com.blanka.apartments.common.DayMonth
 import hr.com.blanka.apartments.query.PersistenceQueryEvent
-import hr.com.blanka.apartments.query.booking.StartSync
 
 object DailyPriceAggregateActor {
   def apply(parent: ActorRef) = Props(classOf[DailyPriceAggregateActor], parent)
 
   val extractEntityId: ShardRegion.ExtractEntityId = {
-    case e @ DailyPriceSaved(userId, unitId, _, _, _) => (s"${userId.id}${unitId.id}", e)
-    case e @ LookupPriceForDay(userId, unitId, _)     => (s"${userId.id}${unitId.id}", e)
+    case PersistenceQueryEvent(_, e: DailyPriceSaved) => {
+      (s"${e.userId.id}${e.unitId.id}", e)
+    }
+    case e @ LookupPriceForDay(userId, unitId, _, _) => {
+      val lala = userId
+      (s"${userId.id}${unitId.id}", e)
+    }
   }
 
   val extractShardId: ShardRegion.ExtractShardId = _ => "one"
@@ -38,22 +42,17 @@ object DailyPriceAggregateActor {
     }
 }
 
-class DailyPriceAggregateActor(parent: ActorRef) extends Actor {
+class DailyPriceAggregateActor(parent: ActorRef) extends Actor with ActorLogging {
 
   import DailyPriceAggregateActor._
 
   override def receive: Receive = active(Map.empty)
 
   def active(currentDailyPrices: Map[DayMonth, List[BigDecimal]]): Receive = {
-    case PersistenceQueryEvent(_, e: DailyPriceSaved) =>
+    case e: DailyPriceSaved =>
       context become active(updateState(e, currentDailyPrices))
 
-    case LookupPriceForDay(_, _, day) =>
+    case LookupPriceForDay(_, _, day, _) =>
       sender() ! PriceDayFetched(fetchLatestPriceForDay(currentDailyPrices, day))
-  }
-
-  override def preStart(): Unit = {
-    parent ! StartSync(self, PriceAggregateActor.persistenceId, 0)
-    super.preStart()
   }
 }

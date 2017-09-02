@@ -105,7 +105,7 @@ object RequestResponseGenerators extends Constants {
       animals: String = ANIMALS,
       noOfPeople: String = NO_OF_PEOPLE,
       note: String = NOTE,
-      totalPrice: BigDecimal = BigDecimal(0),
+      totalPrice: BigDecimal = BigDecimal(7),
       depositAmount: BigDecimal = DEPOSIT_AMOUNT,
       depositCurrency: String = CURRENCY,
       depositWhen: LocalDate = DEPOSIT_PAID
