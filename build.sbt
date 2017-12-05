@@ -1,4 +1,4 @@
-scalaVersion := "2.12.3"
+scalaVersion := "2.12.4"
 
 resolvers += Resolver.bintrayRepo("hseeberger", "maven")
 
@@ -7,13 +7,13 @@ lazy val api =
     .settings(settings)
     .settings(
       libraryDependencies ++= {
-        val akkaV                     = "2.5.4"
-        val akkaHttpTestV             = "10.0.9"
-        val scalaTestV                = "3.0.3"
-        val scalacticV                = "3.0.3"
-        val akkaPersistanceCassandraV = "0.54"
-        val akkaHttpPlayJsonSupportV  = "1.17.0"
-        val playJsonV                 = "2.6.2"
+        val akkaV                     = "2.5.7"
+        val akkaHttpV                 = "10.0.11"
+        val scalaTestV                = "3.0.4"
+        val scalacticV                = "3.0.4"
+        val akkaPersistanceCassandraV = "0.59"
+        val akkaHttpPlayJsonSupportV  = "1.18.0"
+        val playJsonV                 = "2.6.7"
         val logbackClassicV           = "1.2.3"
         val scalaLoggingV             = "3.7.2"
         val akkaHttpCorsV             = "0.2.1"
@@ -25,8 +25,8 @@ lazy val api =
           "com.typesafe.akka"          %% "akka-cluster"                        % akkaV,
           "com.typesafe.akka"          %% "akka-cluster-sharding"               % akkaV,
           "com.typesafe.akka"          %% "akka-persistence-query"              % akkaV,
-          "com.typesafe.akka"          %% "akka-http-core"                      % akkaHttpTestV,
-          "com.typesafe.akka"          %% "akka-http-spray-json"                % akkaHttpTestV,
+          "com.typesafe.akka"          %% "akka-http-core"                      % akkaHttpV,
+          "com.typesafe.akka"          %% "akka-http-spray-json"                % akkaHttpV,
           "com.typesafe.akka"          %% "akka-persistence-cassandra"          % akkaPersistanceCassandraV,
           "de.heikoseeberger"          %% "akka-http-play-json"                 % akkaHttpPlayJsonSupportV,
           "com.typesafe.play"          %% "play-json"                           % playJsonV,
@@ -37,7 +37,7 @@ lazy val api =
           "com.sun.mail"               % "javax.mail"                           % javaMailV,
           "com.typesafe.akka"          %% "akka-persistence-cassandra-launcher" % akkaPersistanceCassandraV % Test,
           "org.scalatest"              %% "scalatest"                           % scalaTestV % Test,
-          "com.typesafe.akka"          %% "akka-http-testkit"                   % akkaHttpTestV % Test
+          "com.typesafe.akka"          %% "akka-http-testkit"                   % akkaHttpV % Test
         )
       }
     )
@@ -46,7 +46,6 @@ lazy val root = (project in file(".")) aggregate api dependsOn api
 
 lazy val settings =
 commonSettings ++
-gitSettings ++
 scalafmtSettings
 
 lazy val commonSettings =
@@ -68,11 +67,6 @@ lazy val commonSettings =
       val project = Project.extract(state).currentRef.project
       s"[$project]> "
     }
-  )
-
-lazy val gitSettings =
-  Seq(
-    git.useGitDescribe := true
   )
 
 lazy val scalafmtSettings =
