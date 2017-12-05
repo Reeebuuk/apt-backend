@@ -9,13 +9,15 @@ import hr.com.blanka.apartments.http.BaseService
 import hr.com.blanka.apartments.query.QueryActor
 import hr.com.blanka.apartments.utils.AppConfig
 
+import scala.concurrent.ExecutionContextExecutor
+
 object Main extends App with AppConfig with BaseService {
 
   implicit val system: ActorSystem = ActorSystem("BookingSystem")
 
-  override protected implicit val executor                        = system.dispatcher
-  override protected val log: LoggingAdapter                      = Logging(system, getClass)
-  override protected implicit val materializer: ActorMaterializer = ActorMaterializer()
+  override protected implicit val executor: ExecutionContextExecutor = system.dispatcher
+  override protected val log: LoggingAdapter                         = Logging(system, getClass)
+  override protected implicit val materializer: ActorMaterializer    = ActorMaterializer()
 
   val command = system.actorOf(CommandActor(), "CommandActor")
   val query   = system.actorOf(QueryActor(materializer), "QueryActor")
