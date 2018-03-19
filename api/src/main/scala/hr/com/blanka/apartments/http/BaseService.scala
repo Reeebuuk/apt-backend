@@ -45,13 +45,13 @@ trait BaseService
 
   def routes(command: ActorRef, query: ActorRef): Route =
     handleErrors {
-      cors(corsSettings) {
+//      cors(corsSettings) {
         handleErrors {
           pathPrefix("v1") {
             queryPriceRoute(query) ~ queryBookingRoute(query) ~ queryEnquiryRoute(query) ~
             commandPriceRoute(command) ~ commandEnquiryRoute(command) ~ commandContactRoute(command)
           }
         }
-      }
+//      }
     }
 }
