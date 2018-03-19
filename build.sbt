@@ -16,7 +16,7 @@ lazy val api =
         val playJsonV                 = "2.6.7"
         val logbackClassicV           = "1.2.3"
         val scalaLoggingV             = "3.7.2"
-        val akkaHttpCorsV             = "0.2.1"
+        val akkaHttpCorsV             = "0.2.2"
         val javaMailV                 = "1.6.0"
 
         Seq(
