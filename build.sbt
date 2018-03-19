@@ -7,8 +7,8 @@ lazy val api =
     .settings(settings)
     .settings(
       libraryDependencies ++= {
-        val akkaV                     = "2.5.7"
-        val akkaHttpV                 = "10.0.11"
+        val akkaV                     = "2.5.11"
+        val akkaHttpV                 = "10.1.0"
         val scalaTestV                = "3.0.4"
         val scalacticV                = "3.0.4"
         val akkaPersistanceCassandraV = "0.59"

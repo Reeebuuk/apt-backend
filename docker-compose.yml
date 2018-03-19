@@ -4,6 +4,6 @@ services:
 
    cassandra:
      image: cassandra:3.11.0
-     restart: always
+#     restart: always
      ports:
        - 9042:9042
