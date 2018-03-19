@@ -28,7 +28,7 @@ trait BaseService
     with CommandContactServiceRoute {
 
   val corsSettings: CorsSettings.Default = CorsSettings.defaultSettings.copy(
-    allowedOrigins = HttpOriginRange(HttpOrigin("http://www.apartments-blanka.com.hr:9000")),
+    allowedOrigins = HttpOriginRange(HttpOrigin("http://www.apartments-blanka.com.hr")),
     allowedMethods = List(GET, POST, PUT)
   )
 
